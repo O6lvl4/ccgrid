@@ -169,7 +169,7 @@ export function DirPicker({
         ai="center"
         gap="$3"
         px="$3"
-        py="$2"
+        py="$2.5"
         borderTopWidth={1}
         borderTopColor="$gray4"
         bg="$gray3"
@@ -180,17 +180,18 @@ export function DirPicker({
             {listing.current}
           </Text>
         </XStack>
-        <XStack gap="$2" shrink={0}>
-          <Text
-            tag="button"
-            fontSize={12}
+        <XStack gap="$2.5" ai="center" shrink={0}>
+          <Button
+            size="$2"
+            chromeless
             color="$gray9"
-            cursor="pointer"
+            fontWeight="400"
+            fontSize={12}
             hoverStyle={{ color: '$gray12' }}
             onPress={onClose}
           >
             Cancel
-          </Text>
+          </Button>
           <Button
             size="$2"
             bg="$blue9"

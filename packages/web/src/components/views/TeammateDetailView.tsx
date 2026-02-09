@@ -28,31 +28,31 @@ export function TeammateDetailView({ sessionId, agentId }: { sessionId: string; 
   return (
     <YStack flex={1} overflow="hidden">
       {/* Header */}
-      <XStack
-        px="$4"
-        py="$2"
-        bg="$gray2"
-        borderBottomWidth={1}
-        borderBottomColor="$gray4"
-        shrink={0}
-        ai="center"
-        gap="$3"
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          padding: '10px 16px',
+          background: 'var(--gray2, #f9fafb)',
+          borderBottom: '1px solid var(--gray4, #e5e7eb)',
+          flexShrink: 0,
+        }}
       >
-        <Text
-          fontSize={12}
-          color="$gray9"
-          cursor="pointer"
-          hoverStyle={{ color: '$gray12' }}
-          onPress={goBack}
+        <span
+          style={{ fontSize: 12, color: '#9ca3af', cursor: 'pointer', lineHeight: 1 }}
+          onClick={goBack}
+          onMouseEnter={e => { e.currentTarget.style.color = '#111827'; }}
+          onMouseLeave={e => { e.currentTarget.style.color = '#9ca3af'; }}
         >
           &larr; Back
-        </Text>
-        <Text fontWeight="700" fontSize={15} color="$gray12">
+        </span>
+        <span style={{ fontWeight: 700, fontSize: 15, color: '#111827', lineHeight: 1 }}>
           {teammate.name ?? teammate.agentId.slice(0, 8)}
-        </Text>
+        </span>
         <StatusBadge status={teammate.status} />
-        <Text fontSize={11} color="$gray8">{teammate.agentType}</Text>
-      </XStack>
+        <span style={{ fontSize: 11, color: '#9ca3af', lineHeight: 1 }}>{teammate.agentType}</span>
+      </div>
 
       {/* Content */}
       <ScrollView flex={1}>
