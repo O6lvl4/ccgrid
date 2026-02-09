@@ -126,7 +126,7 @@ app.get('/api/teammate-specs', (c) => {
 });
 
 app.post('/api/teammate-specs', async (c) => {
-  const { name, role, instructions } = await c.req.json();
+  const { name, role, instructions, skillIds } = await c.req.json();
   if (!name || !role) {
     return c.json({ error: 'name and role are required' }, 400);
   }
@@ -135,6 +135,7 @@ app.post('/api/teammate-specs', async (c) => {
     name,
     role,
     instructions: instructions || undefined,
+    skillIds: Array.isArray(skillIds) && skillIds.length > 0 ? skillIds : undefined,
     createdAt: new Date().toISOString(),
   };
   teammateSpecs.push(spec);

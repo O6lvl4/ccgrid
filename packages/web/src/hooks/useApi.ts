@@ -15,7 +15,7 @@ export interface Api {
   deleteSession: (id: string) => Promise<void>;
   stopSession: (id: string) => Promise<Session>;
   continueSession: (id: string, prompt: string) => Promise<Session>;
-  createSpec: (params: { name: string; role: string; instructions?: string }) => Promise<TeammateSpec>;
+  createSpec: (params: { name: string; role: string; instructions?: string; skillIds?: string[] }) => Promise<TeammateSpec>;
   updateSpec: (id: string, updates: { name?: string; role?: string; instructions?: string; skillIds?: string[] }) => Promise<TeammateSpec>;
   deleteSpec: (id: string) => Promise<void>;
   createSkillSpec: (params: { name: string; description: string; skillType?: string }) => Promise<SkillSpec>;
@@ -62,7 +62,7 @@ export function useApi(): Api {
   const continueSession = useCallback((id: string, prompt: string) =>
     request<Session>('POST', `/sessions/${id}/continue`, { prompt }), []);
 
-  const createSpec = useCallback((params: { name: string; role: string; instructions?: string }) =>
+  const createSpec = useCallback((params: { name: string; role: string; instructions?: string; skillIds?: string[] }) =>
     request<TeammateSpec>('POST', '/teammate-specs', params), []);
 
   const updateSpec = useCallback((id: string, updates: { name?: string; role?: string; instructions?: string; skillIds?: string[] }) =>

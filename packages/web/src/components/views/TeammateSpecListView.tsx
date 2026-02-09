@@ -1,17 +1,32 @@
 import { useState } from 'react';
-import { Button, Input, ScrollView, Text, TextArea, XStack, YStack } from 'tamagui';
+import { Button, Checkbox, Input, ScrollView, Text, TextArea, XStack, YStack } from 'tamagui';
+import { Check } from '@tamagui/lucide-icons';
 import { useStore } from '../../store/useStore';
 import type { Api } from '../../hooks/useApi';
+
+const SKILL_TYPE_COLORS: Record<string, { bg: string; fg: string }> = {
+  official: { bg: '#dbeafe', fg: '#1e40af' },
+  external: { bg: '#dcfce7', fg: '#166534' },
+  internal: { bg: '#f3f4f6', fg: '#374151' },
+};
 
 export function TeammateSpecListView({ api }: { api: Api }) {
   const specs = useStore(s => s.teammateSpecs);
   const setTeammateSpecs = useStore(s => s.setTeammateSpecs);
+  const skillSpecs = useStore(s => s.skillSpecs);
   const navigate = useStore(s => s.navigate);
 
   const [name, setName] = useState('');
   const [role, setRole] = useState('');
   const [instructions, setInstructions] = useState('');
+  const [selectedSkillIds, setSelectedSkillIds] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
+
+  const toggleSkill = (id: string) => {
+    setSelectedSkillIds(prev =>
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    );
+  };
 
   const handleCreate = async () => {
     if (!name.trim() || !role.trim()) return;
@@ -21,11 +36,13 @@ export function TeammateSpecListView({ api }: { api: Api }) {
         name: name.trim(),
         role: role.trim(),
         ...(instructions.trim() ? { instructions: instructions.trim() } : {}),
+        ...(selectedSkillIds.length > 0 ? { skillIds: selectedSkillIds } : {}),
       });
       setTeammateSpecs([...specs, spec]);
       setName('');
       setRole('');
       setInstructions('');
+      setSelectedSkillIds([]);
     } catch (err) {
       console.error('Failed to create spec:', err);
     } finally {
@@ -89,6 +106,59 @@ export function TeammateSpecListView({ api }: { api: Api }) {
               fontSize={13}
             />
           </YStack>
+          {/* Skills selection */}
+          {skillSpecs.length > 0 && (
+            <YStack gap="$1.5">
+              <Text fontSize={11} color="$gray9">Skills (optional)</Text>
+              <YStack bg="$gray2" borderColor="$gray4" borderWidth={1} rounded="$3" p="$2" gap="$1">
+                {skillSpecs.map(skill => {
+                  const selected = selectedSkillIds.includes(skill.id);
+                  const colors = SKILL_TYPE_COLORS[skill.skillType] ?? SKILL_TYPE_COLORS.internal;
+                  return (
+                    <div
+                      key={skill.id}
+                      onClick={() => toggleSkill(skill.id)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        padding: '6px 8px',
+                        borderRadius: 6,
+                        cursor: 'pointer',
+                      }}
+                      onMouseEnter={e => (e.currentTarget.style.background = '#f3f4f6')}
+                      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                    >
+                      <Checkbox
+                        size="$1"
+                        checked={selected}
+                        onCheckedChange={() => toggleSkill(skill.id)}
+                        bg={selected ? '$blue9' : '$gray4'}
+                        borderColor={selected ? '$blue9' : '$gray6'}
+                      >
+                        <Checkbox.Indicator>
+                          <Check size={10} />
+                        </Checkbox.Indicator>
+                      </Checkbox>
+                      <span style={{ fontSize: 12, color: '#111827', fontWeight: 500, flex: 1 }}>
+                        {skill.name}
+                      </span>
+                      <span style={{
+                        fontSize: 10,
+                        fontWeight: 600,
+                        padding: '1px 6px',
+                        borderRadius: 9999,
+                        backgroundColor: colors.bg,
+                        color: colors.fg,
+                      }}>
+                        {skill.skillType}
+                      </span>
+                    </div>
+                  );
+                })}
+              </YStack>
+            </YStack>
+          )}
           <Button
             size="$3"
             bg="$blue9"
@@ -134,6 +204,11 @@ export function TeammateSpecListView({ api }: { api: Api }) {
                   <XStack ai="center" gap="$2">
                     <Text fontWeight="600" fontSize={13} color="$gray12" flex={1}>{spec.name}</Text>
                     <Text fontSize={11} color="$gray9">{spec.role}</Text>
+                    {(spec.skillIds?.length ?? 0) > 0 && (
+                      <Text fontSize={10} color="$blue9" bg="$blue2" px="$1.5" py="$0.5" rounded="$2" fontWeight="600">
+                        {spec.skillIds!.length} skills
+                      </Text>
+                    )}
                     <Text
                       fontSize={11}
                       color="$gray7"

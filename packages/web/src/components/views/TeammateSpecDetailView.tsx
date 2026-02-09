@@ -141,16 +141,19 @@ export function TeammateSpecDetailView({ specId, api }: { specId: string; api: A
                     }
                   };
                   return (
-                    <XStack
+                    <div
                       key={skill.id}
-                      ai="center"
-                      gap="$2"
-                      px="$2"
-                      py="$1.5"
-                      rounded="$2"
-                      cursor="pointer"
-                      hoverStyle={{ bg: '$gray3' }}
-                      onPress={toggleSkill}
+                      onClick={toggleSkill}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        padding: '6px 8px',
+                        borderRadius: 6,
+                        cursor: 'pointer',
+                      }}
+                      onMouseEnter={e => (e.currentTarget.style.background = '#f3f4f6')}
+                      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                     >
                       <Checkbox
                         size="$1"
@@ -163,9 +166,9 @@ export function TeammateSpecDetailView({ specId, api }: { specId: string; api: A
                           <Check size={10} />
                         </Checkbox.Indicator>
                       </Checkbox>
-                      <Text fontSize={12} color="$gray12" fontWeight="500" flex={1}>
+                      <span style={{ fontSize: 12, color: '#111827', fontWeight: 500, flex: 1 }}>
                         {skill.name}
-                      </Text>
+                      </span>
                       <span style={{
                         fontSize: 10,
                         fontWeight: 600,
@@ -176,7 +179,7 @@ export function TeammateSpecDetailView({ specId, api }: { specId: string; api: A
                       }}>
                         {skill.skillType}
                       </span>
-                    </XStack>
+                    </div>
                   );
                 })}
               </YStack>
