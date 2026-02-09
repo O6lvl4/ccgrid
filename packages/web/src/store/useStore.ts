@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Session, Teammate, TeamTask, TeammateSpec, ServerMessage } from '@ccgrid/shared';
+import type { Session, Teammate, TeamTask, TeammateSpec, SkillSpec, ServerMessage } from '@ccgrid/shared';
 
 // ---- Navigation ----
 export type SessionTab = 'output' | 'teammates' | 'tasks' | 'overview';
@@ -10,7 +10,9 @@ export type ViewRoute =
   | { view: 'teammate_detail'; sessionId: string; agentId: string }
   | { view: 'task_detail'; sessionId: string; taskId: string }
   | { view: 'teammate_spec_list' }
-  | { view: 'teammate_spec_detail'; specId: string };
+  | { view: 'teammate_spec_detail'; specId: string }
+  | { view: 'skill_spec_list' }
+  | { view: 'skill_spec_detail'; specId: string };
 
 // ---- Path <-> Route conversion ----
 
@@ -27,22 +29,34 @@ function routeToPath(route: ViewRoute): string {
     case 'task_detail':
       return `/sessions/${route.sessionId}/tasks/${route.taskId}`;
     case 'teammate_spec_list':
-      return '/specs';
+      return '/teammate-specs';
     case 'teammate_spec_detail':
-      return `/specs/${route.specId}`;
+      return `/teammate-specs/${route.specId}`;
+    case 'skill_spec_list':
+      return '/skill-specs';
+    case 'skill_spec_detail':
+      return `/skill-specs/${route.specId}`;
   }
 }
 
 function pathToRoute(pathname: string): ViewRoute {
   const parts = pathname.split('/').filter(Boolean);
 
-  // /specs/:specId
-  if (parts[0] === 'specs' && parts[1]) {
+  // /teammate-specs/:specId
+  if (parts[0] === 'teammate-specs' && parts[1]) {
     return { view: 'teammate_spec_detail', specId: parts[1] };
   }
-  // /specs
-  if (parts[0] === 'specs') {
+  // /teammate-specs
+  if (parts[0] === 'teammate-specs') {
     return { view: 'teammate_spec_list' };
+  }
+  // /skill-specs/:specId
+  if (parts[0] === 'skill-specs' && parts[1]) {
+    return { view: 'skill_spec_detail', specId: parts[1] };
+  }
+  // /skill-specs
+  if (parts[0] === 'skill-specs') {
+    return { view: 'skill_spec_list' };
   }
   // /sessions/:id/teammates/:agentId
   if (parts[0] === 'sessions' && parts[1] && parts[2] === 'teammates' && parts[3]) {
@@ -78,6 +92,7 @@ interface AppState {
   tasks: Map<string, TeamTask[]>;
   leadOutputs: Map<string, string>;
   teammateSpecs: TeammateSpec[];
+  skillSpecs: SkillSpec[];
   pendingPermissions: Map<string, PendingPermission>;
   wsSend: ((msg: unknown) => void) | null;
   selectedSessionId: string | null;
@@ -89,6 +104,7 @@ interface AppState {
   goBack: () => void;
   patchSession: (id: string, updates: Partial<Session>) => void;
   setTeammateSpecs: (specs: TeammateSpec[]) => void;
+  setSkillSpecs: (specs: SkillSpec[]) => void;
   clearError: () => void;
   setWsSend: (send: ((msg: unknown) => void) | null) => void;
   respondToPermission: (requestId: string, behavior: 'allow' | 'deny', message?: string, updatedInput?: Record<string, unknown>) => void;
@@ -100,6 +116,7 @@ export const useStore = create<AppState>((set, get) => ({
   tasks: new Map(),
   leadOutputs: new Map(),
   teammateSpecs: [],
+  skillSpecs: [],
   pendingPermissions: new Map(),
   wsSend: null,
   selectedSessionId: null,
@@ -129,6 +146,7 @@ export const useStore = create<AppState>((set, get) => ({
             tasks,
             leadOutputs,
             teammateSpecs: msg.teammateSpecs ?? [],
+            skillSpecs: msg.skillSpecs ?? [],
             selectedSessionId,
             route,
           };
@@ -311,6 +329,12 @@ export const useStore = create<AppState>((set, get) => ({
       case 'teammate_spec_detail':
         next = { view: 'teammate_spec_list' as const };
         break;
+      case 'skill_spec_list':
+        next = { view: 'session_list' as const };
+        break;
+      case 'skill_spec_detail':
+        next = { view: 'skill_spec_list' as const };
+        break;
     }
     window.history.pushState(null, '', routeToPath(next));
     return { route: next };
@@ -326,6 +350,8 @@ export const useStore = create<AppState>((set, get) => ({
   }),
 
   setTeammateSpecs: (specs) => set({ teammateSpecs: specs }),
+
+  setSkillSpecs: (specs) => set({ skillSpecs: specs }),
 
   clearError: () => set({ lastError: null }),
 

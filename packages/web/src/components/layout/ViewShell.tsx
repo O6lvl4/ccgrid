@@ -9,7 +9,9 @@ export function ViewShell({ children }: { children: React.ReactNode }) {
   const showSidebar =
     route.view !== 'session_list' &&
     route.view !== 'teammate_spec_list' &&
-    route.view !== 'teammate_spec_detail';
+    route.view !== 'teammate_spec_detail' &&
+    route.view !== 'skill_spec_list' &&
+    route.view !== 'skill_spec_detail';
 
   const isSessionsActive =
     route.view === 'session_list' ||
@@ -19,6 +21,9 @@ export function ViewShell({ children }: { children: React.ReactNode }) {
   const isSpecsActive =
     route.view === 'teammate_spec_list' ||
     route.view === 'teammate_spec_detail';
+  const isSkillsActive =
+    route.view === 'skill_spec_list' ||
+    route.view === 'skill_spec_detail';
 
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: '#f9fafb' }}>
@@ -65,6 +70,12 @@ export function ViewShell({ children }: { children: React.ReactNode }) {
           label="Teammates"
           active={isSpecsActive}
           onClick={() => navigate({ view: 'teammate_spec_list' })}
+        />
+        <NavPill
+          emoji="🔧"
+          label="Skills"
+          active={isSkillsActive}
+          onClick={() => navigate({ view: 'skill_spec_list' })}
         />
 
         {/* Breadcrumb */}

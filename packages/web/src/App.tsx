@@ -9,6 +9,8 @@ import { TeammateDetailView } from './components/views/TeammateDetailView';
 import { TaskDetailView } from './components/views/TaskDetailView';
 import { TeammateSpecListView } from './components/views/TeammateSpecListView';
 import { TeammateSpecDetailView } from './components/views/TeammateSpecDetailView';
+import { SkillSpecListView } from './components/views/SkillSpecListView';
+import { SkillSpecDetailView } from './components/views/SkillSpecDetailView';
 
 function AppInner() {
   useWebSocket();
@@ -29,6 +31,10 @@ function AppInner() {
         return <TeammateSpecListView api={api} />;
       case 'teammate_spec_detail':
         return <TeammateSpecDetailView specId={route.specId} api={api} />;
+      case 'skill_spec_list':
+        return <SkillSpecListView api={api} />;
+      case 'skill_spec_detail':
+        return <SkillSpecDetailView specId={route.specId} api={api} />;
     }
   };
 

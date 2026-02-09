@@ -17,6 +17,12 @@ export function Breadcrumb() {
       const spec = teammateSpecs.find(s => s.id === route.specId);
       crumbs.push({ label: spec?.name ?? route.specId.slice(0, 8) });
     }
+  } else if (route.view === 'skill_spec_list' || route.view === 'skill_spec_detail') {
+    if (route.view === 'skill_spec_detail') {
+      const skillSpecs = useStore.getState().skillSpecs;
+      const spec = skillSpecs.find(s => s.id === route.specId);
+      crumbs.push({ label: spec?.name ?? route.specId.slice(0, 8) });
+    }
   } else if (route.view !== 'session_list') {
     const sid = route.sessionId;
     const session = sessions.get(sid);

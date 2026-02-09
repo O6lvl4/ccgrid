@@ -1,7 +1,9 @@
 import React from 'react';
 
-// Matches emoji characters (Extended_Pictographic + keycap sequences + flag sequences + variation selectors)
-const EMOJI_RE = /(\p{Extended_Pictographic}(?:\uFE0F?\u20E3|\uFE0F|[\u{1F3FB}-\u{1F3FF}]|[\u{E0020}-\u{E007E}]+\u{E007F})?(?:\u200D\p{Extended_Pictographic}(?:\uFE0F?|\u20E3|[\u{1F3FB}-\u{1F3FF}]|[\u{E0020}-\u{E007E}]+\u{E007F})?)*)/gu;
+// Matches emoji characters:
+// - Keycap sequences: [0-9#*] + FE0F? + 20E3
+// - Extended_Pictographic with modifiers, ZWJ sequences, flag sequences
+const EMOJI_RE = /([0-9#*]\uFE0F?\u20E3|\p{Extended_Pictographic}(?:\uFE0F|[\u{1F3FB}-\u{1F3FF}]|[\u{E0020}-\u{E007E}]+\u{E007F})?(?:\u200D(?:[0-9#*]\uFE0F?\u20E3|\p{Extended_Pictographic}(?:\uFE0F|[\u{1F3FB}-\u{1F3FF}]|[\u{E0020}-\u{E007E}]+\u{E007F})))*)/gu;
 
 function toCodePoint(emoji: string): string {
   const cps: string[] = [];

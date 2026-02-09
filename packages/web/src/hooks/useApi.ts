@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import type { Session, TeammateSpec } from '@ccgrid/shared';
+import type { Session, TeammateSpec, SkillSpec } from '@ccgrid/shared';
 
 export interface Api {
   createSession: (params: {
@@ -16,8 +16,11 @@ export interface Api {
   stopSession: (id: string) => Promise<Session>;
   continueSession: (id: string, prompt: string) => Promise<Session>;
   createSpec: (params: { name: string; role: string; instructions?: string }) => Promise<TeammateSpec>;
-  updateSpec: (id: string, updates: { name?: string; role?: string; instructions?: string }) => Promise<TeammateSpec>;
+  updateSpec: (id: string, updates: { name?: string; role?: string; instructions?: string; skillIds?: string[] }) => Promise<TeammateSpec>;
   deleteSpec: (id: string) => Promise<void>;
+  createSkillSpec: (params: { name: string; description: string; skillType?: string }) => Promise<SkillSpec>;
+  updateSkillSpec: (id: string, updates: { name?: string; description?: string; skillType?: string }) => Promise<SkillSpec>;
+  deleteSkillSpec: (id: string) => Promise<void>;
 }
 
 const BASE = '/api';
@@ -62,11 +65,20 @@ export function useApi(): Api {
   const createSpec = useCallback((params: { name: string; role: string; instructions?: string }) =>
     request<TeammateSpec>('POST', '/teammate-specs', params), []);
 
-  const updateSpec = useCallback((id: string, updates: { name?: string; role?: string; instructions?: string }) =>
+  const updateSpec = useCallback((id: string, updates: { name?: string; role?: string; instructions?: string; skillIds?: string[] }) =>
     request<TeammateSpec>('PATCH', `/teammate-specs/${id}`, updates), []);
 
   const deleteSpec = useCallback((id: string) =>
     request<void>('DELETE', `/teammate-specs/${id}`), []);
 
-  return { createSession, updateSession, deleteSession, stopSession, continueSession, createSpec, updateSpec, deleteSpec };
+  const createSkillSpec = useCallback((params: { name: string; description: string; skillType?: string }) =>
+    request<SkillSpec>('POST', '/skill-specs', params), []);
+
+  const updateSkillSpec = useCallback((id: string, updates: { name?: string; description?: string; skillType?: string }) =>
+    request<SkillSpec>('PATCH', `/skill-specs/${id}`, updates), []);
+
+  const deleteSkillSpec = useCallback((id: string) =>
+    request<void>('DELETE', `/skill-specs/${id}`), []);
+
+  return { createSession, updateSession, deleteSession, stopSession, continueSession, createSpec, updateSpec, deleteSpec, createSkillSpec, updateSkillSpec, deleteSkillSpec };
 }

@@ -1,11 +1,12 @@
 import { readFileSync, writeFileSync, readdirSync, mkdirSync, unlinkSync, existsSync } from 'fs';
 import { join } from 'path';
-import type { Session, Teammate, TeamTask, TeammateSpec } from '@ccgrid/shared';
+import type { Session, Teammate, TeamTask, TeammateSpec, SkillSpec } from '@ccgrid/shared';
 
 const HOME = process.env.HOME ?? '';
 const BASE_DIR = join(HOME, '.claude', 'claude-team');
 const SESSIONS_DIR = join(BASE_DIR, 'sessions');
 const SPECS_FILE = join(BASE_DIR, 'teammate-specs.json');
+const SKILL_SPECS_FILE = join(BASE_DIR, 'skill-specs.json');
 const TASKS_DIR = join(HOME, '.claude', 'tasks');
 const TEAMS_DIR = join(HOME, '.claude', 'teams');
 
@@ -166,5 +167,26 @@ export function saveTeammateSpecs(specs: TeammateSpec[]): void {
     writeFileSync(SPECS_FILE, JSON.stringify(specs, null, 2));
   } catch (err) {
     console.error('Failed to save teammate specs:', err);
+  }
+}
+
+// ---- SkillSpecs persistence ----
+
+export function loadSkillSpecs(): SkillSpec[] {
+  try {
+    if (!existsSync(SKILL_SPECS_FILE)) return [];
+    const raw = readFileSync(SKILL_SPECS_FILE, 'utf-8');
+    return JSON.parse(raw) as SkillSpec[];
+  } catch {
+    return [];
+  }
+}
+
+export function saveSkillSpecs(specs: SkillSpec[]): void {
+  try {
+    mkdirSync(BASE_DIR, { recursive: true });
+    writeFileSync(SKILL_SPECS_FILE, JSON.stringify(specs, null, 2));
+  } catch (err) {
+    console.error('Failed to save skill specs:', err);
   }
 }

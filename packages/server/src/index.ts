@@ -6,8 +6,8 @@ import { join } from 'path';
 import os from 'os';
 import { randomUUID } from 'crypto';
 import { SessionManager } from './session-manager.js';
-import { loadTeammateSpecs, saveTeammateSpecs } from './state-store.js';
-import type { ServerMessage, TeammateSpec } from '@ccgrid/shared';
+import { loadTeammateSpecs, saveTeammateSpecs, loadSkillSpecs, saveSkillSpecs } from './state-store.js';
+import type { ServerMessage, TeammateSpec, SkillSpec } from '@ccgrid/shared';
 
 process.on('unhandledRejection', (err) => {
   console.error('Unhandled rejection:', err);
@@ -30,6 +30,7 @@ function broadcast(message: ServerMessage): void {
 
 const sm = new SessionManager(broadcast);
 let teammateSpecs: TeammateSpec[] = loadTeammateSpecs();
+let skillSpecs: SkillSpec[] = loadSkillSpecs();
 
 // ---- REST: Sessions CRUD ----
 
@@ -39,7 +40,7 @@ app.post('/api/sessions', async (c) => {
     return c.json({ error: 'name, cwd, model, taskDescription are required' }, 400);
   }
   try {
-    const session = await sm.createSession(name, cwd, model, teammateSpecs, maxBudgetUsd, taskDescription, permissionMode);
+    const session = await sm.createSession(name, cwd, model, teammateSpecs, maxBudgetUsd, taskDescription, permissionMode, skillSpecs);
     return c.json(session, 201);
   } catch (err) {
     return c.json({ error: String(err) }, 500);
@@ -144,10 +145,11 @@ app.post('/api/teammate-specs', async (c) => {
 app.patch('/api/teammate-specs/:id', async (c) => {
   const idx = teammateSpecs.findIndex(s => s.id === c.req.param('id'));
   if (idx === -1) return c.json({ error: 'Spec not found' }, 404);
-  const { name, role, instructions } = await c.req.json();
+  const { name, role, instructions, skillIds } = await c.req.json();
   if (name !== undefined) teammateSpecs[idx].name = name;
   if (role !== undefined) teammateSpecs[idx].role = role;
   if (instructions !== undefined) teammateSpecs[idx].instructions = instructions || undefined;
+  if (skillIds !== undefined) teammateSpecs[idx].skillIds = skillIds;
   saveTeammateSpecs(teammateSpecs);
   return c.json(teammateSpecs[idx]);
 });
@@ -157,6 +159,48 @@ app.delete('/api/teammate-specs/:id', (c) => {
   if (idx === -1) return c.json({ error: 'Spec not found' }, 404);
   teammateSpecs.splice(idx, 1);
   saveTeammateSpecs(teammateSpecs);
+  return c.body(null, 204);
+});
+
+// ---- REST: Skill Specs CRUD ----
+
+app.get('/api/skill-specs', (c) => {
+  return c.json(skillSpecs);
+});
+
+app.post('/api/skill-specs', async (c) => {
+  const { name, description, skillType } = await c.req.json();
+  if (!name || !description) {
+    return c.json({ error: 'name and description are required' }, 400);
+  }
+  const spec: SkillSpec = {
+    id: randomUUID(),
+    name,
+    description,
+    skillType: skillType ?? 'internal',
+    createdAt: new Date().toISOString(),
+  };
+  skillSpecs.push(spec);
+  saveSkillSpecs(skillSpecs);
+  return c.json(spec, 201);
+});
+
+app.patch('/api/skill-specs/:id', async (c) => {
+  const idx = skillSpecs.findIndex(s => s.id === c.req.param('id'));
+  if (idx === -1) return c.json({ error: 'Skill spec not found' }, 404);
+  const { name, description, skillType } = await c.req.json();
+  if (name !== undefined) skillSpecs[idx].name = name;
+  if (description !== undefined) skillSpecs[idx].description = description;
+  if (skillType !== undefined) skillSpecs[idx].skillType = skillType;
+  saveSkillSpecs(skillSpecs);
+  return c.json(skillSpecs[idx]);
+});
+
+app.delete('/api/skill-specs/:id', (c) => {
+  const idx = skillSpecs.findIndex(s => s.id === c.req.param('id'));
+  if (idx === -1) return c.json({ error: 'Skill spec not found' }, 404);
+  skillSpecs.splice(idx, 1);
+  saveSkillSpecs(skillSpecs);
   return c.body(null, 204);
 });
 
@@ -219,6 +263,7 @@ wss.on('connection', (ws) => {
     tasks: sm.getAllTasks(),
     leadOutputs: sm.getLeadOutputs(),
     teammateSpecs,
+    skillSpecs,
   };
   ws.send(JSON.stringify(snapshot));
 

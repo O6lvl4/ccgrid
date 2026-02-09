@@ -1,12 +1,20 @@
-import { useState, useEffect } from 'react';
-import { ScrollView, Text, TextArea, XStack, YStack } from 'tamagui';
+import { useState, useEffect, useMemo } from 'react';
+import { Checkbox, ScrollView, Text, TextArea, XStack, YStack } from 'tamagui';
+import { Check } from '@tamagui/lucide-icons';
 import { useStore } from '../../store/useStore';
 import { InlineEdit } from '../InlineEdit';
 import type { Api } from '../../hooks/useApi';
 
+const SKILL_TYPE_COLORS: Record<string, { bg: string; fg: string }> = {
+  official: { bg: '#dbeafe', fg: '#1e40af' },
+  external: { bg: '#dcfce7', fg: '#166534' },
+  internal: { bg: '#f3f4f6', fg: '#374151' },
+};
+
 export function TeammateSpecDetailView({ specId, api }: { specId: string; api: Api }) {
   const specs = useStore(s => s.teammateSpecs);
   const setTeammateSpecs = useStore(s => s.setTeammateSpecs);
+  const skillSpecs = useStore(s => s.skillSpecs);
   const navigate = useStore(s => s.navigate);
   const goBack = useStore(s => s.goBack);
 
@@ -93,6 +101,86 @@ export function TeammateSpecDetailView({ specId, api }: { specId: string; api: A
               <Text fontSize={12} color="$gray8" width={80}>Created</Text>
               <Text fontSize={12} color="$gray9">{new Date(spec.createdAt).toLocaleString()}</Text>
             </XStack>
+          </YStack>
+
+          {/* Skills */}
+          <YStack gap="$2">
+            <XStack ai="center" jc="space-between">
+              <Text fontSize={11} fontWeight="600" color="$gray8" textTransform="uppercase" letterSpacing={0.5}>
+                Skills
+              </Text>
+              <Text
+                fontSize={11}
+                color="$blue9"
+                cursor="pointer"
+                hoverStyle={{ color: '$blue10' }}
+                onPress={() => navigate({ view: 'skill_spec_list' })}
+              >
+                Manage Skills
+              </Text>
+            </XStack>
+            {skillSpecs.length === 0 ? (
+              <Text fontSize={12} color="$gray7" fontStyle="italic">
+                No skills defined yet
+              </Text>
+            ) : (
+              <YStack bg="$gray2" borderColor="$gray4" borderWidth={1} rounded="$3" p="$2" gap="$1">
+                {skillSpecs.map(skill => {
+                  const selected = spec.skillIds?.includes(skill.id) ?? false;
+                  const colors = SKILL_TYPE_COLORS[skill.skillType] ?? SKILL_TYPE_COLORS.internal;
+                  const toggleSkill = async () => {
+                    const current = spec.skillIds ?? [];
+                    const next = selected
+                      ? current.filter(id => id !== skill.id)
+                      : [...current, skill.id];
+                    try {
+                      const updated = await api.updateSpec(specId, { skillIds: next });
+                      setTeammateSpecs(specs.map(s => s.id === specId ? updated : s));
+                    } catch (err) {
+                      console.error('Failed to update skills:', err);
+                    }
+                  };
+                  return (
+                    <XStack
+                      key={skill.id}
+                      ai="center"
+                      gap="$2"
+                      px="$2"
+                      py="$1.5"
+                      rounded="$2"
+                      cursor="pointer"
+                      hoverStyle={{ bg: '$gray3' }}
+                      onPress={toggleSkill}
+                    >
+                      <Checkbox
+                        size="$1"
+                        checked={selected}
+                        onCheckedChange={toggleSkill}
+                        bg={selected ? '$blue9' : '$gray4'}
+                        borderColor={selected ? '$blue9' : '$gray6'}
+                      >
+                        <Checkbox.Indicator>
+                          <Check size={10} />
+                        </Checkbox.Indicator>
+                      </Checkbox>
+                      <Text fontSize={12} color="$gray12" fontWeight="500" flex={1}>
+                        {skill.name}
+                      </Text>
+                      <span style={{
+                        fontSize: 10,
+                        fontWeight: 600,
+                        padding: '1px 6px',
+                        borderRadius: 9999,
+                        backgroundColor: colors.bg,
+                        color: colors.fg,
+                      }}>
+                        {skill.skillType}
+                      </span>
+                    </XStack>
+                  );
+                })}
+              </YStack>
+            )}
           </YStack>
 
           {/* Instructions */}

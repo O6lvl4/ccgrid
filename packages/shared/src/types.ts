@@ -1,9 +1,21 @@
+// ---- Skill spec (reusable skill definition) ----
+export type SkillType = 'official' | 'external' | 'internal';
+
+export interface SkillSpec {
+  id: string;
+  name: string;
+  description: string;
+  skillType: SkillType;
+  createdAt: string;
+}
+
 // ---- Teammate spec (user-defined before session start) ----
 export interface TeammateSpec {
   id: string;
   name: string;
   role: string;
   instructions?: string;
+  skillIds?: string[];
   createdAt: string;
 }
 
@@ -63,7 +75,7 @@ export type ServerMessage =
   | { type: 'cost_update'; sessionId: string; costUsd: number; inputTokens: number; outputTokens: number }
   | { type: 'error'; message: string; sessionId?: string }
   | { type: 'permission_request'; sessionId: string; requestId: string; toolName: string; input: Record<string, unknown>; description?: string; agentId?: string }
-  | { type: 'snapshot'; sessions: Session[]; teammates: Teammate[]; tasks: Record<string, TeamTask[]>; leadOutputs: Record<string, string>; teammateSpecs: TeammateSpec[] };
+  | { type: 'snapshot'; sessions: Session[]; teammates: Teammate[]; tasks: Record<string, TeamTask[]>; leadOutputs: Record<string, string>; teammateSpecs: TeammateSpec[]; skillSpecs: SkillSpec[] };
 
 // ---- WebSocket: Client → Server ----
 export type ClientMessage =

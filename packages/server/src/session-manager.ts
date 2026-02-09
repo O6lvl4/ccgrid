@@ -1,6 +1,6 @@
 import { query, type Query, type CanUseTool } from '@anthropic-ai/claude-agent-sdk';
 import { v4 as uuidv4 } from 'uuid';
-import type { Session, Teammate, TeamTask, TeammateSpec, ServerMessage } from '@ccgrid/shared';
+import type { Session, Teammate, TeamTask, TeammateSpec, SkillSpec, ServerMessage } from '@ccgrid/shared';
 import { loadAllSessions, saveSession, deleteSessionFile } from './state-store.js';
 import { buildPrompt, buildSystemPrompt } from './prompt-builder.js';
 import { processLeadStream } from './lead-stream.js';
@@ -100,6 +100,7 @@ export class SessionManager {
     maxBudgetUsd: number | undefined,
     taskDescription: string,
     permissionMode?: 'acceptEdits' | 'bypassPermissions',
+    skillSpecs?: SkillSpec[],
   ): Promise<Session> {
     const session: Session = {
       id: uuidv4(),
@@ -120,7 +121,7 @@ export class SessionManager {
     this.persistSession(session.id);
     this.broadcast({ type: 'session_created', session });
 
-    this.startAgent(session, teammateSpecs, maxBudgetUsd);
+    this.startAgent(session, teammateSpecs, maxBudgetUsd, undefined, skillSpecs);
     return session;
   }
 
@@ -253,7 +254,7 @@ export class SessionManager {
 
   // ---- Internal ----
 
-  private startAgent(session: Session, teammateSpecs: TeammateSpec[] | undefined, maxBudgetUsd: number | undefined, resumePrompt?: string): void {
+  private startAgent(session: Session, teammateSpecs: TeammateSpec[] | undefined, maxBudgetUsd: number | undefined, resumePrompt?: string, skillSpecs?: SkillSpec[]): void {
     const abortController = new AbortController();
 
     const hooks = createHookHandlers({
@@ -270,7 +271,7 @@ export class SessionManager {
       stopPolling: (agentId) => stopTranscriptPolling(agentId),
     });
 
-    const prompt = resumePrompt ?? buildPrompt(teammateSpecs, session.taskDescription);
+    const prompt = resumePrompt ?? buildPrompt(teammateSpecs, session.taskDescription, skillSpecs);
 
     const isBypass = session.permissionMode === 'bypassPermissions';
 

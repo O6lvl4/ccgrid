@@ -1,12 +1,25 @@
-import type { TeammateSpec } from '@ccgrid/shared';
+import type { TeammateSpec, SkillSpec } from '@ccgrid/shared';
 
-export function buildPrompt(teammateSpecs: TeammateSpec[] | undefined, taskDescription: string): string {
+export function buildPrompt(teammateSpecs: TeammateSpec[] | undefined, taskDescription: string, skillSpecs?: SkillSpec[]): string {
+  const skillMap = new Map((skillSpecs ?? []).map(s => [s.id, s]));
+
   let teammateInstruction: string;
   if (teammateSpecs && teammateSpecs.length > 0) {
-    const specList = teammateSpecs.map((s, i) =>
-      `${i + 1}. Name: "${s.name}" | Role: ${s.role}${s.instructions ? ` | Instructions: ${s.instructions}` : ''}`
-    ).join('\n');
-    teammateInstruction = `You MUST create exactly the following ${teammateSpecs.length} teammates:\n${specList}\n\nUse these exact names when spawning teammates. Give each teammate instructions matching their role.`;
+    const specList = teammateSpecs.map((s, i) => {
+      const parts = [`Name: "${s.name}"`, `Role: ${s.role}`];
+      if (s.skillIds && s.skillIds.length > 0) {
+        const skills = s.skillIds
+          .map(id => skillMap.get(id))
+          .filter((sk): sk is SkillSpec => sk != null)
+          .map(sk => `${sk.name} [${sk.skillType}]: ${sk.description}`);
+        if (skills.length > 0) {
+          parts.push(`Skills:\n${skills.map(sk => `      - ${sk}`).join('\n')}`);
+        }
+      }
+      if (s.instructions) parts.push(`Instructions: ${s.instructions}`);
+      return `${i + 1}. ${parts.join(' | ')}`;
+    }).join('\n');
+    teammateInstruction = `You MUST create exactly the following ${teammateSpecs.length} teammates:\n${specList}\n\nUse these exact names when spawning teammates. Give each teammate instructions matching their role and skills.`;
   } else {
     teammateInstruction = `You MUST create at least 1 teammate and delegate the work. Do NOT do the work yourself.`;
   }
