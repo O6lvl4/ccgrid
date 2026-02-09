@@ -3,7 +3,9 @@ import { join } from 'path';
 import { existsSync } from 'fs';
 import type { Session, TeamTask, ServerMessage } from '../shared/types.js';
 
-const TASKS_DIR = join(process.env.HOME ?? '', '.claude', 'tasks');
+const HOME = process.env.HOME ?? '';
+const TASKS_DIR = join(HOME, '.claude', 'tasks');
+const TEAMS_DIR = join(HOME, '.claude', 'teams');
 
 export interface TaskWatcherDeps {
   sessions: Map<string, Session>;
@@ -27,12 +29,50 @@ export function startTaskWatcher(sessionId: string, sdkSessionId: string, deps: 
   }, 2000);
 }
 
+/**
+ * Find the task directory for a session.
+ * Agent teams store tasks under ~/.claude/tasks/{team-name}/
+ * where the team-name is discovered by scanning ~/.claude/teams/ configs
+ * for a matching leadSessionId.
+ * Falls back to ~/.claude/tasks/{sdkSessionId}/ for non-team sessions.
+ */
+async function findTaskDir(sdkSessionId: string): Promise<string | null> {
+  // 1. Try team-name based directory by scanning team configs
+  if (existsSync(TEAMS_DIR)) {
+    try {
+      const teamDirs = await readdir(TEAMS_DIR);
+      for (const teamName of teamDirs) {
+        const configPath = join(TEAMS_DIR, teamName, 'config.json');
+        if (!existsSync(configPath)) continue;
+        try {
+          const raw = await readFile(configPath, 'utf-8');
+          const config = JSON.parse(raw);
+          if (config.leadSessionId === sdkSessionId) {
+            const teamTaskDir = join(TASKS_DIR, teamName);
+            if (existsSync(teamTaskDir)) return teamTaskDir;
+          }
+        } catch {
+          // skip invalid config
+        }
+      }
+    } catch {
+      // teams dir read failed
+    }
+  }
+
+  // 2. Fallback: SDK session ID based directory
+  const sdkTaskDir = join(TASKS_DIR, sdkSessionId);
+  if (existsSync(sdkTaskDir)) return sdkTaskDir;
+
+  return null;
+}
+
 export async function syncTasks(sessionId: string, deps: TaskWatcherDeps): Promise<void> {
   const session = deps.sessions.get(sessionId);
   if (!session?.sessionId) return;
 
-  const taskDir = join(TASKS_DIR, session.sessionId);
-  if (!existsSync(taskDir)) return;
+  const taskDir = await findTaskDir(session.sessionId);
+  if (!taskDir) return;
 
   try {
     const files = await readdir(taskDir);

@@ -61,7 +61,17 @@ wss.on('connection', (ws) => {
   });
 
   ws.on('close', () => clients.delete(ws));
+  ws.on('pong', () => { /* alive */ });
 });
+
+// Ping clients every 30s to detect dead connections
+setInterval(() => {
+  for (const ws of clients) {
+    if (ws.readyState === ws.OPEN) {
+      ws.ping();
+    }
+  }
+}, 30000);
 
 // ---- REST: Sessions CRUD ----
 
@@ -105,6 +115,15 @@ app.post('/api/sessions/:id/stop', async (req, res) => {
   if (!session) return res.status(404).json({ error: 'Session not found' });
   await sm.stopSession(req.params.id);
   res.json(sm.getSession(req.params.id));
+});
+
+// Continue a completed session with a follow-up prompt
+app.post('/api/sessions/:id/continue', (req, res) => {
+  const { prompt } = req.body;
+  if (!prompt) return res.status(400).json({ error: 'prompt required' });
+  const session = sm.continueSession(req.params.id, prompt);
+  if (!session) return res.status(404).json({ error: 'Session not found or not completed' });
+  res.json(session);
 });
 
 // ---- REST: Teammates (read-only sub-resource) ----
@@ -188,11 +207,20 @@ app.get('/api/health', (_req, res) => {
 app.get('/api/dirs', async (req, res) => {
   const requestedPath = (req.query.path as string) || os.homedir();
   try {
-    const entries = await readdir(requestedPath, { withFileTypes: true });
-    const dirs = entries
-      .filter(e => e.isDirectory() && !e.name.startsWith('.'))
-      .map(e => ({ name: e.name, path: join(requestedPath, e.name) }))
-      .sort((a, b) => a.name.localeCompare(b.name));
+    const names = await readdir(requestedPath);
+    const visible = names.filter(n => !n.startsWith('.'));
+    const checks = await Promise.all(
+      visible.map(async (name) => {
+        try {
+          const s = await stat(join(requestedPath, name));
+          return s.isDirectory() ? name : null;
+        } catch { return null; }
+      })
+    );
+    const dirs = checks
+      .filter((n): n is string => n !== null)
+      .sort((a, b) => a.localeCompare(b))
+      .map(name => ({ name, path: join(requestedPath, name) }));
     res.json({ current: requestedPath, parent: join(requestedPath, '..'), dirs });
   } catch {
     res.status(400).json({ error: 'Cannot read directory' });
@@ -211,5 +239,5 @@ app.get('/api/dirs/validate', async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`claude-team server running on http://localhost:${PORT}`);
+  console.log(`ccgrid server running on http://localhost:${PORT}`);
 });

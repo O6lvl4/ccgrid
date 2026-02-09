@@ -14,6 +14,7 @@ export interface Api {
   updateSession: (id: string, updates: { name?: string }) => Promise<Session>;
   deleteSession: (id: string) => Promise<void>;
   stopSession: (id: string) => Promise<Session>;
+  continueSession: (id: string, prompt: string) => Promise<Session>;
   createSpec: (params: { name: string; role: string; instructions?: string }) => Promise<TeammateSpec>;
   updateSpec: (id: string, updates: { name?: string; role?: string; instructions?: string }) => Promise<TeammateSpec>;
   deleteSpec: (id: string) => Promise<void>;
@@ -55,6 +56,9 @@ export function useApi(): Api {
   const stopSession = useCallback((id: string) =>
     request<Session>('POST', `/sessions/${id}/stop`), []);
 
+  const continueSession = useCallback((id: string, prompt: string) =>
+    request<Session>('POST', `/sessions/${id}/continue`, { prompt }), []);
+
   const createSpec = useCallback((params: { name: string; role: string; instructions?: string }) =>
     request<TeammateSpec>('POST', '/teammate-specs', params), []);
 
@@ -64,5 +68,5 @@ export function useApi(): Api {
   const deleteSpec = useCallback((id: string) =>
     request<void>('DELETE', `/teammate-specs/${id}`), []);
 
-  return { createSession, updateSession, deleteSession, stopSession, createSpec, updateSpec, deleteSpec };
+  return { createSession, updateSession, deleteSession, stopSession, continueSession, createSpec, updateSpec, deleteSpec };
 }

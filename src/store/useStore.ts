@@ -122,9 +122,11 @@ export const useStore = create<AppState>((set, get) => ({
           if (route !== state.route) {
             window.history.replaceState(null, '', routeToPath(route));
           }
+          const tasks = new Map(Object.entries(msg.tasks ?? {}));
           return {
             sessions,
             teammates: new Map(msg.teammates.map(t => [t.agentId, t])),
+            tasks,
             leadOutputs,
             teammateSpecs: msg.teammateSpecs ?? [],
             selectedSessionId,

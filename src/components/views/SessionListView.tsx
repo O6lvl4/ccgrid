@@ -32,7 +32,7 @@ export function SessionListView({ api }: { api: Api }) {
         {/* Create form */}
         <YStack px="$4" mb="$4">
           <XStack
-            items="center"
+            ai="center"
             gap="$2"
             cursor="pointer"
             onPress={() => setShowConfig(!showConfig)}
@@ -55,7 +55,7 @@ export function SessionListView({ api }: { api: Api }) {
           </Text>
 
           {sessionList.length === 0 ? (
-            <YStack py="$6" items="center">
+            <YStack py="$6" ai="center">
               <Text fontSize={13} color="$gray7">
                 No sessions yet. Create one above to get started.
               </Text>
@@ -80,16 +80,16 @@ export function SessionListView({ api }: { api: Api }) {
                     gap="$1"
                   >
                     {/* Row 1: name + status + time */}
-                    <XStack items="center" gap="$2">
+                    <XStack ai="center" gap="$2">
                       <StatusBadge status={s.status} showLabel={false} />
                       <Text fontSize={13} fontWeight="500" color="$gray12" numberOfLines={1} flex={1}>
                         {s.name}
                       </Text>
-                      <XStack gap="$2" items="center" shrink={0}>
-                        <Text fontSize={11} color="$gray7" fontFamily="$mono">
+                      <XStack gap="$2" ai="center" shrink={0}>
+                        <Text fontSize={11} color="$gray7" fontFamily="monospace">
                           {s.model.split('-').slice(1, 3).join(' ')}
                         </Text>
-                        <Text fontSize={11} color="$gray8" fontFamily="$mono">
+                        <Text fontSize={11} color="$gray8" fontFamily="monospace">
                           ${s.costUsd.toFixed(2)}
                         </Text>
                         {tmCount > 0 && (
@@ -103,7 +103,7 @@ export function SessionListView({ api }: { api: Api }) {
                     </XStack>
 
                     {/* Row 2: description + actions */}
-                    <XStack items="center" pl="$4" gap="$2">
+                    <XStack ai="center" pl="$4" gap="$2">
                       <Text fontSize={12} color="$gray9" numberOfLines={1} flex={1}>
                         {s.taskDescription}
                       </Text>

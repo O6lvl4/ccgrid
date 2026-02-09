@@ -12,12 +12,12 @@ export function CostTracker({ session }: { session: Session }) {
     budgetPercent > 80 ? '$red5' : budgetPercent > 50 ? '$yellow5' : '$blue5';
 
   return (
-    <XStack items="center" gap="$3" ml="auto" flexShrink={0}>
-      <XStack items="center" gap="$1.5">
+    <XStack ai="center" gap="$3" ml="auto" shrink={0}>
+      <XStack ai="center" gap="$1.5">
         <Text fontSize={12} color="$gray4">
           Cost:
         </Text>
-        <Text fontSize={12} fontFamily="$mono" color="$gray2">
+        <Text fontSize={12} fontFamily="monospace" color="$gray2">
           ${session.costUsd.toFixed(4)}
         </Text>
         {hasBudget && (
@@ -44,7 +44,7 @@ export function CostTracker({ session }: { session: Session }) {
         </YStack>
       )}
 
-      <Text fontSize={12} fontFamily="$mono" color="$gray4">
+      <Text fontSize={12} fontFamily="monospace" color="$gray4">
         {totalTokens.toLocaleString()} tokens
       </Text>
     </XStack>

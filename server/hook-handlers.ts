@@ -8,10 +8,12 @@ export interface HookDeps {
   broadcast: (msg: ServerMessage) => void;
   persistSession: (sessionId: string) => void;
   syncTasks: (sessionId: string) => Promise<void>;
+  startPolling: (agentId: string) => void;
+  stopPolling: (agentId: string) => void;
 }
 
 export function createHookHandlers(deps: HookDeps) {
-  const { sessionId, teammates, broadcast, persistSession, syncTasks } = deps;
+  const { sessionId, teammates, broadcast, persistSession, syncTasks, startPolling, stopPolling } = deps;
 
   const onSubagentStart: HookCallback = async (input) => {
     if (input.hook_event_name === 'SubagentStart') {
@@ -24,12 +26,14 @@ export function createHookHandlers(deps: HookDeps) {
       teammates.set(input.agent_id, teammate);
       persistSession(sessionId);
       broadcast({ type: 'teammate_discovered', sessionId, teammate });
+      startPolling(input.agent_id);
     }
     return {};
   };
 
   const onSubagentStop: HookCallback = async (input) => {
     if (input.hook_event_name === 'SubagentStop') {
+      stopPolling(input.agent_id);
       const teammate = teammates.get(input.agent_id);
       if (teammate) {
         teammate.status = 'stopped';

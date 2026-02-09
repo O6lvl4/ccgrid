@@ -17,11 +17,11 @@ function PathBreadcrumb({ path, onNavigate }: { path: string; onNavigate: (path:
   const segments = path.split('/').filter(Boolean);
 
   return (
-    <XStack items="center" gap="$0.5" flexWrap="wrap" minHeight={20}>
+    <XStack ai="center" gap="$0.5" flexWrap="wrap" minHeight={20}>
       {/* Root */}
       <Text
         fontSize={12}
-        fontFamily="$mono"
+        fontFamily="monospace"
         color="$gray9"
         cursor="pointer"
         onPress={() => onNavigate('/')}
@@ -37,11 +37,11 @@ function PathBreadcrumb({ path, onNavigate }: { path: string; onNavigate: (path:
         const segPath = '/' + segments.slice(0, i + 1).join('/');
         const isLast = i === segments.length - 1;
         return (
-          <XStack key={segPath} items="center" gap="$0.5">
+          <XStack key={segPath} ai="center" gap="$0.5">
             <ChevronRight size={10} color="$gray7" />
             <Text
               fontSize={12}
-              fontFamily="$mono"
+              fontFamily="monospace"
               color={isLast ? '$gray12' : '$gray9'}
               fontWeight={isLast ? '600' : '400'}
               cursor={isLast ? 'default' : 'pointer'}
@@ -94,7 +94,7 @@ export function DirPicker({
 
   if (!listing) {
     return (
-      <YStack bg="$gray2" borderColor="$gray4" borderWidth={1} rounded="$3" p="$4" items="center">
+      <YStack bg="$gray2" borderColor="$gray4" borderWidth={1} rounded="$3" p="$4" ai="center">
         <Text fontSize={12} color="$gray9">Loading...</Text>
       </YStack>
     );
@@ -104,7 +104,7 @@ export function DirPicker({
     <YStack bg="$gray2" borderColor="$gray4" borderWidth={1} rounded="$3" overflow="hidden">
       {/* Header: breadcrumb path + up button */}
       <XStack
-        items="center"
+        ai="center"
         gap="$2"
         px="$3"
         py="$2"
@@ -130,11 +130,11 @@ export function DirPicker({
       {/* Directory list */}
       <ScrollView maxHeight={280}>
         {loading ? (
-          <YStack px="$3" py="$6" items="center">
+          <YStack px="$3" py="$6" ai="center">
             <Text fontSize={12} color="$gray9">Loading...</Text>
           </YStack>
         ) : listing.dirs.length === 0 ? (
-          <YStack px="$3" py="$6" items="center" gap="$1">
+          <YStack px="$3" py="$6" ai="center" gap="$1">
             <FolderOpen size={20} color="$gray6" />
             <Text fontSize={12} color="$gray7">No subdirectories</Text>
           </YStack>
@@ -147,14 +147,14 @@ export function DirPicker({
                 width="100%"
                 px="$3"
                 py="$2"
-                items="center"
+                ai="center"
                 gap="$2"
                 cursor="pointer"
                 hoverStyle={{ bg: '$gray3' }}
                 onPress={() => fetchDirs(dir.path)}
               >
                 <Folder size={14} color="$gray8" />
-                <Text fontSize={13} fontFamily="$mono" color="$gray11" flex={1}>
+                <Text fontSize={13} fontFamily="monospace" color="$gray11" flex={1}>
                   {dir.name}
                 </Text>
                 <ChevronRight size={12} color="$gray6" />
@@ -166,7 +166,7 @@ export function DirPicker({
 
       {/* Footer: selected path + actions */}
       <XStack
-        items="center"
+        ai="center"
         gap="$3"
         px="$3"
         py="$2"
@@ -174,9 +174,9 @@ export function DirPicker({
         borderTopColor="$gray4"
         bg="$gray3"
       >
-        <XStack flex={1} items="center" gap="$1.5" minWidth={0}>
+        <XStack flex={1} ai="center" gap="$1.5" minWidth={0}>
           <FolderOpen size={13} color="$blue9" />
-          <Text fontSize={12} fontFamily="$mono" color="$gray11" numberOfLines={1} flex={1}>
+          <Text fontSize={12} fontFamily="monospace" color="$gray11" numberOfLines={1} flex={1}>
             {listing.current}
           </Text>
         </XStack>

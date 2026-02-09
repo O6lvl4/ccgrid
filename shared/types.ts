@@ -63,7 +63,7 @@ export type ServerMessage =
   | { type: 'cost_update'; sessionId: string; costUsd: number; inputTokens: number; outputTokens: number }
   | { type: 'error'; message: string; sessionId?: string }
   | { type: 'permission_request'; sessionId: string; requestId: string; toolName: string; input: Record<string, unknown>; description?: string; agentId?: string }
-  | { type: 'snapshot'; sessions: Session[]; teammates: Teammate[]; tasks: TeamTask[]; leadOutputs: Record<string, string>; teammateSpecs: TeammateSpec[] };
+  | { type: 'snapshot'; sessions: Session[]; teammates: Teammate[]; tasks: Record<string, TeamTask[]>; leadOutputs: Record<string, string>; teammateSpecs: TeammateSpec[] };
 
 // ---- WebSocket: Client → Server ----
 export type ClientMessage =

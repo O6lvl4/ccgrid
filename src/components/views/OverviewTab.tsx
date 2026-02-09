@@ -45,7 +45,7 @@ export function OverviewTab({ session }: { session: Session }) {
           <YStack bg="$gray2" borderWidth={1} borderColor="$gray4" rounded="$3" p="$3" gap="$0.5">
             <InfoRow label="Model">{session.model}</InfoRow>
             <InfoRow label="Working Dir">
-              <Text fontFamily="$mono" fontSize={12} color="$gray11">{session.cwd}</Text>
+              <Text fontFamily="monospace" fontSize={12} color="$gray11">{session.cwd}</Text>
             </InfoRow>
             {hasBudget && (
               <InfoRow label="Budget">${session.maxBudgetUsd!.toFixed(2)}</InfoRow>
@@ -53,7 +53,7 @@ export function OverviewTab({ session }: { session: Session }) {
             <InfoRow label="Created">{new Date(session.createdAt).toLocaleString()}</InfoRow>
             {session.sessionId && (
               <InfoRow label="Session ID">
-                <Text fontFamily="$mono" fontSize={11} color="$gray9">{session.sessionId}</Text>
+                <Text fontFamily="monospace" fontSize={11} color="$gray9">{session.sessionId}</Text>
               </InfoRow>
             )}
           </YStack>
@@ -85,9 +85,9 @@ export function OverviewTab({ session }: { session: Session }) {
         <YStack>
           <SectionLabel>Cost & Tokens</SectionLabel>
           <YStack bg="$gray2" borderWidth={1} borderColor="$gray4" rounded="$3" p="$3" gap="$2">
-            <XStack items="center" gap="$3">
+            <XStack ai="center" gap="$3">
               <Text fontSize={12} color="$gray8" width={100}>Cost</Text>
-              <Text fontFamily="$mono" color="$gray12" fontSize={13} fontWeight="600">
+              <Text fontFamily="monospace" color="$gray12" fontSize={13} fontWeight="600">
                 ${session.costUsd.toFixed(4)}
               </Text>
               {hasBudget && (
@@ -96,18 +96,18 @@ export function OverviewTab({ session }: { session: Session }) {
             </XStack>
 
             {hasBudget && (
-              <XStack items="center" gap="$3">
+              <XStack ai="center" gap="$3">
                 <Text fontSize={12} color="$gray8" width={100}>Budget</Text>
                 <XStack flex={1} height={6} bg="$gray4" rounded="$10" overflow="hidden" maxWidth={200}>
                   <YStack height="100%" rounded="$10" bg={budgetColor as any} width={`${budgetPercent}%` as any} />
                 </XStack>
-                <Text fontSize={11} color="$gray9" fontFamily="$mono">{budgetPercent.toFixed(0)}%</Text>
+                <Text fontSize={11} color="$gray9" fontFamily="monospace">{budgetPercent.toFixed(0)}%</Text>
               </XStack>
             )}
 
-            <XStack items="center" gap="$3">
+            <XStack ai="center" gap="$3">
               <Text fontSize={12} color="$gray8" width={100}>Tokens</Text>
-              <Text fontFamily="$mono" color="$gray12" fontSize={13}>
+              <Text fontFamily="monospace" color="$gray12" fontSize={13}>
                 {totalTokens.toLocaleString()}
               </Text>
               <Text color="$gray8" fontSize={11}>

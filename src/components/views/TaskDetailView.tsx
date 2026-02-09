@@ -47,7 +47,7 @@ export function TaskDetailView({ sessionId, taskId }: { sessionId: string; taskI
                 hoverStyle={{ borderColor: '$gray6' }}
                 cursor="pointer"
                 onPress={() => navigate({ view: 'task_detail', sessionId, taskId: id })}
-                items="center"
+                ai="center"
                 gap="$2"
               >
                 {dep ? (
@@ -56,7 +56,7 @@ export function TaskDetailView({ sessionId, taskId }: { sessionId: string; taskI
                     <Text fontSize={13} color="$gray11" numberOfLines={1} flex={1}>{dep.subject}</Text>
                   </>
                 ) : (
-                  <Text fontSize={12} color="$gray9" fontFamily="$mono">#{id}</Text>
+                  <Text fontSize={12} color="$gray9" fontFamily="monospace">#{id}</Text>
                 )}
               </XStack>
             );
@@ -76,7 +76,7 @@ export function TaskDetailView({ sessionId, taskId }: { sessionId: string; taskI
         borderBottomWidth={1}
         borderBottomColor="$gray4"
         shrink={0}
-        items="center"
+        ai="center"
         gap="$3"
       >
         <Text
@@ -120,7 +120,7 @@ export function TaskDetailView({ sessionId, taskId }: { sessionId: string; taskI
                 hoverStyle={{ borderColor: '$gray6' }}
                 cursor="pointer"
                 onPress={() => navigate({ view: 'teammate_detail', sessionId, agentId: task.assignedAgentId! })}
-                items="center"
+                ai="center"
                 gap="$2"
               >
                 {assignedTm && <StatusBadge status={assignedTm.status} />}

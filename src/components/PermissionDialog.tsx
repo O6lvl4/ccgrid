@@ -25,12 +25,12 @@ export function PermissionDialog({ sessionId }: { sessionId: string }) {
           p="$3"
           gap="$2"
         >
-          <XStack items="center" gap="$2">
+          <XStack ai="center" gap="$2">
             <Text fontSize={12} fontWeight="700" color="$yellow11">
               Permission Request
             </Text>
             {req.agentId && (
-              <Text fontSize={11} color="$gray8" fontFamily="$mono">
+              <Text fontSize={11} color="$gray8" fontFamily="monospace">
                 agent: {req.agentId.slice(0, 8)}
               </Text>
             )}
@@ -38,7 +38,7 @@ export function PermissionDialog({ sessionId }: { sessionId: string }) {
 
           <XStack gap="$2" items="baseline">
             <Text fontSize={11} color="$gray9" fontWeight="600" width={50}>Tool</Text>
-            <Text fontSize={12} color="$gray12" fontFamily="$mono">{req.toolName}</Text>
+            <Text fontSize={12} color="$gray12" fontFamily="monospace">{req.toolName}</Text>
           </XStack>
 
           {req.description && (
@@ -57,13 +57,13 @@ export function PermissionDialog({ sessionId }: { sessionId: string }) {
               rounded="$2"
               p="$2"
             >
-              <Text fontSize={11} fontFamily="$mono" color="$gray11" whiteSpace="pre-wrap">
+              <Text fontSize={11} fontFamily="monospace" color="$gray11" whiteSpace="pre-wrap">
                 {JSON.stringify(req.input, null, 2)}
               </Text>
             </ScrollView>
           </YStack>
 
-          <XStack gap="$2" justifyContent="flex-end" mt="$1">
+          <XStack gap="$2" jc="flex-end" mt="$1">
             <Button
               size="$2"
               bg="$gray5"

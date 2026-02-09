@@ -2,9 +2,12 @@ import { readFileSync, writeFileSync, readdirSync, mkdirSync, unlinkSync, exists
 import { join } from 'path';
 import type { Session, Teammate, TeamTask, TeammateSpec } from '../shared/types.js';
 
-const BASE_DIR = join(process.env.HOME ?? '', '.claude', 'claude-team');
+const HOME = process.env.HOME ?? '';
+const BASE_DIR = join(HOME, '.claude', 'claude-team');
 const SESSIONS_DIR = join(BASE_DIR, 'sessions');
 const SPECS_FILE = join(BASE_DIR, 'teammate-specs.json');
+const TASKS_DIR = join(HOME, '.claude', 'tasks');
+const TEAMS_DIR = join(HOME, '.claude', 'teams');
 
 interface SessionFile {
   session: Session;
@@ -37,6 +40,12 @@ export function loadAllSessions(): {
         }
         if (data.tasks.length > 0) {
           tasks.set(data.session.id, data.tasks);
+        } else if (data.session.sessionId) {
+          // Try loading tasks from ~/.claude/tasks/{team-name}/ or ~/.claude/tasks/{sdkSessionId}/
+          const liveTasks = loadTasksFromDisk(data.session.sessionId);
+          if (liveTasks.length > 0) {
+            tasks.set(data.session.id, liveTasks);
+          }
         }
         if (data.leadOutput) {
           leadOutputs.set(data.session.id, data.leadOutput);
@@ -73,6 +82,69 @@ export function deleteSessionFile(sessionId: string): void {
     unlinkSync(join(SESSIONS_DIR, `${sessionId}.json`));
   } catch {
     // file may not exist
+  }
+}
+
+// ---- Load tasks from ~/.claude/tasks/ ----
+
+function findTaskDirSync(sdkSessionId: string): string | null {
+  // 1. Scan team configs for matching leadSessionId
+  if (existsSync(TEAMS_DIR)) {
+    try {
+      const teamDirs = readdirSync(TEAMS_DIR);
+      for (const teamName of teamDirs) {
+        const configPath = join(TEAMS_DIR, teamName, 'config.json');
+        if (!existsSync(configPath)) continue;
+        try {
+          const raw = readFileSync(configPath, 'utf-8');
+          const config = JSON.parse(raw);
+          if (config.leadSessionId === sdkSessionId) {
+            const teamTaskDir = join(TASKS_DIR, teamName);
+            if (existsSync(teamTaskDir)) return teamTaskDir;
+          }
+        } catch {
+          // skip invalid config
+        }
+      }
+    } catch {
+      // teams dir read failed
+    }
+  }
+
+  // 2. Fallback: SDK session ID based directory
+  const sdkTaskDir = join(TASKS_DIR, sdkSessionId);
+  if (existsSync(sdkTaskDir)) return sdkTaskDir;
+
+  return null;
+}
+
+function loadTasksFromDisk(sdkSessionId: string): TeamTask[] {
+  const taskDir = findTaskDirSync(sdkSessionId);
+  if (!taskDir) return [];
+
+  try {
+    const files = readdirSync(taskDir).filter(f => f.endsWith('.json'));
+    const tasks: TeamTask[] = [];
+    for (const file of files) {
+      try {
+        const content = readFileSync(join(taskDir, file), 'utf-8');
+        const data = JSON.parse(content);
+        tasks.push({
+          id: data.id ?? file.replace('.json', ''),
+          subject: data.subject ?? 'Untitled',
+          description: data.description,
+          status: data.status ?? 'pending',
+          assignedAgentId: data.owner,
+          blocks: data.blocks ?? [],
+          blockedBy: data.blockedBy ?? [],
+        });
+      } catch {
+        // skip invalid files
+      }
+    }
+    return tasks;
+  } catch {
+    return [];
   }
 }
 

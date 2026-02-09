@@ -111,7 +111,7 @@ export function TeammateSpecListView({ api }: { api: Api }) {
             Specs ({specs.length})
           </Text>
           {specs.length === 0 ? (
-            <YStack py="$6" items="center">
+            <YStack py="$6" ai="center">
               <Text fontSize={13} color="$gray7">
                 No specs yet. Create one above to define reusable teammates.
               </Text>
@@ -131,7 +131,7 @@ export function TeammateSpecListView({ api }: { api: Api }) {
                   p="$3"
                   gap="$1"
                 >
-                  <XStack items="center" gap="$2">
+                  <XStack ai="center" gap="$2">
                     <Text fontWeight="600" fontSize={13} color="$gray12" flex={1}>{spec.name}</Text>
                     <Text fontSize={11} color="$gray9">{spec.role}</Text>
                     <Text

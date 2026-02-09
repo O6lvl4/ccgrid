@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import { Text, XStack, YStack } from 'tamagui';
 import { useStore, type SessionTab } from '../../store/useStore';
 import { InlineEdit } from '../InlineEdit';
 import { StatusBadge } from '../StatusBadge';
@@ -50,90 +49,149 @@ export function SessionDetailView({ sessionId, tab, api }: { sessionId: string; 
   };
 
   return (
-    <YStack flex={1} overflow="hidden">
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
       {/* Header */}
-      <YStack bg="$gray2" borderBottomWidth={1} borderBottomColor="$gray4" shrink={0}>
-        {/* Info row */}
-        <XStack items="center" gap="$3" px="$4" pt="$2.5" pb="$1.5">
-          <InlineEdit value={session.name} onSave={handleRename} fontSize={15} fontWeight="700" />
+      <div
+        style={{
+          background: '#ffffff',
+          borderBottom: '1px solid #e5e7eb',
+          flexShrink: 0,
+        }}
+      >
+        {/* Info row 1: name + status */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            padding: '12px 20px 4px',
+          }}
+        >
+          <InlineEdit value={session.name} onSave={handleRename} fontSize={16} fontWeight="700" />
           <StatusBadge status={session.status} />
-          <XStack gap="$2" items="center" marginLeft="auto" shrink={0}>
-            <Text fontSize={11} color="$gray8" fontFamily="$mono">
-              {session.model.split('-').slice(1, 3).join(' ')}
-            </Text>
-            <Text fontSize={11} color="$gray8" numberOfLines={1}>
-              {session.cwd}
-            </Text>
-            <Text fontSize={11} color="$gray8" fontFamily="$mono">
-              ${session.costUsd.toFixed(4)}
-            </Text>
-            {isActive && (
-              <Text
-                fontSize={11}
-                color="$red9"
-                cursor="pointer"
-                fontWeight="600"
-                hoverStyle={{ color: '$red10' }}
-                onPress={() => api.stopSession(sessionId).catch(console.error)}
-              >
-                Stop
-              </Text>
-            )}
-          </XStack>
-        </XStack>
+        </div>
+
+        {/* Info row 2: metadata */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            padding: '0 20px 10px',
+          }}
+        >
+          <span style={{ fontSize: 11, color: '#9ca3af', fontFamily: 'monospace' }}>
+            {session.model.split('-').slice(1, 3).join(' ')}
+          </span>
+          <span
+            style={{
+              fontSize: 11,
+              color: '#9ca3af',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              maxWidth: 260,
+            }}
+          >
+            {session.cwd}
+          </span>
+          <span style={{ fontSize: 11, color: '#9ca3af', fontFamily: 'monospace' }}>
+            ${session.costUsd.toFixed(4)}
+          </span>
+          {isActive && (
+            <button
+              onClick={() => api.stopSession(sessionId).catch(console.error)}
+              style={{
+                marginLeft: 'auto',
+                padding: '3px 10px',
+                borderRadius: 4,
+                border: '1px solid #fca5a5',
+                background: '#fef2f2',
+                color: '#dc2626',
+                fontSize: 11,
+                fontWeight: 600,
+                cursor: 'pointer',
+                lineHeight: 1.3,
+                transition: 'background 0.15s',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = '#fee2e2';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = '#fef2f2';
+              }}
+            >
+              Stop
+            </button>
+          )}
+        </div>
 
         {/* Tab bar */}
-        <XStack gap="$1" px="$4">
+        <div style={{ display: 'flex', gap: 0, padding: '0 20px' }}>
           {TABS.map(t => {
             const active = tab === t.key;
             return (
-              <YStack
+              <button
                 key={t.key}
-                cursor="pointer"
-                onPress={() => navigate({ view: 'session_detail', sessionId, tab: t.key })}
-                pb="$1.5"
-                borderBottomWidth={2}
-                borderBottomColor={active ? '$blue9' : 'transparent'}
+                onClick={() => navigate({ view: 'session_detail', sessionId, tab: t.key })}
+                style={{
+                  padding: '6px 14px 8px',
+                  border: 'none',
+                  borderBottom: active ? '2px solid #3b82f6' : '2px solid transparent',
+                  background: 'transparent',
+                  color: active ? '#111827' : '#6b7280',
+                  fontWeight: active ? 600 : 400,
+                  fontSize: 12,
+                  cursor: 'pointer',
+                  lineHeight: 1,
+                  transition: 'color 0.15s, border-color 0.15s',
+                }}
+                onMouseEnter={e => {
+                  if (!active) e.currentTarget.style.color = '#111827';
+                }}
+                onMouseLeave={e => {
+                  if (!active) e.currentTarget.style.color = '#6b7280';
+                }}
               >
-                <Text
-                  fontSize={12}
-                  fontWeight={active ? '600' : '400'}
-                  color={active ? '$gray12' : '$gray9'}
-                  hoverStyle={{ color: '$gray12' }}
-                  px="$1.5"
-                >
-                  {tabLabels[t.key]}
-                </Text>
-              </YStack>
+                {tabLabels[t.key]}
+              </button>
             );
           })}
-        </XStack>
-      </YStack>
+        </div>
+      </div>
 
       {/* Error banner */}
       {lastError && (
-        <XStack
-          px="$4"
-          py="$2"
-          bg="$red3"
-          borderBottomWidth={1}
-          borderBottomColor="$red6"
-          items="center"
-          gap="$2"
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            padding: '8px 20px',
+            background: '#fef2f2',
+            borderBottom: '1px solid #fecaca',
+          }}
         >
-          <Text flex={1} fontSize={12} color="$red11">
-            {lastError}
-          </Text>
-          <Text
-            fontSize={12}
-            cursor="pointer"
-            onPress={clearError}
-            color="$red9"
-            hoverStyle={{ color: '$red11' }}
+          <span style={{ flex: 1, fontSize: 12, color: '#dc2626' }}>{lastError}</span>
+          <button
+            onClick={clearError}
+            style={{
+              border: 'none',
+              background: 'transparent',
+              color: '#ef4444',
+              fontSize: 12,
+              cursor: 'pointer',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.color = '#dc2626';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.color = '#ef4444';
+            }}
           >
             Dismiss
-          </Text>
-        </XStack>
+          </button>
+        </div>
       )}
 
       {/* Permission requests */}
@@ -144,6 +202,6 @@ export function SessionDetailView({ sessionId, tab, api }: { sessionId: string; 
       {tab === 'overview' && <OverviewTab session={session} />}
       {tab === 'teammates' && <TeammatesTab sessionId={sessionId} />}
       {tab === 'tasks' && <TasksTab sessionId={sessionId} />}
-    </YStack>
+    </div>
   );
 }

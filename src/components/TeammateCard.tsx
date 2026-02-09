@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Markdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { ScrollView, Text, XStack, YStack } from 'tamagui';
 import { StatusBadge } from './StatusBadge';
 import type { Teammate } from '../../shared/types';
@@ -14,7 +15,7 @@ export function TeammateCard({ tm }: { tm: Teammate }) {
       <XStack
         tag="button"
         width="100%"
-        items="center"
+        ai="center"
         gap="$2"
         px="$2"
         py="$1.5"
@@ -23,7 +24,7 @@ export function TeammateCard({ tm }: { tm: Teammate }) {
         onPress={() => hasContent && setExpanded(!expanded)}
       >
         <StatusBadge status={tm.status} />
-        <Text fontSize={12} fontFamily="$mono" color="$gray2" numberOfLines={1} flex={1}>
+        <Text fontSize={12} fontFamily="monospace" color="$gray2" numberOfLines={1} flex={1}>
           {tm.name ?? tm.agentId.slice(0, 8)}
         </Text>
         <Text fontSize={12} color="$gray5" ml="auto" shrink={0}>
@@ -46,7 +47,7 @@ export function TeammateCard({ tm }: { tm: Teammate }) {
                 <Text fontSize={11} color="$gray5" shrink={0}>
                   Agent ID
                 </Text>
-                <Text fontSize={11} color="$gray4" fontFamily="$mono" numberOfLines={1}>
+                <Text fontSize={11} color="$gray4" fontFamily="monospace" numberOfLines={1}>
                   {tm.agentId}
                 </Text>
               </XStack>
@@ -66,7 +67,7 @@ export function TeammateCard({ tm }: { tm: Teammate }) {
                   <Text
                     fontSize={11}
                     color="$gray4"
-                    fontFamily="$mono"
+                    fontFamily="monospace"
                     numberOfLines={1}
                     title={tm.transcriptPath}
                   >
@@ -79,7 +80,7 @@ export function TeammateCard({ tm }: { tm: Teammate }) {
             {/* Output markdown - kept as Tailwind prose since Tamagui doesn't have prose utilities */}
             {tm.output && (
               <div className="prose prose-xs prose-invert max-w-none prose-pre:bg-gray-900 prose-pre:text-[11px] prose-p:text-[11px] prose-p:text-gray-300 prose-headings:text-xs prose-headings:text-gray-200 prose-li:text-[11px] prose-code:text-blue-300">
-                <Markdown>{tm.output}</Markdown>
+                <Markdown remarkPlugins={[remarkGfm]}>{tm.output}</Markdown>
               </div>
             )}
           </YStack>

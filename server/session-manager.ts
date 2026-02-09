@@ -7,6 +7,7 @@ import { processLeadStream } from './lead-stream.js';
 import { createHookHandlers } from './hook-handlers.js';
 import { startTaskWatcher, syncTasks } from './task-watcher.js';
 import { loadTeammateOutputs, readTeammateTranscript } from './transcript-reader.js';
+import { startPolling as startTranscriptPolling, stopPolling as stopTranscriptPolling, stopAllPolling, type PollerDeps } from './transcript-poller.js';
 
 interface ActiveSession {
   query: Query;
@@ -123,6 +124,16 @@ export class SessionManager {
   }
 
   getSessions(): Session[] {
+    // Auto-fix stale running/starting sessions that have no active query
+    for (const session of this.sessions.values()) {
+      if (
+        (session.status === 'running' || session.status === 'starting') &&
+        !this.activeSessions.has(session.id)
+      ) {
+        session.status = 'completed';
+        this.persistSession(session.id);
+      }
+    }
     return Array.from(this.sessions.values());
   }
 
@@ -157,6 +168,7 @@ export class SessionManager {
   }
 
   async stopSession(sessionId: string): Promise<void> {
+    stopAllPolling(sessionId, this.pollerDeps());
     const active = this.activeSessions.get(sessionId);
     if (active) {
       try {
@@ -172,6 +184,24 @@ export class SessionManager {
       this.persistSession(sessionId);
       this.broadcast({ type: 'session_status', sessionId, status: 'completed' });
     }
+  }
+
+  continueSession(sessionId: string, prompt: string): Session | undefined {
+    const session = this.sessions.get(sessionId);
+    console.log(`[continueSession] sessionId=${sessionId} sdkSessionId=${session?.sessionId} status=${session?.status}`);
+    if (!session?.sessionId || session.status !== 'completed') return undefined;
+
+    const userBlock = `\n\n<!-- follow-up -->\n\n> ${prompt.replace(/\n/g, '\n> ')}\n\n`;
+    const existing = this.leadOutputs.get(sessionId) ?? '';
+    this.leadOutputs.set(sessionId, existing + userBlock);
+    this.broadcast({ type: 'lead_output', sessionId, text: userBlock });
+
+    session.status = 'running';
+    this.persistSession(sessionId);
+    this.broadcast({ type: 'session_status', sessionId, status: 'running' });
+
+    this.startAgent(session, undefined, session.maxBudgetUsd, prompt);
+    return session;
   }
 
   // ---- Permission resolution ----
@@ -204,8 +234,8 @@ export class SessionManager {
     return this.tasks.get(sessionId) ?? [];
   }
 
-  getAllTasks(): TeamTask[] {
-    return Array.from(this.tasks.values()).flat();
+  getAllTasks(): Record<string, TeamTask[]> {
+    return Object.fromEntries(this.tasks);
   }
 
   // ---- Lead Output (read-only) ----
@@ -220,7 +250,7 @@ export class SessionManager {
 
   // ---- Internal ----
 
-  private startAgent(session: Session, teammateSpecs: TeammateSpec[] | undefined, maxBudgetUsd: number | undefined): void {
+  private startAgent(session: Session, teammateSpecs: TeammateSpec[] | undefined, maxBudgetUsd: number | undefined, resumePrompt?: string): void {
     const abortController = new AbortController();
 
     const hooks = createHookHandlers({
@@ -229,9 +259,15 @@ export class SessionManager {
       broadcast: this.broadcast,
       persistSession: (id) => this.persistSession(id),
       syncTasks: (id) => syncTasks(id, this.taskWatcherDeps()),
+      startPolling: (agentId) => {
+        if (session.sessionId) {
+          startTranscriptPolling(session.id, agentId, session.sessionId, session.cwd, this.pollerDeps());
+        }
+      },
+      stopPolling: (agentId) => stopTranscriptPolling(agentId),
     });
 
-    const prompt = buildPrompt(teammateSpecs, session.taskDescription);
+    const prompt = resumePrompt ?? buildPrompt(teammateSpecs, session.taskDescription);
 
     const isBypass = session.permissionMode === 'bypassPermissions';
 
@@ -263,6 +299,7 @@ export class SessionManager {
       agentQuery = query({
         prompt,
         options: {
+          ...(resumePrompt && session.sessionId ? { resume: session.sessionId } : {}),
           cwd: session.cwd,
           model: session.model,
           permissionMode: isBypass ? 'bypassPermissions' : 'acceptEdits',
@@ -270,6 +307,7 @@ export class SessionManager {
             ? { allowDangerouslySkipPermissions: true }
             : { canUseTool }),
           includePartialMessages: true,
+          maxTurns: 999999,
           ...(maxBudgetUsd != null ? { maxBudgetUsd } : {}),
           abortController,
           env: {
@@ -315,6 +353,7 @@ export class SessionManager {
       persistSessionDebounced: (id: string) => this.persistSessionDebounced(id),
       startTaskWatcher: (id: string, sdkId: string) => startTaskWatcher(id, sdkId, this.taskWatcherDeps()),
       loadTeammateOutputs: (id: string) => loadTeammateOutputs(id, this.transcriptDeps()),
+      stopAllPolling: (id: string) => stopAllPolling(id, this.pollerDeps()),
     };
   }
 
@@ -325,6 +364,14 @@ export class SessionManager {
       activeSessions: this.activeSessions,
       broadcast: this.broadcast,
       persistSession: (id: string) => this.persistSession(id),
+    };
+  }
+
+  private pollerDeps(): PollerDeps {
+    return {
+      teammates: this.teammates,
+      sessions: this.sessions,
+      broadcast: this.broadcast,
     };
   }
 

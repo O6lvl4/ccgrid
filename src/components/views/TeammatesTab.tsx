@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import { ScrollView, Text, XStack, YStack } from 'tamagui';
 import { useStore } from '../../store/useStore';
 import { StatusBadge } from '../StatusBadge';
 
@@ -14,48 +13,137 @@ export function TeammatesTab({ sessionId }: { sessionId: string }) {
 
   if (tmList.length === 0) {
     return (
-      <YStack flex={1} items="center" justify="center">
-        <Text color="$gray7" fontSize={13}>
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <span style={{ color: '#9ca3af', fontSize: 13 }}>
           Teammates will appear here as the lead agent spawns them.
-        </Text>
-      </YStack>
+        </span>
+      </div>
     );
   }
 
   return (
-    <ScrollView flex={1}>
-      <YStack p="$4" gap="$2" maxWidth={640} alignSelf="center" width="100%">
+    <div style={{ flex: 1, overflowY: 'auto' }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+          gap: 12,
+          padding: 20,
+          maxWidth: 960,
+          margin: '0 auto',
+          width: '100%',
+          boxSizing: 'border-box',
+        }}
+      >
         {tmList.map(tm => (
-          <YStack
+          <TeammateCard
             key={tm.agentId}
-            tag="button"
-            onPress={() => navigate({ view: 'teammate_detail', sessionId, agentId: tm.agentId })}
-            bg="$gray2"
-            borderWidth={1}
-            borderColor="$gray4"
-            hoverStyle={{ borderColor: '$gray6' }}
-            rounded="$3"
-            p="$3"
-            cursor="pointer"
-            gap="$1.5"
-          >
-            <XStack items="center" gap="$2">
-              <StatusBadge status={tm.status} />
-              <Text fontWeight="600" fontSize={13} color="$gray12" numberOfLines={1} flex={1}>
-                {tm.name ?? tm.agentId.slice(0, 8)}
-              </Text>
-              <Text fontSize={11} color="$gray8">{tm.agentType}</Text>
-            </XStack>
-            {tm.output ? (
-              <Text fontSize={12} color="$gray9" numberOfLines={2} lineHeight={18}>
-                {tm.output.slice(0, 200)}
-              </Text>
-            ) : (
-              <Text fontSize={12} color="$gray7" fontStyle="italic">No output yet</Text>
-            )}
-          </YStack>
+            name={tm.name ?? tm.agentId.slice(0, 8)}
+            status={tm.status}
+            agentType={tm.agentType}
+            output={tm.output}
+            onClick={() => navigate({ view: 'teammate_detail', sessionId, agentId: tm.agentId })}
+          />
         ))}
-      </YStack>
-    </ScrollView>
+      </div>
+    </div>
+  );
+}
+
+function TeammateCard({
+  name,
+  status,
+  agentType,
+  output,
+  onClick,
+}: {
+  name: string;
+  status: string;
+  agentType: string;
+  output?: string;
+  onClick: () => void;
+}) {
+  return (
+    <div
+      role="button"
+      onClick={onClick}
+      style={{
+        background: '#ffffff',
+        border: '1px solid #e5e7eb',
+        borderRadius: 8,
+        padding: 14,
+        cursor: 'pointer',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 8,
+        transition: 'border-color 0.15s, box-shadow 0.15s',
+      }}
+      onMouseEnter={e => {
+        e.currentTarget.style.borderColor = '#d1d5db';
+        e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)';
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.borderColor = '#e5e7eb';
+        e.currentTarget.style.boxShadow = 'none';
+      }}
+    >
+      {/* Header: status + name */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <StatusBadge status={status} showLabel={false} />
+        <span
+          style={{
+            fontWeight: 600,
+            fontSize: 13,
+            color: '#111827',
+            flex: 1,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {name}
+        </span>
+      </div>
+
+      {/* Agent type badge */}
+      <div>
+        <span
+          style={{
+            fontSize: 10,
+            color: '#6b7280',
+            background: '#f3f4f6',
+            padding: '2px 6px',
+            borderRadius: 4,
+            fontWeight: 500,
+          }}
+        >
+          {agentType}
+        </span>
+      </div>
+
+      {/* Output preview */}
+      <div
+        style={{
+          fontSize: 12,
+          color: output ? '#6b7280' : '#9ca3af',
+          fontStyle: output ? 'normal' : 'italic',
+          lineHeight: 1.5,
+          overflow: 'hidden',
+          display: '-webkit-box',
+          WebkitLineClamp: 3,
+          WebkitBoxOrient: 'vertical',
+          minHeight: 36,
+        }}
+      >
+        {output ? output.slice(0, 200) : 'No output yet'}
+      </div>
+    </div>
   );
 }

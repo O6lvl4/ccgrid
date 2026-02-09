@@ -1,15 +1,43 @@
 import { useEffect, useRef } from 'react';
 import { useStore } from '../store/useStore';
-import type { ServerMessage } from '../../shared/types';
+import type { ServerMessage, Session } from '../../shared/types';
 
 export function useWebSocket() {
   const handleServerMessage = useStore(s => s.handleServerMessage);
   const setWsSend = useStore(s => s.setWsSend);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const pollTimer = useRef<ReturnType<typeof setInterval>>(undefined);
 
   useEffect(() => {
     let isClosed = false;
+
+    // running セッションの状態をポーリングで同期（取りこぼし対策）
+    function startStatusPoller() {
+      if (pollTimer.current) return;
+      pollTimer.current = setInterval(async () => {
+        const sessions = useStore.getState().sessions;
+        for (const [id, session] of sessions) {
+          if (session.status === 'running' || session.status === 'starting') {
+            try {
+              const res = await fetch(`/api/sessions/${id}`);
+              if (!res.ok) continue;
+              const latest: Session = await res.json();
+              if (latest.status !== session.status) {
+                handleServerMessage({ type: 'session_status', sessionId: id, status: latest.status } as ServerMessage);
+              }
+            } catch { /* ignore */ }
+          }
+        }
+      }, 10000);
+    }
+
+    function stopStatusPoller() {
+      if (pollTimer.current) {
+        clearInterval(pollTimer.current);
+        pollTimer.current = undefined;
+      }
+    }
 
     function connect() {
       if (isClosed) return;
@@ -20,6 +48,7 @@ export function useWebSocket() {
 
       ws.onopen = () => {
         setWsSend((msg: unknown) => ws.send(JSON.stringify(msg)));
+        startStatusPoller();
       };
 
       ws.onmessage = (event) => {
@@ -48,9 +77,10 @@ export function useWebSocket() {
     return () => {
       isClosed = true;
       setWsSend(null);
+      stopStatusPoller();
       clearTimeout(reconnectTimer.current);
       if (wsRef.current) {
-        wsRef.current.onclose = null; // prevent reconnect on intentional close
+        wsRef.current.onclose = null;
         wsRef.current.close();
         wsRef.current = null;
       }

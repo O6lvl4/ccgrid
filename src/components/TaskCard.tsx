@@ -23,7 +23,7 @@ export function TaskCard({ task, isExpanded, onToggle }: TaskCardProps) {
         ? { borderWidth: 1, borderColor: '$blue6' }
         : {})}
     >
-      <XStack items="center" gap="$1.5">
+      <XStack ai="center" gap="$1.5">
         <Text
           fontSize={12}
           fontWeight="500"
@@ -54,7 +54,7 @@ export function TaskCard({ task, isExpanded, onToggle }: TaskCardProps) {
         </Text>
       )}
       {task.assignedAgentId && (
-        <Text fontSize={12} color="$gray5" mt="$0.5" fontFamily="$mono">
+        <Text fontSize={12} color="$gray5" mt="$0.5" fontFamily="monospace">
           {task.assignedAgentId.slice(0, 8)}
         </Text>
       )}

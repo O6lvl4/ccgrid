@@ -38,9 +38,9 @@ export function Breadcrumb() {
   if (crumbs.length === 0) return null;
 
   return (
-    <XStack role="navigation" items="center" gap="$1">
+    <XStack role="navigation" ai="center" gap="$1">
       {crumbs.map((c, i) => (
-        <XStack key={i} items="center" gap="$1">
+        <XStack key={i} ai="center" gap="$1">
           {i > 0 && (
             <Text fontSize={11} color="$gray6">›</Text>
           )}

@@ -11,17 +11,25 @@ export interface LeadStreamDeps {
   persistSessionDebounced: (sessionId: string) => void;
   startTaskWatcher: (sessionId: string, sdkSessionId: string) => void;
   loadTeammateOutputs: (sessionId: string) => Promise<void>;
+  stopAllPolling: (sessionId: string) => void;
 }
 
 export async function processLeadStream(sessionId: string, agentQuery: Query, deps: LeadStreamDeps): Promise<void> {
+  console.log(`[lead-stream] START ${sessionId.slice(0, 8)}`);
   for await (const message of agentQuery) {
     await handleLeadMessage(sessionId, message, deps);
   }
+  console.log(`[lead-stream] END ${sessionId.slice(0, 8)}`);
 }
 
 async function handleLeadMessage(sessionId: string, message: SDKMessage, deps: LeadStreamDeps): Promise<void> {
   const session = deps.sessions.get(sessionId);
   if (!session) return;
+
+  // Debug: log all message types received
+  if (message.type !== 'stream_event') {
+    console.log(`[lead-stream] ${sessionId.slice(0, 8)} type=${message.type}${'subtype' in message ? ` subtype=${message.subtype}` : ''}`);
+  }
 
   switch (message.type) {
     case 'system': {
@@ -50,7 +58,23 @@ async function handleLeadMessage(sessionId: string, message: SDKMessage, deps: L
     }
 
     case 'assistant': {
-      // Text already streamed via stream_event deltas; skip to avoid duplication
+      // Fallback: extract text from assistant message if stream_event deltas didn't deliver it
+      const existing = deps.leadOutputs.get(sessionId) ?? '';
+      let assistantText = '';
+      if ('content' in message && Array.isArray(message.content)) {
+        for (const block of message.content) {
+          if (block && typeof block === 'object' && 'type' in block && block.type === 'text' && 'text' in block && typeof block.text === 'string') {
+            assistantText += block.text;
+          }
+        }
+      } else if ('text' in message && typeof message.text === 'string') {
+        assistantText = message.text;
+      }
+      if (assistantText && !existing.endsWith(assistantText)) {
+        deps.leadOutputs.set(sessionId, existing + assistantText);
+        deps.persistSessionDebounced(sessionId);
+        deps.broadcast({ type: 'lead_output', sessionId, text: assistantText });
+      }
       break;
     }
 
@@ -80,6 +104,9 @@ async function handleLeadMessage(sessionId: string, message: SDKMessage, deps: L
       session.status = message.subtype === 'success' ? 'completed' : 'error';
       deps.broadcast({ type: 'session_status', sessionId, status: session.status });
       deps.activeSessions.delete(sessionId);
+
+      // Stop polling before marking teammates as stopped
+      deps.stopAllPolling(sessionId);
 
       // Mark all teammates for this session as stopped
       for (const teammate of deps.teammates.values()) {

@@ -100,7 +100,7 @@ export function SessionConfig({ api }: { api: Api }) {
               bg="$gray3"
               borderColor="$gray5"
               color="$gray12"
-              fontFamily="$mono"
+              fontFamily="monospace"
               fontSize={12}
               focusStyle={{ borderColor: '$blue9' }}
             />
@@ -229,7 +229,7 @@ export function SessionConfig({ api }: { api: Api }) {
 
       {/* Teammate Specs */}
       <YStack>
-        <XStack items="center" justifyContent="space-between" mb="$1">
+        <XStack ai="center" jc="space-between" mb="$1">
           <FieldLabel>Teammate Specs</FieldLabel>
           <Text
             tag="button"
@@ -254,7 +254,7 @@ export function SessionConfig({ api }: { api: Api }) {
               return (
                 <XStack
                   key={spec.id}
-                  items="center"
+                  ai="center"
                   gap="$1.5"
                   px="$2"
                   py="$1"

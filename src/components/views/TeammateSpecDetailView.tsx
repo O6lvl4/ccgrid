@@ -48,7 +48,7 @@ export function TeammateSpecDetailView({ specId, api }: { specId: string; api: A
         borderBottomWidth={1}
         borderBottomColor="$gray4"
         shrink={0}
-        items="center"
+        ai="center"
         gap="$3"
       >
         <Text
@@ -81,15 +81,15 @@ export function TeammateSpecDetailView({ specId, api }: { specId: string; api: A
         <YStack p="$4" gap="$4" maxWidth={640} alignSelf="center" width="100%">
           {/* Metadata */}
           <YStack bg="$gray2" borderColor="$gray4" borderWidth={1} rounded="$3" p="$3" gap="$2">
-            <XStack gap="$3" items="center">
+            <XStack gap="$3" ai="center">
               <Text fontSize={12} color="$gray8" width={80}>Name</Text>
               <InlineEdit value={spec.name} onSave={(v) => updateField('name', v)} fontSize={13} fontWeight="500" />
             </XStack>
-            <XStack gap="$3" items="center">
+            <XStack gap="$3" ai="center">
               <Text fontSize={12} color="$gray8" width={80}>Role</Text>
               <InlineEdit value={spec.role} onSave={(v) => updateField('role', v)} fontSize={13} fontWeight="500" />
             </XStack>
-            <XStack gap="$3" items="center">
+            <XStack gap="$3" ai="center">
               <Text fontSize={12} color="$gray8" width={80}>Created</Text>
               <Text fontSize={12} color="$gray9">{new Date(spec.createdAt).toLocaleString()}</Text>
             </XStack>

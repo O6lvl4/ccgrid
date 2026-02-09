@@ -15,10 +15,23 @@ export function buildPrompt(teammateSpecs: TeammateSpec[] | undefined, taskDescr
 
 CRITICAL RULES:
 1. Use the Task tool to spawn teammates. Each teammate gets a clear, specific sub-task.
-2. After spawning teammates, you MUST wait for ALL of them to complete. Use TaskList to check progress.
-3. Do NOT finish your response until every teammate's task shows status "completed".
-4. Once all tasks are completed, collect and present ALL results in a comprehensive summary.
-5. If a teammate is still working, keep checking TaskList every few seconds until done.
+2. After spawning ALL teammates, IMMEDIATELY call TaskList to check their status. Do NOT just say "waiting" — you MUST actually call the TaskList tool.
+3. NEVER stop or end your response while ANY task has status other than "completed". If tasks are still "pending" or "in_progress", call TaskList again. Keep calling TaskList in a loop until ALL tasks show "completed".
+4. Once ALL tasks show status "completed", collect and present ALL results in a comprehensive summary.
+5. IMPORTANT: Every time you check TaskList and tasks are not all completed, you MUST call TaskList again. Never output text saying you will wait — instead, TAKE ACTION by calling TaskList.
+
+TASK MANAGEMENT:
+- Before starting work, use TaskCreate to break down the task into trackable sub-tasks.
+- Each sub-task should have a clear subject (imperative form) and description.
+- Always provide activeForm (present continuous, e.g. "Analyzing components") when creating tasks.
+- Update task status with TaskUpdate: set to "in_progress" when starting, "completed" when done.
+- Create tasks for each teammate's work AND for your own coordination steps.
+- Example workflow:
+  1. TaskCreate: "Analyze existing components" (your planning step)
+  2. TaskUpdate: mark as in_progress, then completed after analysis
+  3. TaskCreate: "Refactor Button component" (teammate's work)
+  4. Spawn teammate, TaskUpdate: mark as in_progress
+  5. When teammate finishes, TaskUpdate: mark as completed
 
 ## Task
 ${taskDescription}`;

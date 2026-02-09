@@ -1,29 +1,7 @@
-import { XStack, YStack, Text } from 'tamagui';
 import { useStore } from '../../store/useStore';
+import { TwemojiIcon } from '../../utils/twemoji';
 import { Breadcrumb } from './Breadcrumb';
 import { SessionSidebar } from './SessionSidebar';
-
-function NavItem({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
-  return (
-    <YStack
-      cursor="pointer"
-      onPress={onPress}
-      pb="$1.5"
-      borderBottomWidth={2}
-      borderBottomColor={active ? '$blue9' : 'transparent'}
-    >
-      <Text
-        fontSize={13}
-        fontWeight={active ? '600' : '400'}
-        color={active ? '$gray12' : '$gray9'}
-        hoverStyle={{ color: '$gray12' }}
-        px="$1"
-      >
-        {label}
-      </Text>
-    </YStack>
-  );
-}
 
 export function ViewShell({ children }: { children: React.ReactNode }) {
   const route = useStore(s => s.route);
@@ -43,53 +21,107 @@ export function ViewShell({ children }: { children: React.ReactNode }) {
     route.view === 'teammate_spec_detail';
 
   return (
-    <YStack height="100vh" bg="$color1">
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: '#f9fafb' }}>
       {/* Header */}
-      <XStack
+      <div
         role="banner"
-        items="flex-end"
-        gap="$4"
-        px="$4"
-        pt="$2.5"
-        bg="$gray2"
-        borderBottomWidth={1}
-        borderBottomColor="$gray4"
-        shrink={0}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 4,
+          padding: '0 20px',
+          height: 48,
+          background: '#ffffff',
+          borderBottom: '1px solid #e5e7eb',
+          flexShrink: 0,
+        }}
       >
-        <Text
-          fontSize={15}
-          fontWeight="700"
-          letterSpacing={-0.5}
-          shrink={0}
-          color="$gray12"
-          pb="$1.5"
+        {/* Logo */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            marginRight: 24,
+            cursor: 'pointer',
+          }}
+          onClick={() => navigate({ view: 'session_list' })}
         >
-          claude-team
-        </Text>
+          <span style={{ fontSize: 18, lineHeight: 1, color: '#3b82f6' }}>⊞</span>
+          <span style={{ fontSize: 14, fontWeight: 700, color: '#111827', letterSpacing: -0.3 }}>
+            ccgrid
+          </span>
+        </div>
 
-        <NavItem
+        {/* Nav items */}
+        <NavPill
+          emoji="💬"
           label="Sessions"
           active={isSessionsActive}
-          onPress={() => navigate({ view: 'session_list' })}
+          onClick={() => navigate({ view: 'session_list' })}
         />
-        <NavItem
+        <NavPill
+          emoji="👥"
           label="Teammates"
           active={isSpecsActive}
-          onPress={() => navigate({ view: 'teammate_spec_list' })}
+          onClick={() => navigate({ view: 'teammate_spec_list' })}
         />
 
-        <YStack pb="$1.5" marginLeft="auto">
+        {/* Breadcrumb */}
+        <div style={{ marginLeft: 'auto' }}>
           <Breadcrumb />
-        </YStack>
-      </XStack>
+        </div>
+      </div>
 
       {/* Body */}
-      <XStack flex={1} overflow="hidden">
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         {showSidebar && <SessionSidebar />}
-        <YStack role="main" flex={1} overflow="hidden" minW={0}>
+        <div role="main" style={{ flex: 1, overflow: 'hidden', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
           {children}
-        </YStack>
-      </XStack>
-    </YStack>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function NavPill({
+  emoji,
+  label,
+  active,
+  onClick,
+}: {
+  emoji: string;
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 5,
+        padding: '5px 12px',
+        borderRadius: 6,
+        border: 'none',
+        background: active ? '#f3f4f6' : 'transparent',
+        color: active ? '#111827' : '#6b7280',
+        fontWeight: active ? 600 : 400,
+        fontSize: 13,
+        cursor: 'pointer',
+        lineHeight: 1,
+        transition: 'background 0.15s, color 0.15s',
+      }}
+      onMouseEnter={e => {
+        if (!active) (e.currentTarget as HTMLButtonElement).style.background = '#f9fafb';
+      }}
+      onMouseLeave={e => {
+        if (!active) (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+      }}
+    >
+      <TwemojiIcon emoji={emoji} size={13} />
+      {label}
+    </button>
   );
 }

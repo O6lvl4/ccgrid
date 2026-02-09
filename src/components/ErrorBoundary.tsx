@@ -16,7 +16,7 @@ export class ErrorBoundary extends Component<
       return (
         <YStack
           height="100vh"
-          items="center"
+          ai="center"
           justify="center"
           bg="$gray1"
         >
@@ -43,7 +43,7 @@ export class ErrorBoundary extends Component<
               <Text
                 fontSize={12}
                 color="$gray11"
-                fontFamily="$mono"
+                fontFamily="monospace"
                 whiteSpace="pre-wrap"
                 lineHeight={18}
               >
