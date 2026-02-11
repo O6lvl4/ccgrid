@@ -1,63 +1,129 @@
 import { type ReactNode } from 'react';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 /**
  * Detects `cat -n` style line-numbered output:
  *   "     1\tline content"  (tab separator)
  *   "     1→line content"   (→ U+2192 separator, used by Claude Code)
- * Lines must start with optional spaces + digits + separator.
  */
 const LINE_NUM_RE = /^(\s*\d+)[\t\u2192](.*)$/;
 
 function hasLineNumbers(code: string): boolean {
   const lines = code.split('\n').filter(l => l.length > 0);
   if (lines.length < 2) return false;
-  // At least 80% of non-empty lines should match the pattern
   const matching = lines.filter(l => LINE_NUM_RE.test(l)).length;
   return matching / lines.length >= 0.8;
 }
 
-function LineNumberedCode({ code }: { code: string }) {
-  const lines = code.endsWith('\n') ? code.slice(0, -1).split('\n') : code.split('\n');
-
-  const parsed = lines.map(line => {
+function stripLineNumbers(code: string): { nums: string[]; content: string } {
+  const rawLines = code.endsWith('\n') ? code.slice(0, -1).split('\n') : code.split('\n');
+  const nums: string[] = [];
+  const contentLines: string[] = [];
+  for (const line of rawLines) {
     const m = line.match(LINE_NUM_RE);
-    if (m) return { num: m[1].trim(), content: m[2] };
-    return { num: '', content: line };
-  });
+    if (m) {
+      nums.push(m[1].trim());
+      contentLines.push(m[2]);
+    } else {
+      nums.push('');
+      contentLines.push(line);
+    }
+  }
+  return { nums, content: contentLines.join('\n') };
+}
+
+function LineNumberedCode({ code, language }: { code: string; language?: string }) {
+  const { nums, content } = stripLineNumbers(code);
 
   return (
-    <div style={{ display: 'flex', fontSize: 'inherit', lineHeight: 'inherit' }}>
+    <div style={{ display: 'flex', borderRadius: 8, overflow: 'hidden' }}>
+      {/* Line numbers — not selectable */}
       <div
         aria-hidden
         style={{
           userSelect: 'none',
           WebkitUserSelect: 'none',
           textAlign: 'right',
+          padding: '16px 0',
+          paddingLeft: 12,
           paddingRight: 12,
-          color: '#9ca3af',
-          borderRight: '1px solid #e5e7eb',
-          marginRight: 12,
+          backgroundColor: '#1e1e2e',
+          color: '#6c7086',
+          fontSize: 13,
+          lineHeight: '1.45',
+          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+          borderRight: '1px solid #313244',
           flexShrink: 0,
-          whiteSpace: 'pre',
         }}
       >
-        {parsed.map((l, i) => (
-          <div key={i}>{l.num}</div>
+        {nums.map((n, i) => (
+          <div key={i}>{n}</div>
         ))}
       </div>
-      <div style={{ whiteSpace: 'pre', overflowX: 'auto', flex: 1 }}>
-        {parsed.map((l, i) => (
-          <div key={i}>{l.content || '\n'}</div>
-        ))}
+      {/* Content — with syntax highlighting */}
+      <div style={{ flex: 1, overflow: 'auto' }}>
+        <SyntaxHighlighter
+          language={language ?? guessLanguage(content)}
+          style={oneDark}
+          customStyle={{
+            margin: 0,
+            padding: '16px',
+            borderRadius: 0,
+            fontSize: 13,
+            background: '#282a36',
+          }}
+          codeTagProps={{ style: { fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace' } }}
+        >
+          {content}
+        </SyntaxHighlighter>
       </div>
     </div>
   );
 }
 
+function HighlightedCode({ code, language }: { code: string; language?: string }) {
+  return (
+    <SyntaxHighlighter
+      language={language ?? guessLanguage(code)}
+      style={oneDark}
+      customStyle={{
+        margin: 0,
+        padding: '16px',
+        borderRadius: 8,
+        fontSize: 13,
+        background: '#282a36',
+      }}
+      codeTagProps={{ style: { fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace' } }}
+    >
+      {code}
+    </SyntaxHighlighter>
+  );
+}
+
+/** Try to guess language from content heuristics */
+function guessLanguage(code: string): string {
+  const first = code.trimStart().slice(0, 200);
+  if (/^(import |from |export |const |let |var |function |class |=>)/.test(first)) return 'typescript';
+  if (/^(def |class |import |from |if __name__)/.test(first)) return 'python';
+  if (/^(<\?php|namespace |use )/.test(first)) return 'php';
+  if (/^(package |func |import \()/.test(first)) return 'go';
+  if (/^(#include|int main|void )/.test(first)) return 'c';
+  if (/^(<!DOCTYPE|<html|<div)/.test(first)) return 'html';
+  if (/^\{/.test(first) && /\}$/.test(code.trimEnd())) return 'json';
+  if (/^(apiVersion:|kind:|metadata:)/.test(first)) return 'yaml';
+  if (/^(FROM |RUN |COPY |CMD )/.test(first)) return 'dockerfile';
+  if (/^(SELECT |INSERT |CREATE |ALTER |DROP )/i.test(first)) return 'sql';
+  if (/^#!\//.test(first) || /^(if \[|for |while |echo |export )/.test(first)) return 'bash';
+  if (/^(@description|param |targetScope)/.test(first)) return 'typescript'; // Bicep looks close to TS
+  return 'text';
+}
+
 /**
  * Custom code renderer for react-markdown.
- * Detects cat -n style output and renders with separated line numbers.
- * Line numbers are excluded from text selection / copy.
+ * - Fenced code blocks: syntax highlighting with Prism
+ * - cat -n style output: separated line numbers + syntax highlighting
+ * - Inline code: plain rendering
  */
 export function CodeBlock({
   children,
@@ -70,13 +136,19 @@ export function CodeBlock({
     return <code className={className} {...props}>{children}</code>;
   }
 
-  const code = typeof children === 'string' ? children : String(children ?? '');
+  const code = typeof children === 'string'
+    ? children.replace(/\n$/, '')
+    : String(children ?? '').replace(/\n$/, '');
+
+  // Extract language from className (e.g. "language-typescript")
+  const langMatch = className?.match(/language-(\w+)/);
+  const language = langMatch?.[1];
 
   if (hasLineNumbers(code)) {
-    return <LineNumberedCode code={code} />;
+    return <LineNumberedCode code={code} language={language} />;
   }
 
-  return <code className={className} {...props}>{children}</code>;
+  return <HighlightedCode code={code} language={language} />;
 }
 
 /** Components object to pass to react-markdown */
