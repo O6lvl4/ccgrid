@@ -19,7 +19,7 @@ function FieldLabel({ children }: { children: string }) {
   );
 }
 
-export function SessionConfig({ api }: { api: Api }) {
+export function SessionConfig({ api, onCreated }: { api: Api; onCreated?: () => void }) {
   const allSpecs = useStore(s => s.teammateSpecs);
   const navigate = useStore(s => s.navigate);
 
@@ -62,6 +62,7 @@ export function SessionConfig({ api }: { api: Api }) {
       setName('');
       setTaskDescription('');
       setSelectedSpecIds(new Set());
+      onCreated?.();
     } catch (err) {
       console.error('Failed to create session:', err);
     } finally {

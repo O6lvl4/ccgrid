@@ -1,8 +1,26 @@
+import { startTransition } from 'react';
 import { create } from 'zustand';
 import type { Session, Teammate, TeamTask, TeammateSpec, SkillSpec, ServerMessage } from '@ccgrid/shared';
 
 // ---- Navigation ----
 export type SessionTab = 'output' | 'teammates' | 'tasks' | 'overview';
+export type SidebarSection = 'sessions' | 'teammates' | 'skills';
+
+function deriveSectionFromRoute(route: ViewRoute): SidebarSection {
+  switch (route.view) {
+    case 'session_list':
+    case 'session_detail':
+    case 'teammate_detail':
+    case 'task_detail':
+      return 'sessions';
+    case 'teammate_spec_list':
+    case 'teammate_spec_detail':
+      return 'teammates';
+    case 'skill_spec_list':
+    case 'skill_spec_detail':
+      return 'skills';
+  }
+}
 
 export type ViewRoute =
   | { view: 'session_list' }
@@ -105,10 +123,12 @@ interface AppState {
   selectedSessionId: string | null;
   lastError: string | null;
   route: ViewRoute;
+  activeSection: SidebarSection;
 
   handleServerMessage: (msg: ServerMessage) => void;
   navigate: (route: ViewRoute) => void;
   goBack: () => void;
+  setActiveSection: (section: SidebarSection) => void;
   patchSession: (id: string, updates: Partial<Session>) => void;
   setTeammateSpecs: (specs: TeammateSpec[]) => void;
   setSkillSpecs: (specs: SkillSpec[]) => void;
@@ -130,6 +150,7 @@ export const useStore = create<AppState>((set, get) => ({
   selectedSessionId: null,
   lastError: null,
   route: pathToRoute(window.location.pathname),
+  activeSection: deriveSectionFromRoute(pathToRoute(window.location.pathname)),
 
   handleServerMessage: (msg: ServerMessage) => {
     switch (msg.type) {
@@ -157,6 +178,7 @@ export const useStore = create<AppState>((set, get) => ({
             skillSpecs: msg.skillSpecs ?? [],
             selectedSessionId,
             route,
+            activeSection: deriveSectionFromRoute(route),
           };
         });
         break;
@@ -171,6 +193,7 @@ export const useStore = create<AppState>((set, get) => ({
             sessions,
             selectedSessionId: msg.session.id,
             route: newRoute,
+            activeSection: 'sessions' as SidebarSection,
           };
         });
         break;
@@ -325,9 +348,14 @@ export const useStore = create<AppState>((set, get) => ({
 
   navigate: (route) => {
     window.history.pushState(null, '', routeToPath(route));
+    // Immediate: update sidebar selection for instant visual feedback
     set({
-      route,
+      activeSection: deriveSectionFromRoute(route),
       selectedSessionId: 'sessionId' in route ? route.sessionId : get().selectedSessionId,
+    });
+    // Deferred: update route (triggers heavy content switch)
+    startTransition(() => {
+      set({ route });
     });
   },
 
@@ -372,6 +400,8 @@ export const useStore = create<AppState>((set, get) => ({
     return { sessions };
   }),
 
+  setActiveSection: (section) => set({ activeSection: section }),
+
   setTeammateSpecs: (specs) => set({ teammateSpecs: specs }),
 
   setSkillSpecs: (specs) => set({ skillSpecs: specs }),
@@ -398,6 +428,7 @@ window.addEventListener('popstate', () => {
   const route = pathToRoute(window.location.pathname);
   useStore.setState({
     route,
+    activeSection: deriveSectionFromRoute(route),
     selectedSessionId: 'sessionId' in route ? route.sessionId : useStore.getState().selectedSessionId,
   });
 });

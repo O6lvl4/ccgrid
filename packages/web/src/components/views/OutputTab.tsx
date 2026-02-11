@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useMemo, type ReactNode } from 'react';
+import { useEffect, useRef, useState, useMemo, memo, type ReactNode } from 'react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
@@ -9,10 +9,25 @@ import { rehypeTwemoji } from '../../utils/twemoji';
 import { markdownComponents } from '../CodeBlock';
 import type { Teammate } from '@ccgrid/shared';
 
+// Stable plugin arrays (avoid recreating on every render)
+const remarkPlugins = [remarkGfm, remarkBreaks];
+const rehypePlugins = [rehypeTwemoji];
+
 const SEPARATOR = '\n\n<!-- follow-up -->\n\n';
 const LEGACY_SEPARATOR = '\n\n---\n\n';
 
 const proseClass = 'prose prose-sm max-w-none prose-pre:bg-gray-100 prose-pre:border prose-pre:border-gray-200 prose-code:text-blue-600 prose-headings:text-gray-900 prose-p:text-gray-700 prose-li:text-gray-700 prose-strong:text-gray-900 prose-a:text-blue-600';
+
+/** Memoized Markdown — only re-parses when content string changes */
+const MemoMarkdown = memo(function MemoMarkdown({ content }: { content: string }) {
+  return (
+    <div className={proseClass}>
+      <Markdown remarkPlugins={remarkPlugins} rehypePlugins={rehypePlugins} components={markdownComponents}>
+        {content}
+      </Markdown>
+    </div>
+  );
+});
 
 // ---- チームメイト用のカラーパレット ----
 const AVATAR_COLORS = [
@@ -221,7 +236,7 @@ const BORDER_COLORS: Record<string, string> = {
   '$indigo5': '#a5b4fc',
 };
 
-function ContentCard({ icon, title, subtitle, status, content, borderColorOverride }: {
+const ContentCard = memo(function ContentCard({ icon, title, subtitle, status, content, borderColorOverride }: {
   icon: ReactNode;
   title: string;
   subtitle?: string;
@@ -244,9 +259,7 @@ function ContentCard({ icon, title, subtitle, status, content, borderColorOverri
       {!collapsed && (
         <div style={{ padding: '0 12px 12px' }}>
           {content ? (
-            <div className={proseClass}>
-              <Markdown remarkPlugins={[remarkGfm, remarkBreaks]} rehypePlugins={[rehypeTwemoji]} components={markdownComponents}>{content}</Markdown>
-            </div>
+            <MemoMarkdown content={content} />
           ) : (
             <span style={{ color: '#9ca3af', fontStyle: 'italic', fontSize: 13 }}>No output yet</span>
           )}
@@ -254,10 +267,10 @@ function ContentCard({ icon, title, subtitle, status, content, borderColorOverri
       )}
     </div>
   );
-}
+});
 
 // ---- TeammateCard ----
-function TeammateCard({ teammate }: { teammate: Teammate }) {
+const TeammateCard = memo(function TeammateCard({ teammate }: { teammate: Teammate }) {
   const [collapsed, setCollapsed] = useState(false);
   const displayName = teammate.name ?? teammate.agentType ?? teammate.agentId;
   const isWorking = (teammate.status === 'starting' || teammate.status === 'working') && !teammate.output;
@@ -275,9 +288,7 @@ function TeammateCard({ teammate }: { teammate: Teammate }) {
       {!collapsed && (
         <div style={{ padding: '0 12px 12px' }}>
           {teammate.output ? (
-            <div className={proseClass}>
-              <Markdown remarkPlugins={[remarkGfm, remarkBreaks]} rehypePlugins={[rehypeTwemoji]} components={markdownComponents}>{teammate.output}</Markdown>
-            </div>
+            <MemoMarkdown content={teammate.output} />
           ) : isWorking ? (
             <PulseWorking />
           ) : (
@@ -287,7 +298,7 @@ function TeammateCard({ teammate }: { teammate: Teammate }) {
       )}
     </div>
   );
-}
+});
 
 // ---- タイムラインの縦線コネクタ ----
 function TimelineConnector() {

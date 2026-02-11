@@ -1,6 +1,35 @@
-import { type ReactNode } from 'react';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { memo, type ReactNode } from 'react';
+import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+
+// Register only the languages we need (instead of loading all 300+)
+import typescript from 'react-syntax-highlighter/dist/esm/languages/prism/typescript';
+import javascript from 'react-syntax-highlighter/dist/esm/languages/prism/javascript';
+import python from 'react-syntax-highlighter/dist/esm/languages/prism/python';
+import php from 'react-syntax-highlighter/dist/esm/languages/prism/php';
+import go from 'react-syntax-highlighter/dist/esm/languages/prism/go';
+import c from 'react-syntax-highlighter/dist/esm/languages/prism/c';
+import markup from 'react-syntax-highlighter/dist/esm/languages/prism/markup';
+import json from 'react-syntax-highlighter/dist/esm/languages/prism/json';
+import yaml from 'react-syntax-highlighter/dist/esm/languages/prism/yaml';
+import docker from 'react-syntax-highlighter/dist/esm/languages/prism/docker';
+import sql from 'react-syntax-highlighter/dist/esm/languages/prism/sql';
+import bash from 'react-syntax-highlighter/dist/esm/languages/prism/bash';
+
+SyntaxHighlighter.registerLanguage('typescript', typescript);
+SyntaxHighlighter.registerLanguage('javascript', javascript);
+SyntaxHighlighter.registerLanguage('python', python);
+SyntaxHighlighter.registerLanguage('php', php);
+SyntaxHighlighter.registerLanguage('go', go);
+SyntaxHighlighter.registerLanguage('c', c);
+SyntaxHighlighter.registerLanguage('html', markup);
+SyntaxHighlighter.registerLanguage('json', json);
+SyntaxHighlighter.registerLanguage('yaml', yaml);
+SyntaxHighlighter.registerLanguage('dockerfile', docker);
+SyntaxHighlighter.registerLanguage('sql', sql);
+SyntaxHighlighter.registerLanguage('bash', bash);
+
+const CODE_FONT = 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace';
 
 /**
  * Detects `cat -n` style line-numbered output:
@@ -33,12 +62,11 @@ function stripLineNumbers(code: string): { nums: string[]; content: string } {
   return { nums, content: contentLines.join('\n') };
 }
 
-function LineNumberedCode({ code, language }: { code: string; language?: string }) {
+const LineNumberedCode = memo(function LineNumberedCode({ code, language }: { code: string; language?: string }) {
   const { nums, content } = stripLineNumbers(code);
 
   return (
     <div style={{ display: 'flex', borderRadius: 8, overflow: 'hidden' }}>
-      {/* Line numbers — not selectable */}
       <div
         aria-hidden
         style={{
@@ -52,7 +80,7 @@ function LineNumberedCode({ code, language }: { code: string; language?: string 
           color: '#6c7086',
           fontSize: 13,
           lineHeight: '1.45',
-          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+          fontFamily: CODE_FONT,
           borderRight: '1px solid #313244',
           flexShrink: 0,
         }}
@@ -61,7 +89,6 @@ function LineNumberedCode({ code, language }: { code: string; language?: string 
           <div key={i}>{n}</div>
         ))}
       </div>
-      {/* Content — with syntax highlighting */}
       <div style={{ flex: 1, overflow: 'auto' }}>
         <SyntaxHighlighter
           language={language ?? guessLanguage(content)}
@@ -73,16 +100,16 @@ function LineNumberedCode({ code, language }: { code: string; language?: string 
             fontSize: 13,
             background: '#282a36',
           }}
-          codeTagProps={{ style: { fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace' } }}
+          codeTagProps={{ style: { fontFamily: CODE_FONT, color: '#abb2bf' } }}
         >
           {content}
         </SyntaxHighlighter>
       </div>
     </div>
   );
-}
+});
 
-function HighlightedCode({ code, language }: { code: string; language?: string }) {
+const HighlightedCode = memo(function HighlightedCode({ code, language }: { code: string; language?: string }) {
   return (
     <SyntaxHighlighter
       language={language ?? guessLanguage(code)}
@@ -94,12 +121,12 @@ function HighlightedCode({ code, language }: { code: string; language?: string }
         fontSize: 13,
         background: '#282a36',
       }}
-      codeTagProps={{ style: { fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace' } }}
+      codeTagProps={{ style: { fontFamily: CODE_FONT, color: '#abb2bf' } }}
     >
       {code}
     </SyntaxHighlighter>
   );
-}
+});
 
 /** Try to guess language from content heuristics */
 function guessLanguage(code: string): string {
@@ -115,7 +142,7 @@ function guessLanguage(code: string): string {
   if (/^(FROM |RUN |COPY |CMD )/.test(first)) return 'dockerfile';
   if (/^(SELECT |INSERT |CREATE |ALTER |DROP )/i.test(first)) return 'sql';
   if (/^#!\//.test(first) || /^(if \[|for |while |echo |export )/.test(first)) return 'bash';
-  if (/^(@description|param |targetScope)/.test(first)) return 'typescript'; // Bicep looks close to TS
+  if (/^(@description|param |targetScope)/.test(first)) return 'typescript';
   return 'text';
 }
 
@@ -140,7 +167,6 @@ export function CodeBlock({
     ? children.replace(/\n$/, '')
     : String(children ?? '').replace(/\n$/, '');
 
-  // Extract language from className (e.g. "language-typescript")
   const langMatch = className?.match(/language-(\w+)/);
   const language = langMatch?.[1];
 

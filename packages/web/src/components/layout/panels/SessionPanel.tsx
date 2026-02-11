@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
-import { useStore } from '../../store/useStore';
-import { useApi } from '../../hooks/useApi';
-import { timeAgo } from '../../utils/timeAgo';
+import { useStore } from '../../../store/useStore';
+import { useApi } from '../../../hooks/useApi';
+import { timeAgo } from '../../../utils/timeAgo';
+import { NewSessionDialog } from '../../dialogs/NewSessionDialog';
 
 const STATUS_DOT: Record<string, { color: string; pulse?: boolean }> = {
   starting:  { color: '#eab308' },
@@ -10,7 +11,7 @@ const STATUS_DOT: Record<string, { color: string; pulse?: boolean }> = {
   error:     { color: '#ef4444' },
 };
 
-export function SessionSidebar() {
+export function SessionPanel() {
   const sessions = useStore(s => s.sessions);
   const route = useStore(s => s.route);
   const navigate = useStore(s => s.navigate);
@@ -25,34 +26,25 @@ export function SessionSidebar() {
 
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [showNewSession, setShowNewSession] = useState(false);
 
   return (
-    <div
-      role="complementary"
-      style={{
-        width: 240,
-        background: '#ffffff',
-        borderRight: '1px solid #e5e7eb',
-        flexShrink: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-      }}
-    >
-      {/* Sidebar header */}
+    <>
+      {/* Panel header */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '14px 16px 10px',
+          flexShrink: 0,
         }}
       >
         <span style={{ fontSize: 12, fontWeight: 600, color: '#6b7280', letterSpacing: 0.3 }}>
           Sessions
         </span>
         <button
-          onClick={() => navigate({ view: 'session_list' })}
+          onClick={() => setShowNewSession(true)}
           title="New session"
           style={{
             display: 'inline-flex',
@@ -126,7 +118,10 @@ export function SessionSidebar() {
           );
         })}
       </div>
-    </div>
+
+      {/* New session dialog */}
+      <NewSessionDialog open={showNewSession} onClose={() => setShowNewSession(false)} />
+    </>
   );
 }
 
@@ -170,7 +165,6 @@ function SessionItem({
   const renameRef = useRef<HTMLInputElement>(null);
   const [draft, setDraft] = useState(name);
 
-  // Close menu on outside click
   useEffect(() => {
     if (!menuOpen) return;
     const handler = (e: MouseEvent) => {
@@ -182,7 +176,6 @@ function SessionItem({
     return () => document.removeEventListener('mousedown', handler);
   }, [menuOpen, onMenuClose]);
 
-  // Focus rename input
   useEffect(() => {
     if (isRenaming && renameRef.current) {
       setDraft(name);
@@ -216,7 +209,6 @@ function SessionItem({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Status dot */}
       <div
         className={dotPulse ? 'animate-pulse' : undefined}
         style={{
@@ -230,8 +222,6 @@ function SessionItem({
           flexShrink: 0,
         }}
       />
-
-      {/* Text block */}
       <div style={{ flex: 1, minWidth: 0 }}>
         {isRenaming ? (
           <input
@@ -273,25 +263,14 @@ function SessionItem({
             {name}
           </div>
         )}
-        <div
-          style={{
-            fontSize: 11,
-            color: '#9ca3af',
-            marginTop: 2,
-            lineHeight: 1,
-          }}
-        >
+        <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 2, lineHeight: 1 }}>
           {status} · {timeAgo(createdAt)}
         </div>
       </div>
 
-      {/* 3-dot menu button */}
       {(hovered || menuOpen) && !isRenaming && (
         <button
-          onClick={e => {
-            e.stopPropagation();
-            onMenuToggle();
-          }}
+          onClick={e => { e.stopPropagation(); onMenuToggle(); }}
           style={{
             position: 'absolute',
             top: 6,
@@ -311,18 +290,13 @@ function SessionItem({
             padding: 0,
             transition: 'background 0.1s',
           }}
-          onMouseEnter={e => {
-            e.currentTarget.style.background = '#e5e7eb';
-          }}
-          onMouseLeave={e => {
-            if (!menuOpen) e.currentTarget.style.background = '#f3f4f6';
-          }}
+          onMouseEnter={e => { e.currentTarget.style.background = '#e5e7eb'; }}
+          onMouseLeave={e => { if (!menuOpen) e.currentTarget.style.background = '#f3f4f6'; }}
         >
           ⋯
         </button>
       )}
 
-      {/* Popup menu */}
       {menuOpen && (
         <div
           ref={menuRef}
@@ -339,28 +313,13 @@ function SessionItem({
             minWidth: 120,
           }}
         >
-          <MenuItem
-            label="Rename"
-            onClick={e => {
-              e.stopPropagation();
-              onRenameStart();
-            }}
-          />
-          <MenuItem
-            label="Delete"
-            danger
-            onClick={e => {
-              e.stopPropagation();
-              onDelete();
-            }}
-          />
+          <MenuItem label="Rename" onClick={e => { e.stopPropagation(); onRenameStart(); }} />
+          <MenuItem label="Delete" danger onClick={e => { e.stopPropagation(); onDelete(); }} />
         </div>
       )}
     </div>
   );
 }
-
-// ---- Menu item ----
 
 function MenuItem({
   label,
@@ -386,12 +345,8 @@ function MenuItem({
         cursor: 'pointer',
         transition: 'background 0.1s',
       }}
-      onMouseEnter={e => {
-        e.currentTarget.style.background = danger ? '#fef2f2' : '#f3f4f6';
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.background = 'transparent';
-      }}
+      onMouseEnter={e => { e.currentTarget.style.background = danger ? '#fef2f2' : '#f3f4f6'; }}
+      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
     >
       {label}
     </button>
