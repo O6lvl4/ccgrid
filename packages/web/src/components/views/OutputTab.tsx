@@ -5,24 +5,34 @@ import remarkBreaks from 'remark-breaks';
 import { useStore } from '../../store/useStore';
 import { useShallow } from 'zustand/shallow';
 import { FollowUpInput } from '../FollowUpInput';
-import { rehypeTwemoji } from '../../utils/twemoji';
+import { applyTwemojiToElement } from '../../utils/twemoji';
 import { markdownComponents } from '../CodeBlock';
 import type { Teammate } from '@ccgrid/shared';
 
 // Stable plugin arrays (avoid recreating on every render)
 const remarkPlugins = [remarkGfm, remarkBreaks];
-const rehypePlugins = [rehypeTwemoji];
 
 const SEPARATOR = '\n\n<!-- follow-up -->\n\n';
 const LEGACY_SEPARATOR = '\n\n---\n\n';
 
 const proseClass = 'prose prose-sm max-w-none prose-pre:bg-gray-100 prose-pre:border prose-pre:border-gray-200 prose-code:text-blue-600 prose-headings:text-gray-900 prose-p:text-gray-700 prose-li:text-gray-700 prose-strong:text-gray-900 prose-a:text-blue-600';
 
-/** Memoized Markdown — only re-parses when content string changes */
+/** Memoized Markdown — renders fast with native emoji, then applies Twemoji after paint */
 const MemoMarkdown = memo(function MemoMarkdown({ content }: { content: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    // Apply Twemoji after the browser paints the native-emoji version
+    const id = requestAnimationFrame(() => {
+      if (ref.current) applyTwemojiToElement(ref.current);
+    });
+    return () => cancelAnimationFrame(id);
+  }, [content]);
+
   return (
-    <div className={proseClass}>
-      <Markdown remarkPlugins={remarkPlugins} rehypePlugins={rehypePlugins} components={markdownComponents}>
+    <div ref={ref} className={proseClass}>
+      <Markdown remarkPlugins={remarkPlugins} components={markdownComponents}>
         {content}
       </Markdown>
     </div>
@@ -313,7 +323,7 @@ function TimelineConnector() {
 }
 
 // ---- OutputTab 本体 ----
-export function OutputTab({ sessionId }: { sessionId: string }) {
+export const OutputTab = memo(function OutputTab({ sessionId }: { sessionId: string }) {
   const session = useStore(s => s.sessions.get(sessionId));
   const output = useStore(s => s.leadOutputs.get(sessionId) ?? '');
   const allTeammates = useStore(useShallow((s) => {
@@ -379,7 +389,7 @@ export function OutputTab({ sessionId }: { sessionId: string }) {
   const hasTeammates = allTeammates.length > 0;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', height: '100%', backgroundColor: '#f9fafb' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', backgroundColor: '#f9fafb' }}>
       <div
         ref={scrollRef}
         style={{
@@ -482,4 +492,4 @@ export function OutputTab({ sessionId }: { sessionId: string }) {
       </div>
     </div>
   );
-}
+});

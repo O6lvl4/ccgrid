@@ -113,6 +113,54 @@ export function rehypeTwemoji() {
   };
 }
 
+/**
+ * Post-render DOM-based Twemoji replacement.
+ * Walk all text nodes inside a container and replace emoji chars with <img>.
+ * Designed to run asynchronously after the initial paint so it doesn't block rendering.
+ */
+export function applyTwemojiToElement(container: HTMLElement): void {
+  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+  const textNodes: Text[] = [];
+  while (walker.nextNode()) {
+    textNodes.push(walker.currentNode as Text);
+  }
+
+  for (const node of textNodes) {
+    const text = node.textContent ?? '';
+    EMOJI_RE.lastIndex = 0;
+    if (!EMOJI_RE.test(text)) continue;
+
+    EMOJI_RE.lastIndex = 0;
+    const fragment = document.createDocumentFragment();
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+
+    while ((match = EMOJI_RE.exec(text)) !== null) {
+      const emoji = match[1];
+      const idx = match.index;
+
+      if (idx > lastIndex) {
+        fragment.appendChild(document.createTextNode(text.slice(lastIndex, idx)));
+      }
+
+      const img = document.createElement('img');
+      img.src = twemojiUrl(emoji);
+      img.alt = emoji;
+      img.className = 'emoji';
+      img.draggable = false;
+      fragment.appendChild(img);
+
+      lastIndex = idx + match[0].length;
+    }
+
+    if (lastIndex < text.length) {
+      fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
+    }
+
+    node.replaceWith(fragment);
+  }
+}
+
 function visitTextNodes(node: any) {
   if (!node.children) return;
 

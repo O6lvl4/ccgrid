@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, memo } from 'react';
 import { useStore, type SessionTab } from '../../store/useStore';
 import { InlineEdit } from '../InlineEdit';
 import { StatusBadge } from '../StatusBadge';
@@ -8,6 +8,7 @@ import { TeammatesTab } from './TeammatesTab';
 import { TasksTab } from './TasksTab';
 import { PermissionDialog, PermissionBadge } from '../PermissionDialog';
 import type { Api } from '../../hooks/useApi';
+import type { TeamTask } from '@ccgrid/shared';
 
 const TABS: { key: SessionTab; label: string }[] = [
   { key: 'output', label: 'Output' },
@@ -16,20 +17,24 @@ const TABS: { key: SessionTab; label: string }[] = [
   { key: 'overview', label: 'Overview' },
 ];
 
-export function SessionDetailView({ sessionId, tab, api }: { sessionId: string; tab: SessionTab; api: Api }) {
+const EMPTY_TASKS: TeamTask[] = [];
+
+export const SessionDetailView = memo(function SessionDetailView({ sessionId, tab, api }: { sessionId: string; tab: SessionTab; api: Api }) {
   const session = useStore(s => s.sessions.get(sessionId));
   const navigate = useStore(s => s.navigate);
   const patchSession = useStore(s => s.patchSession);
   const lastError = useStore(s => s.lastError);
   const clearError = useStore(s => s.clearError);
-  const teammates = useStore(s => s.teammates);
-  const tasks = useStore(s => s.tasks);
 
-  const tmCount = useMemo(
-    () => Array.from(teammates.values()).filter(t => t.sessionId === sessionId).length,
-    [teammates, sessionId],
-  );
-  const taskList = useMemo(() => tasks.get(sessionId) ?? [], [tasks, sessionId]);
+  // Derived selectors — return primitives/stable refs so unrelated updates don't trigger re-renders
+  const tmCount = useStore(s => {
+    let count = 0;
+    for (const t of s.teammates.values()) {
+      if (t.sessionId === sessionId) count++;
+    }
+    return count;
+  });
+  const taskList = useStore(s => s.tasks.get(sessionId) ?? EMPTY_TASKS);
   const doneCount = useMemo(() => taskList.filter(t => t.status === 'completed').length, [taskList]);
 
   if (!session) return null;
@@ -198,11 +203,13 @@ export function SessionDetailView({ sessionId, tab, api }: { sessionId: string; 
       {/* Permission requests */}
       <PermissionDialog sessionId={sessionId} />
 
-      {/* Tab content */}
-      {tab === 'output' && <OutputTab sessionId={sessionId} />}
+      {/* Tab content — OutputTab stays mounted to preserve DOM across tab switches */}
+      <div style={{ display: tab === 'output' ? 'flex' : 'none', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+        <OutputTab sessionId={sessionId} />
+      </div>
       {tab === 'overview' && <OverviewTab session={session} />}
       {tab === 'teammates' && <TeammatesTab sessionId={sessionId} />}
       {tab === 'tasks' && <TasksTab sessionId={sessionId} />}
     </div>
   );
-}
+});
