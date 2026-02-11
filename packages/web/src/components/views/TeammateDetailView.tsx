@@ -6,6 +6,7 @@ import { Button, ScrollView, Text, TextArea, XStack, YStack } from 'tamagui';
 import { useStore, type TeammateMessage } from '../../store/useStore';
 import { useApi } from '../../hooks/useApi';
 import { StatusBadge } from '../StatusBadge';
+import { markdownComponents } from '../CodeBlock';
 
 function InfoRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -201,7 +202,7 @@ export function TeammateDetailView({ sessionId, agentId }: { sessionId: string; 
                 style={{ backgroundColor: '#ffffff', borderRadius: 8, padding: 16, border: '1px solid #e5e7eb' }}
                 className="prose prose-sm max-w-none prose-pre:bg-gray-100 prose-pre:border prose-pre:border-gray-200 prose-code:text-blue-600 prose-headings:text-gray-900 prose-p:text-gray-700 prose-li:text-gray-700 prose-strong:text-gray-900 prose-a:text-blue-600"
               >
-                <Markdown remarkPlugins={[remarkGfm, remarkBreaks]}>{teammate.output}</Markdown>
+                <Markdown remarkPlugins={[remarkGfm, remarkBreaks]} components={markdownComponents}>{teammate.output}</Markdown>
               </div>
             ) : (
               <Text fontSize={13} color="$gray7" fontStyle="italic">No output yet</Text>
