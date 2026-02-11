@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import remarkBreaks from 'remark-breaks';
 import { ScrollView, Text, XStack, YStack } from 'tamagui';
 import { StatusBadge } from './StatusBadge';
 import type { Teammate } from '@ccgrid/shared';
@@ -80,7 +81,7 @@ export function TeammateCard({ tm }: { tm: Teammate }) {
             {/* Output markdown - kept as Tailwind prose since Tamagui doesn't have prose utilities */}
             {tm.output && (
               <div className="prose prose-xs prose-invert max-w-none prose-pre:bg-gray-900 prose-pre:text-[11px] prose-p:text-[11px] prose-p:text-gray-300 prose-headings:text-xs prose-headings:text-gray-200 prose-li:text-[11px] prose-code:text-blue-300">
-                <Markdown remarkPlugins={[remarkGfm]}>{tm.output}</Markdown>
+                <Markdown remarkPlugins={[remarkGfm, remarkBreaks]}>{tm.output}</Markdown>
               </div>
             )}
           </YStack>

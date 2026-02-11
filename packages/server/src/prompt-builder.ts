@@ -19,7 +19,7 @@ export function buildPrompt(teammateSpecs: TeammateSpec[] | undefined, taskDescr
       if (s.instructions) parts.push(`Instructions: ${s.instructions}`);
       return `${i + 1}. ${parts.join(' | ')}`;
     }).join('\n');
-    teammateInstruction = `You MUST create exactly the following ${teammateSpecs.length} teammates:\n${specList}\n\nUse these exact names when spawning teammates. Give each teammate instructions matching their role and skills.`;
+    teammateInstruction = `You MUST create exactly the following ${teammateSpecs.length} teammates:\n${specList}\n\nIMPORTANT: When using the Task tool to spawn each teammate, set subagent_type to the teammate's exact Name (e.g. subagent_type: "Frontend"). This ensures the teammate's pre-configured skills and instructions are loaded at the SDK level. Give each teammate a clear sub-task description in the prompt parameter.`;
   } else {
     teammateInstruction = `You MUST create at least 1 teammate and delegate the work. Do NOT do the work yourself.`;
   }
@@ -34,24 +34,40 @@ You are running inside an agentic loop. Each turn you produce a response:
 
 Therefore: NEVER respond with only text until you are ready to give your final summary.
 
-## SPAWNING AND WAITING FOR TEAMMATES
+## ACTIVE COORDINATION PATTERN
 
-1. Use the Task tool to spawn each teammate with a clear sub-task description.
-   - The Task tool automatically creates a tracked task for each teammate.
-   - Do NOT use TaskCreate, TaskUpdate, or TaskGet — they are separate from the Task tool and will cause tracking confusion.
+You are an **active coordinator**, not a passive poller. Follow this pattern:
 
-2. After spawning all teammates, enter this polling loop:
+### Step 1: Spawn teammates
+- Use the Task tool to spawn each teammate with a clear sub-task description.
+- The Task tool automatically creates a tracked task for each teammate.
+- Do NOT use TaskCreate, TaskUpdate, or TaskGet — they are separate from the Task tool and will cause tracking confusion.
+- Spawn all teammates in parallel (multiple Task calls in one response).
 
-   a. Call TaskList to check task statuses.
-   b. If ALL tasks show "completed" → proceed to step 3.
-   c. If any task is NOT "completed" → call Bash with command \`sleep 10\`, then go back to (a).
+### Step 2: Monitor and coordinate actively
+After spawning, enter an active coordination loop:
 
-3. Once all tasks are completed, write a comprehensive final summary of all results.
+a. Call Bash with \`sleep 3\` to wait briefly, then call TaskList to check progress.
+b. For each **newly completed** teammate:
+   - Review their result immediately.
+   - If their output contains information useful for other still-running teammates, use the Task tool with the \`resume\` parameter to send that information to the relevant teammate.
+   - Example: if Backend completed an API schema, resume Frontend with the schema details.
+c. If any teammates are still running → go back to (a).
+d. Adjust your plan dynamically based on intermediate results. If a teammate's output reveals issues, you can spawn additional teammates or resume existing ones with corrective instructions.
 
-IMPORTANT:
-- Every response MUST include a tool call until your final summary. Text-only responses kill the session.
-- Do NOT use TaskCreate/TaskUpdate/TaskGet. Only use TaskList to check status and Task to spawn teammates.
-- Do NOT say "waiting" or "monitoring" without an accompanying tool call.
+### Step 3: Final summary
+Once ALL tasks are completed, write a comprehensive summary covering:
+- What each teammate accomplished
+- How information was shared between teammates
+- Overall outcome
+
+IMPORTANT RULES:
+- Every response MUST include a tool call until your final summary.
+- Use \`sleep 3\` (not \`sleep 10\`) between TaskList checks to avoid busy-waiting.
+- Do NOT use TaskCreate/TaskUpdate/TaskGet. Only use TaskList and Task.
+- When resuming a teammate with the Task tool, use the \`resume\` parameter with that teammate's agent ID.
+- Proactively relay useful findings between teammates — do not wait for all to finish.
+- Do NOT start doing the work yourself. Delegate to teammates and coordinate.
 
 ## Task
 ${taskDescription}`;
@@ -61,16 +77,21 @@ export function buildSystemPrompt() {
   return {
     type: 'preset' as const,
     preset: 'claude_code' as const,
-    append: `You are a team lead coordinating teammates.
+    append: `You are a team lead actively coordinating teammates.
 
 IMPORTANT SYSTEM BEHAVIOR:
 - If you respond with only text (no tool call), the agentic loop ends and all teammates are killed.
 - You MUST include a tool call in every response until your final summary.
 
-After spawning teammates with the Task tool, poll with this exact pattern:
-1. Call TaskList tool to check statuses
-2. If not all completed → call Bash tool with "sleep 10" → go to 1
-3. If all completed → write final summary
+ACTIVE COORDINATION:
+- After spawning teammates, use \`sleep 3\` then TaskList to monitor progress.
+- When a teammate completes, immediately review their result and relay useful information to other teammates using the Task tool with the resume parameter.
+- Use \`sleep 3\` between TaskList checks. Do NOT call TaskList without waiting first.
+- Adjust plans dynamically based on intermediate results.
+- Do NOT start doing the work yourself — delegate and coordinate.
+
+TEAMMATE MESSAGING:
+- When a user sends a message to a specific teammate (indicated by <!-- teammate-message:Name --> markers), use the Task tool with resume to forward it to that teammate immediately.
 
 Do NOT use TaskCreate/TaskUpdate/TaskGet — only TaskList and Task.`,
   };

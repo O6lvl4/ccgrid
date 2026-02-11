@@ -47,7 +47,7 @@ export function SessionConfig({ api }: { api: Api }) {
     const budget = maxBudget ? Number(maxBudget) : undefined;
     const selectedSpecs = allSpecs
       .filter(s => selectedSpecIds.has(s.id))
-      .map(s => ({ id: s.id, name: s.name, role: s.role, instructions: s.instructions, createdAt: s.createdAt }));
+      .map(s => ({ id: s.id, name: s.name, role: s.role, instructions: s.instructions, skillIds: s.skillIds, createdAt: s.createdAt }));
     setSubmitting(true);
     try {
       await api.createSession({
@@ -230,9 +230,8 @@ export function SessionConfig({ api }: { api: Api }) {
       {/* Teammate Specs */}
       <YStack>
         <XStack ai="center" jc="space-between" mb="$1">
-          <FieldLabel>Teammate Specs</FieldLabel>
+          <Text fontSize={11} fontWeight="500" color="$gray9">Teammate Specs</Text>
           <Text
-            tag="button"
             fontSize={11}
             color="$blue9"
             cursor="pointer"
@@ -254,7 +253,7 @@ export function SessionConfig({ api }: { api: Api }) {
               return (
                 <XStack
                   key={spec.id}
-                  ai="center"
+                  items="baseline"
                   gap="$1.5"
                   px="$2"
                   py="$1"
@@ -272,6 +271,7 @@ export function SessionConfig({ api }: { api: Api }) {
                     onCheckedChange={() => toggleSpec(spec.id)}
                     bg={selected ? '$blue9' : '$gray4'}
                     borderColor={selected ? '$blue9' : '$gray6'}
+                    alignSelf="center"
                   >
                     <Checkbox.Indicator>
                       <Check size={10} />

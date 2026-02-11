@@ -86,11 +86,18 @@ export interface PendingPermission {
   agentId?: string;
 }
 
+export interface TeammateMessage {
+  teammateName: string;
+  message: string;
+  timestamp: string;
+}
+
 interface AppState {
   sessions: Map<string, Session>;
   teammates: Map<string, Teammate>;
   tasks: Map<string, TeamTask[]>;
   leadOutputs: Map<string, string>;
+  teammateMessages: Map<string, TeammateMessage[]>; // sessionId -> messages
   teammateSpecs: TeammateSpec[];
   skillSpecs: SkillSpec[];
   pendingPermissions: Map<string, PendingPermission>;
@@ -115,6 +122,7 @@ export const useStore = create<AppState>((set, get) => ({
   teammates: new Map(),
   tasks: new Map(),
   leadOutputs: new Map(),
+  teammateMessages: new Map(),
   teammateSpecs: [],
   skillSpecs: [],
   pendingPermissions: new Map(),
@@ -190,6 +198,8 @@ export const useStore = create<AppState>((set, get) => ({
           tasks.delete(msg.sessionId);
           const leadOutputs = new Map(state.leadOutputs);
           leadOutputs.delete(msg.sessionId);
+          const teammateMessages = new Map(state.teammateMessages);
+          teammateMessages.delete(msg.sessionId);
 
           const isViewingDeleted =
             (state.route.view !== 'session_list') &&
@@ -204,7 +214,7 @@ export const useStore = create<AppState>((set, get) => ({
           }
 
           return {
-            sessions, teammates, tasks, leadOutputs,
+            sessions, teammates, tasks, leadOutputs, teammateMessages,
             selectedSessionId: state.selectedSessionId === msg.sessionId ? nextSessionId : state.selectedSessionId,
             route: isViewingDeleted ? { view: 'session_list' } : state.route,
           };
@@ -289,6 +299,19 @@ export const useStore = create<AppState>((set, get) => ({
             agentId: msg.agentId,
           });
           return { pendingPermissions };
+        });
+        break;
+      }
+      case 'teammate_message_relayed': {
+        set(state => {
+          const teammateMessages = new Map(state.teammateMessages);
+          const existing = teammateMessages.get(msg.sessionId) ?? [];
+          teammateMessages.set(msg.sessionId, [...existing, {
+            teammateName: msg.teammateName,
+            message: msg.message,
+            timestamp: new Date().toISOString(),
+          }]);
+          return { teammateMessages };
         });
         break;
       }

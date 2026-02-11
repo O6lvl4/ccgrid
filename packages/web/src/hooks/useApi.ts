@@ -21,6 +21,7 @@ export interface Api {
   createSkillSpec: (params: { name: string; description: string; skillType?: string }) => Promise<SkillSpec>;
   updateSkillSpec: (id: string, updates: { name?: string; description?: string; skillType?: string }) => Promise<SkillSpec>;
   deleteSkillSpec: (id: string) => Promise<void>;
+  sendToTeammate: (sessionId: string, teammateName: string, message: string) => Promise<Session>;
 }
 
 const BASE = '/api';
@@ -80,5 +81,8 @@ export function useApi(): Api {
   const deleteSkillSpec = useCallback((id: string) =>
     request<void>('DELETE', `/skill-specs/${id}`), []);
 
-  return { createSession, updateSession, deleteSession, stopSession, continueSession, createSpec, updateSpec, deleteSpec, createSkillSpec, updateSkillSpec, deleteSkillSpec };
+  const sendToTeammate = useCallback((sessionId: string, teammateName: string, message: string) =>
+    request<Session>('POST', `/sessions/${sessionId}/teammates/${encodeURIComponent(teammateName)}/message`, { message }), []);
+
+  return { createSession, updateSession, deleteSession, stopSession, continueSession, createSpec, updateSpec, deleteSpec, createSkillSpec, updateSkillSpec, deleteSkillSpec, sendToTeammate };
 }

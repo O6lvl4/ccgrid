@@ -75,8 +75,10 @@ export type ServerMessage =
   | { type: 'cost_update'; sessionId: string; costUsd: number; inputTokens: number; outputTokens: number }
   | { type: 'error'; message: string; sessionId?: string }
   | { type: 'permission_request'; sessionId: string; requestId: string; toolName: string; input: Record<string, unknown>; description?: string; agentId?: string }
+  | { type: 'teammate_message_relayed'; sessionId: string; teammateName: string; message: string }
   | { type: 'snapshot'; sessions: Session[]; teammates: Teammate[]; tasks: Record<string, TeamTask[]>; leadOutputs: Record<string, string>; teammateSpecs: TeammateSpec[]; skillSpecs: SkillSpec[] };
 
 // ---- WebSocket: Client → Server ----
 export type ClientMessage =
-  | { type: 'permission_response'; requestId: string; behavior: 'allow' | 'deny'; message?: string; updatedInput?: Record<string, unknown> };
+  | { type: 'permission_response'; requestId: string; behavior: 'allow' | 'deny'; message?: string; updatedInput?: Record<string, unknown> }
+  | { type: 'teammate_message'; sessionId: string; teammateName: string; message: string };

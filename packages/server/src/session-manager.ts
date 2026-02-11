@@ -206,6 +206,39 @@ export class SessionManager {
     return session;
   }
 
+  // ---- Teammate messaging ----
+
+  sendToTeammate(sessionId: string, teammateName: string, message: string): Session | undefined {
+    const session = this.sessions.get(sessionId);
+    if (!session) return undefined;
+
+    const isRunningOrCompleted = session.status === 'running' || session.status === 'completed';
+    if (!isRunningOrCompleted || !session.sessionId) return undefined;
+
+    // Record the message in lead output
+    const marker = `\n\n<!-- teammate-message:${teammateName} -->\n\n> **To ${teammateName}:** ${message.replace(/\n/g, '\n> ')}\n\n`;
+    const existing = this.leadOutputs.get(sessionId) ?? '';
+    this.leadOutputs.set(sessionId, existing + marker);
+    this.broadcast({ type: 'lead_output', sessionId, text: marker });
+
+    // Notify GUI
+    this.broadcast({ type: 'teammate_message_relayed', sessionId, teammateName, message });
+
+    // If session is completed, restart Lead with instruction to forward the message
+    if (session.status === 'completed') {
+      const forwardPrompt = `The user has sent a message to teammate "${teammateName}". Please forward this message by resuming the teammate using the Task tool with the resume parameter:\n\nMessage to ${teammateName}: ${message}`;
+
+      session.status = 'running';
+      this.persistSession(sessionId);
+      this.broadcast({ type: 'session_status', sessionId, status: 'running' });
+
+      this.startAgent(session, undefined, session.maxBudgetUsd, forwardPrompt);
+    }
+    // If session is already running, the Lead will see the marker in the output on next check
+
+    return session;
+  }
+
   // ---- Permission resolution ----
 
   resolvePermission(requestId: string, behavior: 'allow' | 'deny', message?: string, updatedInput?: Record<string, unknown>): void {
@@ -254,6 +287,37 @@ export class SessionManager {
 
   // ---- Internal ----
 
+  private buildAgents(teammateSpecs: TeammateSpec[] | undefined, skillSpecs: SkillSpec[] | undefined): Record<string, { description: string; prompt: string; skills?: string[] }> | undefined {
+    if (!teammateSpecs || teammateSpecs.length === 0) return undefined;
+    const skillMap = new Map((skillSpecs ?? []).map(s => [s.id, s]));
+    const agents: Record<string, { description: string; prompt: string; skills?: string[] }> = {};
+
+    // Build team context section listing all members
+    const teamMembers = teammateSpecs.map(s => `- ${s.name}: ${s.role}`).join('\n');
+    const teamContext = `\n\n## TEAM CONTEXT
+You are a member of a team. Other members:
+${teamMembers}
+
+The Lead coordinates the team and relays information between members.
+- If you discover something that other members need to know, clearly state it in your output.
+- The Lead may send you additional context from other members' results during your work.
+- Focus on your assigned task, but be aware that your output may inform other members' work.`;
+
+    for (const spec of teammateSpecs) {
+      const skillNames = (spec.skillIds ?? [])
+        .map(id => skillMap.get(id))
+        .filter((s): s is SkillSpec => s != null)
+        .map(s => s.name);
+      const basePrompt = spec.instructions ?? `You are a ${spec.role}. Complete the assigned task thoroughly.`;
+      agents[spec.name] = {
+        description: spec.role,
+        prompt: basePrompt + teamContext,
+        ...(skillNames.length > 0 ? { skills: skillNames } : {}),
+      };
+    }
+    return agents;
+  }
+
   private startAgent(session: Session, teammateSpecs: TeammateSpec[] | undefined, maxBudgetUsd: number | undefined, resumePrompt?: string, skillSpecs?: SkillSpec[]): void {
     const abortController = new AbortController();
 
@@ -272,6 +336,7 @@ export class SessionManager {
     });
 
     const prompt = resumePrompt ?? buildPrompt(teammateSpecs, session.taskDescription, skillSpecs);
+    const agents = resumePrompt ? undefined : this.buildAgents(teammateSpecs, skillSpecs);
 
     const isBypass = session.permissionMode === 'bypassPermissions';
 
@@ -331,6 +396,7 @@ export class SessionManager {
           maxTurns: 999999,
           ...(maxBudgetUsd != null ? { maxBudgetUsd } : {}),
           abortController,
+          ...(agents ? { agents } : {}),
           env: {
             ...process.env,
             CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: '1',

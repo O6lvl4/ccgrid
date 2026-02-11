@@ -87,6 +87,18 @@ app.post('/api/sessions/:id/continue', async (c) => {
   return c.json(session);
 });
 
+// ---- REST: Teammate messaging ----
+
+app.post('/api/sessions/:id/teammates/:name/message', async (c) => {
+  const id = c.req.param('id');
+  const name = c.req.param('name');
+  const { message } = await c.req.json();
+  if (!message) return c.json({ error: 'message required' }, 400);
+  const session = sm.sendToTeammate(id, name, message);
+  if (!session) return c.json({ error: 'Session not found or not in valid state' }, 404);
+  return c.json(session);
+});
+
 // ---- REST: Teammates (read-only sub-resource) ----
 
 app.get('/api/sessions/:id/teammates', (c) => {
@@ -273,6 +285,8 @@ wss.on('connection', (ws) => {
       const msg = JSON.parse(data.toString());
       if (msg.type === 'permission_response') {
         sm.resolvePermission(msg.requestId, msg.behavior, msg.message, msg.updatedInput);
+      } else if (msg.type === 'teammate_message') {
+        sm.sendToTeammate(msg.sessionId, msg.teammateName, msg.message);
       }
     } catch { /* ignore malformed messages */ }
   });

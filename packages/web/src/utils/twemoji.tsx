@@ -1,5 +1,24 @@
 import React from 'react';
 
+/**
+ * Global error handler for emoji <img> elements.
+ * When a Twemoji SVG fails to load (404), replace the <img> with the alt text.
+ * Must be called once at app startup.
+ */
+export function installEmojiErrorHandler() {
+  document.addEventListener('error', (e) => {
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'IMG' && target.classList.contains('emoji')) {
+      const alt = (target as HTMLImageElement).alt;
+      if (alt) {
+        const span = document.createElement('span');
+        span.textContent = alt;
+        target.replaceWith(span);
+      }
+    }
+  }, true); // useCapture to catch errors from img elements
+}
+
 // Matches emoji characters:
 // - Keycap sequences: [0-9#*] + FE0F? + 20E3
 // - Extended_Pictographic with modifiers, ZWJ sequences, flag sequences
@@ -23,7 +42,7 @@ export function twemojiUrl(emoji: string): string {
   return `${BASE}${toCodePoint(emoji)}.svg`;
 }
 
-/** Render a single emoji as a Twemoji <img> */
+/** Render a single emoji as a Twemoji <img>, falling back to text on load error */
 export function TwemojiIcon({ emoji, size = '1em' }: { emoji: string; size?: string | number }) {
   return (
     <img
@@ -32,6 +51,11 @@ export function TwemojiIcon({ emoji, size = '1em' }: { emoji: string; size?: str
       className="emoji"
       draggable={false}
       style={{ height: size, width: size }}
+      onError={(e) => {
+        const span = document.createElement('span');
+        span.textContent = emoji;
+        (e.target as HTMLElement).replaceWith(span);
+      }}
     />
   );
 }
@@ -61,6 +85,11 @@ export function replaceEmoji(text: string): React.ReactNode[] {
         alt={emoji}
         className="emoji"
         draggable={false}
+        onError={(e) => {
+          const span = document.createElement('span');
+          span.textContent = emoji;
+          (e.target as HTMLElement).replaceWith(span);
+        }}
       />,
     );
 

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useMemo, type ReactNode } from 'react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import remarkBreaks from 'remark-breaks';
 import { useStore } from '../../store/useStore';
 import { useShallow } from 'zustand/shallow';
 import { FollowUpInput } from '../FollowUpInput';
@@ -243,7 +244,7 @@ function ContentCard({ icon, title, subtitle, status, content, borderColorOverri
         <div style={{ padding: '0 12px 12px' }}>
           {content ? (
             <div className={proseClass}>
-              <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeTwemoji]}>{content}</Markdown>
+              <Markdown remarkPlugins={[remarkGfm, remarkBreaks]} rehypePlugins={[rehypeTwemoji]}>{content}</Markdown>
             </div>
           ) : (
             <span style={{ color: '#9ca3af', fontStyle: 'italic', fontSize: 13 }}>No output yet</span>
@@ -274,7 +275,7 @@ function TeammateCard({ teammate }: { teammate: Teammate }) {
         <div style={{ padding: '0 12px 12px' }}>
           {teammate.output ? (
             <div className={proseClass}>
-              <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeTwemoji]}>{teammate.output}</Markdown>
+              <Markdown remarkPlugins={[remarkGfm, remarkBreaks]} rehypePlugins={[rehypeTwemoji]}>{teammate.output}</Markdown>
             </div>
           ) : isWorking ? (
             <PulseWorking />

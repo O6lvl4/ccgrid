@@ -3,7 +3,10 @@ import { createRoot } from 'react-dom/client';
 import { TamaguiProvider } from 'tamagui';
 import config from './tamagui.config';
 import App from './App';
+import { installEmojiErrorHandler } from './utils/twemoji';
 import './index.css';
+
+installEmojiErrorHandler();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
