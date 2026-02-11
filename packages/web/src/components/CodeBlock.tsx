@@ -2,10 +2,11 @@ import { type ReactNode } from 'react';
 
 /**
  * Detects `cat -n` style line-numbered output:
- *   "     1\tline content"
- * Lines must start with optional spaces + digits + tab.
+ *   "     1\tline content"  (tab separator)
+ *   "     1→line content"   (→ U+2192 separator, used by Claude Code)
+ * Lines must start with optional spaces + digits + separator.
  */
-const LINE_NUM_RE = /^(\s*\d+)\t(.*)$/;
+const LINE_NUM_RE = /^(\s*\d+)[\t\u2192](.*)$/;
 
 function hasLineNumbers(code: string): boolean {
   const lines = code.split('\n').filter(l => l.length > 0);
