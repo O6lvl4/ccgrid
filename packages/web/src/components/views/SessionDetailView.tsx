@@ -6,7 +6,7 @@ import { OutputTab } from './OutputTab';
 import { OverviewTab } from './OverviewTab';
 import { TeammatesTab } from './TeammatesTab';
 import { TasksTab } from './TasksTab';
-import { PermissionDialog, PermissionBadge } from '../PermissionDialog';
+import { PermissionDialog, PermissionBadge, PermissionHistory } from '../PermissionDialog';
 import type { Api } from '../../hooks/useApi';
 import type { TeamTask } from '@ccgrid/shared';
 
@@ -18,6 +18,37 @@ const TABS: { key: SessionTab; label: string }[] = [
 ];
 
 const EMPTY_TASKS: TeamTask[] = [];
+
+function ToastStack() {
+  const toasts = useStore(s => s.toasts);
+  if (toasts.length === 0) return null;
+  return (
+    <div style={{
+      position: 'fixed', bottom: 20, right: 20, zIndex: 900,
+      display: 'flex', flexDirection: 'column', gap: 6, maxWidth: 360,
+    }}>
+      {toasts.map(t => (
+        <div key={t.id} style={{
+          padding: '8px 14px', borderRadius: 8,
+          background: t.type === 'success' ? '#ecfdf5' : '#eff6ff',
+          border: `1px solid ${t.type === 'success' ? '#86efac' : '#93c5fd'}`,
+          color: t.type === 'success' ? '#065f46' : '#1e40af',
+          fontSize: 12, fontWeight: 500,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+          animation: 'toast-in 0.2s ease-out',
+        }}>
+          {t.type === 'success' ? '\u2713 ' : ''}{t.message}
+        </div>
+      ))}
+      <style>{`
+        @keyframes toast-in {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+    </div>
+  );
+}
 
 export const SessionDetailView = memo(function SessionDetailView({ sessionId, tab, api }: { sessionId: string; tab: SessionTab; api: Api }) {
   const session = useStore(s => s.sessions.get(sessionId));
@@ -200,8 +231,9 @@ export const SessionDetailView = memo(function SessionDetailView({ sessionId, ta
         </div>
       )}
 
-      {/* Permission requests */}
+      {/* Permission requests + history */}
       <PermissionDialog sessionId={sessionId} />
+      <PermissionHistory sessionId={sessionId} />
 
       {/* Tab content — OutputTab stays mounted to preserve DOM across tab switches */}
       <div style={{ display: tab === 'output' ? 'flex' : 'none', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
@@ -210,6 +242,9 @@ export const SessionDetailView = memo(function SessionDetailView({ sessionId, ta
       {tab === 'overview' && <OverviewTab session={session} />}
       {tab === 'teammates' && <TeammatesTab sessionId={sessionId} />}
       {tab === 'tasks' && <TasksTab sessionId={sessionId} />}
+
+      {/* Toast notifications */}
+      <ToastStack />
     </div>
   );
 });

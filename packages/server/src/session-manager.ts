@@ -1,7 +1,7 @@
 import { query, type Query, type CanUseTool } from '@anthropic-ai/claude-agent-sdk';
 import { v4 as uuidv4 } from 'uuid';
-import type { Session, Teammate, TeamTask, TeammateSpec, SkillSpec, ServerMessage } from '@ccgrid/shared';
-import { loadAllSessions, saveSession, deleteSessionFile } from './state-store.js';
+import type { Session, Teammate, TeamTask, TeammateSpec, SkillSpec, ServerMessage, PermissionLogEntry, PermissionRule } from '@ccgrid/shared';
+import { loadAllSessions, saveSession, deleteSessionFile, loadPermissionRules } from './state-store.js';
 import { buildPrompt, buildSystemPrompt } from './prompt-builder.js';
 import { processLeadStream } from './lead-stream.js';
 import { createHookHandlers } from './hook-handlers.js';
@@ -26,6 +26,7 @@ export class SessionManager {
     resolve: (result: { behavior: 'allow'; updatedInput?: Record<string, unknown> } | { behavior: 'deny'; message: string }) => void;
   }>();
   private pendingPermissionInputs = new Map<string, Record<string, unknown>>();
+  private pendingPermissionMeta = new Map<string, { sessionId: string; toolName: string; description?: string; agentId?: string }>();
 
   constructor(broadcast: (msg: ServerMessage) => void) {
     this.broadcast = broadcast;
@@ -101,6 +102,7 @@ export class SessionManager {
     taskDescription: string,
     permissionMode?: 'acceptEdits' | 'bypassPermissions',
     skillSpecs?: SkillSpec[],
+    customInstructions?: string,
   ): Promise<Session> {
     const session: Session = {
       id: uuidv4(),
@@ -111,6 +113,7 @@ export class SessionManager {
       ...(maxBudgetUsd != null ? { maxBudgetUsd } : {}),
       ...(teammateSpecs && teammateSpecs.length > 0 ? { teammateSpecs } : {}),
       permissionMode: permissionMode ?? 'acceptEdits',
+      ...(customInstructions ? { customInstructions } : {}),
       status: 'starting',
       costUsd: 0,
       inputTokens: 0,
@@ -245,8 +248,25 @@ export class SessionManager {
     const pending = this.pendingPermissions.get(requestId);
     if (!pending) return;
     const originalInput = this.pendingPermissionInputs.get(requestId) ?? {};
+    const meta = this.pendingPermissionMeta.get(requestId);
     this.pendingPermissions.delete(requestId);
     this.pendingPermissionInputs.delete(requestId);
+    this.pendingPermissionMeta.delete(requestId);
+
+    if (meta) {
+      const entry: PermissionLogEntry = {
+        requestId,
+        sessionId: meta.sessionId,
+        toolName: meta.toolName,
+        input: updatedInput ?? originalInput,
+        description: meta.description,
+        agentId: meta.agentId,
+        behavior,
+        timestamp: new Date().toISOString(),
+      };
+      this.broadcast({ type: 'permission_resolved', entry });
+    }
+
     if (behavior === 'allow') {
       pending.resolve({ behavior: 'allow', updatedInput: updatedInput ?? originalInput });
     } else {
@@ -340,9 +360,44 @@ The Lead coordinates the team and relays information between members.
 
     const isBypass = session.permissionMode === 'bypassPermissions';
 
-    // canUseTool callback: send permission request to GUI and wait for response
+    // canUseTool callback: check rules first, then send permission request to GUI
     const canUseTool: CanUseTool = (toolName, input, options) => {
       console.log(`[canUseTool] session=${session.id.slice(0, 8)} tool=${toolName} agent=${options.agentID ?? 'lead'} toolUseID=${options.toolUseID}`);
+
+      // Check permission rules for auto-judgment
+      const rules = loadPermissionRules();
+      const matchedRule = rules.find(r => {
+        if (r.toolName !== '*' && r.toolName !== toolName) return false;
+        if (r.pathPattern) {
+          const inputObj = input as Record<string, unknown>;
+          const filePath = (inputObj.file_path ?? inputObj.path ?? inputObj.command ?? '') as string;
+          if (!filePath.includes(r.pathPattern.replace(/\*\*/g, '').replace(/\*/g, ''))) return false;
+        }
+        return true;
+      });
+
+      if (matchedRule) {
+        console.log(`[canUseTool:auto] rule=${matchedRule.id.slice(0, 8)} behavior=${matchedRule.behavior} tool=${toolName}`);
+        const entry: PermissionLogEntry = {
+          requestId: `auto-${Date.now()}`,
+          sessionId: session.id,
+          toolName,
+          input: input as Record<string, unknown>,
+          description: options.decisionReason,
+          agentId: options.agentID,
+          behavior: 'auto',
+          rule: `${matchedRule.toolName}${matchedRule.pathPattern ? ` (${matchedRule.pathPattern})` : ''}: ${matchedRule.behavior}`,
+          timestamp: new Date().toISOString(),
+        };
+        this.broadcast({ type: 'permission_resolved', entry });
+
+        if (matchedRule.behavior === 'allow') {
+          return Promise.resolve({ behavior: 'allow' as const, updatedInput: input as Record<string, unknown> });
+        } else {
+          return Promise.resolve({ behavior: 'deny' as const, message: `Denied by rule: ${matchedRule.toolName}` });
+        }
+      }
+
       return new Promise((resolve) => {
         const requestId = uuidv4();
         const wrappedResolve = (result: { behavior: 'allow'; updatedInput?: Record<string, unknown> } | { behavior: 'deny'; message: string }) => {
@@ -351,6 +406,7 @@ The Lead coordinates the team and relays information between members.
         };
         this.pendingPermissions.set(requestId, { resolve: wrappedResolve });
         this.pendingPermissionInputs.set(requestId, input as Record<string, unknown>);
+        this.pendingPermissionMeta.set(requestId, { sessionId: session.id, toolName, description: options.decisionReason, agentId: options.agentID });
 
         console.log(`[canUseTool:broadcast] requestId=${requestId.slice(0, 8)}`);
         this.broadcast({
@@ -367,6 +423,7 @@ The Lead coordinates the team and relays information between members.
           console.log(`[canUseTool:already-aborted] requestId=${requestId.slice(0, 8)}`);
           this.pendingPermissions.delete(requestId);
           this.pendingPermissionInputs.delete(requestId);
+          this.pendingPermissionMeta.delete(requestId);
           wrappedResolve({ behavior: 'deny', message: 'Already aborted' });
           return;
         }
@@ -375,6 +432,7 @@ The Lead coordinates the team and relays information between members.
           console.log(`[canUseTool:abort] requestId=${requestId.slice(0, 8)} tool=${toolName}`);
           this.pendingPermissions.delete(requestId);
           this.pendingPermissionInputs.delete(requestId);
+          this.pendingPermissionMeta.delete(requestId);
           wrappedResolve({ behavior: 'deny', message: 'Aborted' });
         });
       });
@@ -401,7 +459,7 @@ The Lead coordinates the team and relays information between members.
             ...process.env,
             CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: '1',
           },
-          systemPrompt: buildSystemPrompt(),
+          systemPrompt: buildSystemPrompt(session.customInstructions),
           settingSources: ['user', 'project'],
           hooks: {
             SubagentStart: [{ hooks: [hooks.onSubagentStart] }],

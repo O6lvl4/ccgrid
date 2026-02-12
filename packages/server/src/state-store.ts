@@ -1,12 +1,13 @@
 import { readFileSync, writeFileSync, readdirSync, mkdirSync, unlinkSync, existsSync } from 'fs';
 import { join } from 'path';
-import type { Session, Teammate, TeamTask, TeammateSpec, SkillSpec } from '@ccgrid/shared';
+import type { Session, Teammate, TeamTask, TeammateSpec, SkillSpec, PermissionRule } from '@ccgrid/shared';
 
 const HOME = process.env.HOME ?? '';
 const BASE_DIR = join(HOME, '.claude', 'claude-team');
 const SESSIONS_DIR = join(BASE_DIR, 'sessions');
 const SPECS_FILE = join(BASE_DIR, 'teammate-specs.json');
 const SKILL_SPECS_FILE = join(BASE_DIR, 'skill-specs.json');
+const PERMISSION_RULES_FILE = join(BASE_DIR, 'permission-rules.json');
 const TASKS_DIR = join(HOME, '.claude', 'tasks');
 const TEAMS_DIR = join(HOME, '.claude', 'teams');
 
@@ -188,5 +189,26 @@ export function saveSkillSpecs(specs: SkillSpec[]): void {
     writeFileSync(SKILL_SPECS_FILE, JSON.stringify(specs, null, 2));
   } catch (err) {
     console.error('Failed to save skill specs:', err);
+  }
+}
+
+// ---- PermissionRules persistence ----
+
+export function loadPermissionRules(): PermissionRule[] {
+  try {
+    if (!existsSync(PERMISSION_RULES_FILE)) return [];
+    const raw = readFileSync(PERMISSION_RULES_FILE, 'utf-8');
+    return JSON.parse(raw) as PermissionRule[];
+  } catch {
+    return [];
+  }
+}
+
+export function savePermissionRules(rules: PermissionRule[]): void {
+  try {
+    mkdirSync(BASE_DIR, { recursive: true });
+    writeFileSync(PERMISSION_RULES_FILE, JSON.stringify(rules, null, 2));
+  } catch (err) {
+    console.error('Failed to save permission rules:', err);
   }
 }

@@ -73,11 +73,8 @@ IMPORTANT RULES:
 ${taskDescription}`;
 }
 
-export function buildSystemPrompt() {
-  return {
-    type: 'preset' as const,
-    preset: 'claude_code' as const,
-    append: `You are a team lead actively coordinating teammates.
+export function buildSystemPrompt(customInstructions?: string) {
+  const base = `You are a team lead actively coordinating teammates.
 
 IMPORTANT SYSTEM BEHAVIOR:
 - If you respond with only text (no tool call), the agentic loop ends and all teammates are killed.
@@ -93,6 +90,11 @@ ACTIVE COORDINATION:
 TEAMMATE MESSAGING:
 - When a user sends a message to a specific teammate (indicated by <!-- teammate-message:Name --> markers), use the Task tool with resume to forward it to that teammate immediately.
 
-Do NOT use TaskCreate/TaskUpdate/TaskGet — only TaskList and Task.`,
+Do NOT use TaskCreate/TaskUpdate/TaskGet — only TaskList and Task.`;
+
+  return {
+    type: 'preset' as const,
+    preset: 'claude_code' as const,
+    append: customInstructions ? `${base}\n\nUSER CUSTOM INSTRUCTIONS:\n${customInstructions}` : base,
   };
 }

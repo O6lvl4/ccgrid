@@ -31,6 +31,7 @@ export interface Session {
   status: 'starting' | 'running' | 'completed' | 'error';
   sessionId?: string; // SDK session ID
   permissionMode?: 'acceptEdits' | 'bypassPermissions';
+  customInstructions?: string;
   costUsd: number;
   inputTokens: number;
   outputTokens: number;
@@ -61,6 +62,28 @@ export interface TeamTask {
   blockedBy: string[];
 }
 
+// ---- Permission log entry ----
+export interface PermissionLogEntry {
+  requestId: string;
+  sessionId: string;
+  toolName: string;
+  input: Record<string, unknown>;
+  description?: string;
+  agentId?: string;
+  behavior: 'allow' | 'deny' | 'auto';
+  rule?: string;
+  timestamp: string;
+}
+
+// ---- Permission rule (auto-judgment) ----
+export interface PermissionRule {
+  id: string;
+  toolName: string;
+  pathPattern?: string;
+  behavior: 'allow' | 'deny';
+  createdAt: string;
+}
+
 // ---- WebSocket: Server → Client ----
 export type ServerMessage =
   | { type: 'session_created'; session: Session }
@@ -76,7 +99,9 @@ export type ServerMessage =
   | { type: 'error'; message: string; sessionId?: string }
   | { type: 'permission_request'; sessionId: string; requestId: string; toolName: string; input: Record<string, unknown>; description?: string; agentId?: string }
   | { type: 'teammate_message_relayed'; sessionId: string; teammateName: string; message: string }
-  | { type: 'snapshot'; sessions: Session[]; teammates: Teammate[]; tasks: Record<string, TeamTask[]>; leadOutputs: Record<string, string>; teammateSpecs: TeammateSpec[]; skillSpecs: SkillSpec[] };
+  | { type: 'permission_resolved'; entry: PermissionLogEntry }
+  | { type: 'permission_rules_updated'; rules: PermissionRule[] }
+  | { type: 'snapshot'; sessions: Session[]; teammates: Teammate[]; tasks: Record<string, TeamTask[]>; leadOutputs: Record<string, string>; teammateSpecs: TeammateSpec[]; skillSpecs: SkillSpec[]; permissionRules: PermissionRule[] };
 
 // ---- WebSocket: Client → Server ----
 export type ClientMessage =

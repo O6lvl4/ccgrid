@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import { YStack, XStack, Text, Button, ScrollView } from 'tamagui';
 import { useStore } from '../store/useStore';
+import { useApi } from '../hooks/useApi';
+import type { PermissionLogEntry } from '@ccgrid/shared';
 
 export function PermissionDialog({ sessionId }: { sessionId: string }) {
   const pendingPermissions = useStore(s => s.pendingPermissions);
@@ -33,6 +35,7 @@ export function PermissionDialog({ sessionId }: { sessionId: string }) {
           key={req.requestId}
           req={req}
           onRespond={respondToPermission}
+          sessionId={sessionId}
         />
       ))}
     </div>
@@ -79,10 +82,13 @@ export function PermissionBadge({ sessionId }: { sessionId: string }) {
 function PermissionCard({
   req,
   onRespond,
+  sessionId,
 }: {
   req: { requestId: string; toolName: string; input: Record<string, unknown>; description?: string; agentId?: string };
   onRespond: (requestId: string, behavior: 'allow' | 'deny', message?: string, updatedInput?: Record<string, unknown>) => void;
+  sessionId: string;
 }) {
+  const api = useApi();
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
   const [parseError, setParseError] = useState(false);
@@ -230,6 +236,19 @@ function PermissionCard({
         </Button>
         <Button
           size="$2"
+          bg="$blue8"
+          color="white"
+          hoverStyle={{ bg: '$blue7' }}
+          fontSize={11}
+          onPress={() => {
+            api.createPermissionRule({ toolName: req.toolName, behavior: 'allow' }).catch(console.error);
+            handleAllow();
+          }}
+        >
+          Always Allow {req.toolName}
+        </Button>
+        <Button
+          size="$2"
           bg="$green9"
           color="white"
           hoverStyle={{ bg: '$green8' }}
@@ -241,5 +260,59 @@ function PermissionCard({
         </Button>
       </XStack>
     </YStack>
+  );
+}
+
+/** Collapsible permission history for a session */
+export function PermissionHistory({ sessionId }: { sessionId: string }) {
+  const [open, setOpen] = useState(false);
+  const history = useStore(s => s.permissionHistory.get(sessionId) ?? []);
+
+  if (history.length === 0) return null;
+
+  return (
+    <YStack p="$2">
+      <XStack
+        ai="center"
+        gap="$2"
+        cursor="pointer"
+        onPress={() => setOpen(!open)}
+        py="$1"
+      >
+        <Text fontSize={11} color="$gray9" userSelect="none">
+          {open ? '\u25BC' : '\u25B6'}
+        </Text>
+        <Text fontSize={11} fontWeight="600" color="$gray9">
+          Permission History ({history.length})
+        </Text>
+      </XStack>
+      {open && (
+        <ScrollView maxHeight={200} mt="$1">
+          <YStack gap="$1">
+            {[...history].reverse().map(entry => (
+              <PermissionLogRow key={entry.requestId} entry={entry} />
+            ))}
+          </YStack>
+        </ScrollView>
+      )}
+    </YStack>
+  );
+}
+
+function PermissionLogRow({ entry }: { entry: PermissionLogEntry }) {
+  const bgColor = entry.behavior === 'allow' ? '$green3' : entry.behavior === 'auto' ? '$blue3' : '$red3';
+  const fgColor = entry.behavior === 'allow' ? '$green11' : entry.behavior === 'auto' ? '$blue11' : '$red11';
+  const label = entry.behavior === 'auto' ? `auto (${entry.rule ?? 'rule'})` : entry.behavior;
+  const time = new Date(entry.timestamp).toLocaleTimeString();
+
+  return (
+    <XStack ai="center" gap="$2" px="$2" py="$1" bg={bgColor} rounded="$2">
+      <Text fontSize={10} fontWeight="700" color={fgColor} width={40}>{label}</Text>
+      <Text fontSize={11} fontFamily="monospace" color="$gray11" flex={1}>{entry.toolName}</Text>
+      {entry.agentId && (
+        <Text fontSize={10} color="$gray8" fontFamily="monospace">{entry.agentId.slice(0, 6)}</Text>
+      )}
+      <Text fontSize={10} color="$gray8">{time}</Text>
+    </XStack>
   );
 }

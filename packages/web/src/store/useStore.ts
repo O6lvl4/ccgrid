@@ -1,6 +1,6 @@
 import { startTransition } from 'react';
 import { create } from 'zustand';
-import type { Session, Teammate, TeamTask, TeammateSpec, SkillSpec, ServerMessage } from '@ccgrid/shared';
+import type { Session, Teammate, TeamTask, TeammateSpec, SkillSpec, ServerMessage, PermissionLogEntry, PermissionRule } from '@ccgrid/shared';
 
 // ---- Navigation ----
 export type SessionTab = 'output' | 'teammates' | 'tasks' | 'overview';
@@ -119,6 +119,9 @@ interface AppState {
   teammateSpecs: TeammateSpec[];
   skillSpecs: SkillSpec[];
   pendingPermissions: Map<string, PendingPermission>;
+  permissionHistory: Map<string, PermissionLogEntry[]>;
+  permissionRules: PermissionRule[];
+  toasts: { id: string; message: string; type: 'success' | 'info' }[];
   wsSend: ((msg: unknown) => void) | null;
   selectedSessionId: string | null;
   lastError: string | null;
@@ -135,6 +138,8 @@ interface AppState {
   clearError: () => void;
   setWsSend: (send: ((msg: unknown) => void) | null) => void;
   respondToPermission: (requestId: string, behavior: 'allow' | 'deny', message?: string, updatedInput?: Record<string, unknown>) => void;
+  addToast: (message: string, type?: 'success' | 'info') => void;
+  removeToast: (id: string) => void;
 }
 
 export const useStore = create<AppState>((set, get) => ({
@@ -146,6 +151,9 @@ export const useStore = create<AppState>((set, get) => ({
   teammateSpecs: [],
   skillSpecs: [],
   pendingPermissions: new Map(),
+  permissionHistory: new Map(),
+  permissionRules: [],
+  toasts: [],
   wsSend: null,
   selectedSessionId: null,
   lastError: null,
@@ -176,6 +184,7 @@ export const useStore = create<AppState>((set, get) => ({
             leadOutputs,
             teammateSpecs: msg.teammateSpecs ?? [],
             skillSpecs: msg.skillSpecs ?? [],
+            permissionRules: msg.permissionRules ?? [],
             selectedSessionId,
             route,
             activeSection: deriveSectionFromRoute(route),
@@ -292,6 +301,10 @@ export const useStore = create<AppState>((set, get) => ({
         break;
       }
       case 'task_completed': {
+        const label = msg.teammateName
+          ? `${msg.teammateName}: ${msg.taskSubject}`
+          : msg.taskSubject;
+        get().addToast(`Task completed — ${label}`, 'success');
         break;
       }
       case 'cost_update': {
@@ -336,6 +349,19 @@ export const useStore = create<AppState>((set, get) => ({
           }]);
           return { teammateMessages };
         });
+        break;
+      }
+      case 'permission_resolved': {
+        set(state => {
+          const permissionHistory = new Map(state.permissionHistory);
+          const existing = permissionHistory.get(msg.entry.sessionId) ?? [];
+          permissionHistory.set(msg.entry.sessionId, [...existing, msg.entry]);
+          return { permissionHistory };
+        });
+        break;
+      }
+      case 'permission_rules_updated': {
+        set({ permissionRules: msg.rules });
         break;
       }
       case 'error': {
@@ -421,6 +447,14 @@ export const useStore = create<AppState>((set, get) => ({
       return { pendingPermissions };
     });
   },
+
+  addToast: (message, type = 'info') => {
+    const id = crypto.randomUUID();
+    set(state => ({ toasts: [...state.toasts, { id, message, type }] }));
+    setTimeout(() => get().removeToast(id), 3000);
+  },
+
+  removeToast: (id) => set(state => ({ toasts: state.toasts.filter(t => t.id !== id) })),
 }));
 
 // ---- Browser back/forward support ----

@@ -1,5 +1,6 @@
 import { Paragraph, ScrollView, Text, XStack, YStack } from 'tamagui';
 import type { Session } from '@ccgrid/shared';
+import { PermissionRulesPanel } from '../PermissionRulesPanel';
 
 function SectionLabel({ children }: { children: string }) {
   return (
@@ -80,6 +81,12 @@ export function OverviewTab({ session }: { session: Session }) {
             </YStack>
           </YStack>
         )}
+
+        {/* Permission Rules */}
+        <YStack>
+          <SectionLabel>Permission Rules</SectionLabel>
+          <PermissionRulesPanel />
+        </YStack>
 
         {/* Cost & Tokens */}
         <YStack>

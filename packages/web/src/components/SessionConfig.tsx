@@ -30,6 +30,7 @@ export function SessionConfig({ api, onCreated }: { api: Api; onCreated?: () => 
   const [permissionMode, setPermissionMode] = useState<'acceptEdits' | 'bypassPermissions'>('acceptEdits');
   const [maxBudget, setMaxBudget] = useState('');
   const [taskDescription, setTaskDescription] = useState('');
+  const [customInstructions, setCustomInstructions] = useState('');
   const [showDirPicker, setShowDirPicker] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -58,6 +59,7 @@ export function SessionConfig({ api, onCreated }: { api: Api; onCreated?: () => 
         ...(budget && budget > 0 ? { maxBudgetUsd: budget } : {}),
         taskDescription: taskDescription.trim(),
         permissionMode,
+        ...(customInstructions.trim() ? { customInstructions: customInstructions.trim() } : {}),
       });
       setName('');
       setTaskDescription('');
@@ -139,6 +141,22 @@ export function SessionConfig({ api, onCreated }: { api: Api; onCreated?: () => 
           borderColor="$gray5"
           color="$gray12"
           fontSize={13}
+          focusStyle={{ borderColor: '$blue9' }}
+        />
+      </YStack>
+
+      {/* Custom Instructions */}
+      <YStack>
+        <FieldLabel>Custom Instructions (optional)</FieldLabel>
+        <TextArea
+          placeholder="Lead Agent への追加指示 (コーディング規約、使用言語、注意事項など)"
+          value={customInstructions}
+          onChangeText={setCustomInstructions}
+          numberOfLines={2}
+          bg="$gray3"
+          borderColor="$gray5"
+          color="$gray12"
+          fontSize={12}
           focusStyle={{ borderColor: '$blue9' }}
         />
       </YStack>

@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import type { Session, TeammateSpec, SkillSpec } from '@ccgrid/shared';
+import type { Session, TeammateSpec, SkillSpec, PermissionRule } from '@ccgrid/shared';
 
 export interface Api {
   createSession: (params: {
@@ -10,6 +10,7 @@ export interface Api {
     maxBudgetUsd?: number;
     taskDescription: string;
     permissionMode?: 'acceptEdits' | 'bypassPermissions';
+    customInstructions?: string;
   }) => Promise<Session>;
   updateSession: (id: string, updates: { name?: string }) => Promise<Session>;
   deleteSession: (id: string) => Promise<void>;
@@ -22,6 +23,8 @@ export interface Api {
   updateSkillSpec: (id: string, updates: { name?: string; description?: string; skillType?: string }) => Promise<SkillSpec>;
   deleteSkillSpec: (id: string) => Promise<void>;
   sendToTeammate: (sessionId: string, teammateName: string, message: string) => Promise<Session>;
+  createPermissionRule: (params: { toolName: string; pathPattern?: string; behavior: 'allow' | 'deny' }) => Promise<PermissionRule>;
+  deletePermissionRule: (id: string) => Promise<void>;
 }
 
 const BASE = '/api';
@@ -49,6 +52,7 @@ export function useApi(): Api {
     maxBudgetUsd?: number;
     taskDescription: string;
     permissionMode?: 'acceptEdits' | 'bypassPermissions';
+    customInstructions?: string;
   }) => request<Session>('POST', '/sessions', params), []);
 
   const updateSession = useCallback((id: string, updates: { name?: string }) =>
@@ -84,5 +88,11 @@ export function useApi(): Api {
   const sendToTeammate = useCallback((sessionId: string, teammateName: string, message: string) =>
     request<Session>('POST', `/sessions/${sessionId}/teammates/${encodeURIComponent(teammateName)}/message`, { message }), []);
 
-  return { createSession, updateSession, deleteSession, stopSession, continueSession, createSpec, updateSpec, deleteSpec, createSkillSpec, updateSkillSpec, deleteSkillSpec, sendToTeammate };
+  const createPermissionRule = useCallback((params: { toolName: string; pathPattern?: string; behavior: 'allow' | 'deny' }) =>
+    request<PermissionRule>('POST', '/permission-rules', params), []);
+
+  const deletePermissionRule = useCallback((id: string) =>
+    request<void>('DELETE', `/permission-rules/${id}`), []);
+
+  return { createSession, updateSession, deleteSession, stopSession, continueSession, createSpec, updateSpec, deleteSpec, createSkillSpec, updateSkillSpec, deleteSkillSpec, sendToTeammate, createPermissionRule, deletePermissionRule };
 }

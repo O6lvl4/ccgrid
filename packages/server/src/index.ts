@@ -6,8 +6,8 @@ import { join } from 'path';
 import os from 'os';
 import { randomUUID } from 'crypto';
 import { SessionManager } from './session-manager.js';
-import { loadTeammateSpecs, saveTeammateSpecs, loadSkillSpecs, saveSkillSpecs } from './state-store.js';
-import type { ServerMessage, TeammateSpec, SkillSpec } from '@ccgrid/shared';
+import { loadTeammateSpecs, saveTeammateSpecs, loadSkillSpecs, saveSkillSpecs, loadPermissionRules, savePermissionRules } from './state-store.js';
+import type { ServerMessage, TeammateSpec, SkillSpec, PermissionRule } from '@ccgrid/shared';
 
 process.on('unhandledRejection', (err) => {
   console.error('Unhandled rejection:', err);
@@ -31,16 +31,17 @@ function broadcast(message: ServerMessage): void {
 const sm = new SessionManager(broadcast);
 let teammateSpecs: TeammateSpec[] = loadTeammateSpecs();
 let skillSpecs: SkillSpec[] = loadSkillSpecs();
+let permissionRules: PermissionRule[] = loadPermissionRules();
 
 // ---- REST: Sessions CRUD ----
 
 app.post('/api/sessions', async (c) => {
-  const { name, cwd, model, teammateSpecs, maxBudgetUsd, taskDescription, permissionMode } = await c.req.json();
+  const { name, cwd, model, teammateSpecs, maxBudgetUsd, taskDescription, permissionMode, customInstructions } = await c.req.json();
   if (!name || !cwd || !model || !taskDescription) {
     return c.json({ error: 'name, cwd, model, taskDescription are required' }, 400);
   }
   try {
-    const session = await sm.createSession(name, cwd, model, teammateSpecs, maxBudgetUsd, taskDescription, permissionMode, skillSpecs);
+    const session = await sm.createSession(name, cwd, model, teammateSpecs, maxBudgetUsd, taskDescription, permissionMode, skillSpecs, customInstructions);
     return c.json(session, 201);
   } catch (err) {
     return c.json({ error: String(err) }, 500);
@@ -217,6 +218,39 @@ app.delete('/api/skill-specs/:id', (c) => {
   return c.body(null, 204);
 });
 
+// ---- REST: Permission Rules CRUD ----
+
+app.get('/api/permission-rules', (c) => {
+  return c.json(permissionRules);
+});
+
+app.post('/api/permission-rules', async (c) => {
+  const { toolName, pathPattern, behavior } = await c.req.json();
+  if (!toolName || !behavior) {
+    return c.json({ error: 'toolName and behavior are required' }, 400);
+  }
+  const rule: PermissionRule = {
+    id: randomUUID(),
+    toolName,
+    pathPattern: pathPattern || undefined,
+    behavior,
+    createdAt: new Date().toISOString(),
+  };
+  permissionRules.push(rule);
+  savePermissionRules(permissionRules);
+  broadcast({ type: 'permission_rules_updated', rules: permissionRules });
+  return c.json(rule, 201);
+});
+
+app.delete('/api/permission-rules/:id', (c) => {
+  const idx = permissionRules.findIndex(r => r.id === c.req.param('id'));
+  if (idx === -1) return c.json({ error: 'Rule not found' }, 404);
+  permissionRules.splice(idx, 1);
+  savePermissionRules(permissionRules);
+  broadcast({ type: 'permission_rules_updated', rules: permissionRules });
+  return c.body(null, 204);
+});
+
 // ---- REST: Utilities ----
 
 app.get('/api/health', (c) => {
@@ -277,6 +311,7 @@ wss.on('connection', (ws) => {
     leadOutputs: sm.getLeadOutputs(),
     teammateSpecs,
     skillSpecs,
+    permissionRules,
   };
   ws.send(JSON.stringify(snapshot));
 
