@@ -17,6 +17,12 @@ const LEGACY_SEPARATOR = '\n\n---\n\n';
 
 const proseClass = 'prose prose-sm max-w-none prose-pre:bg-gray-100 prose-pre:border prose-pre:border-gray-200 prose-code:text-blue-600 prose-headings:text-gray-900 prose-p:text-gray-700 prose-li:text-gray-700 prose-strong:text-gray-900 prose-a:text-blue-600';
 
+// Strip SDK internal tags (e.g. <tool_use_error>...</ tool_use_error>) from output
+const SDK_TAG_RE = /<\/?(?:tool_use_error|antml:[a-z_]+|system-reminder)[^>]*>|<(?:tool_use_error|antml:[a-z_]+|system-reminder)[^>]*\/>/g;
+function cleanSdkOutput(text: string): string {
+  return text.replace(SDK_TAG_RE, '').replace(/\n{3,}/g, '\n\n');
+}
+
 /** Memoized Markdown — renders fast with native emoji, then applies Twemoji after paint */
 const MemoMarkdown = memo(function MemoMarkdown({ content }: { content: string }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -33,7 +39,7 @@ const MemoMarkdown = memo(function MemoMarkdown({ content }: { content: string }
   return (
     <div ref={ref} className={proseClass}>
       <Markdown remarkPlugins={remarkPlugins} components={markdownComponents}>
-        {content}
+        {cleanSdkOutput(content)}
       </Markdown>
     </div>
   );
