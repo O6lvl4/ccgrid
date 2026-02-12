@@ -4,6 +4,8 @@ import { useStore } from '../store/useStore';
 import { useApi } from '../hooks/useApi';
 import type { PermissionLogEntry } from '@ccgrid/shared';
 
+const EMPTY_HISTORY: PermissionLogEntry[] = [];
+
 export function PermissionDialog({ sessionId }: { sessionId: string }) {
   const pendingPermissions = useStore(s => s.pendingPermissions);
   const respondToPermission = useStore(s => s.respondToPermission);
@@ -266,7 +268,7 @@ function PermissionCard({
 /** Collapsible permission history for a session */
 export function PermissionHistory({ sessionId }: { sessionId: string }) {
   const [open, setOpen] = useState(false);
-  const history = useStore(s => s.permissionHistory.get(sessionId) ?? []);
+  const history = useStore(s => s.permissionHistory.get(sessionId) ?? EMPTY_HISTORY);
 
   if (history.length === 0) return null;
 

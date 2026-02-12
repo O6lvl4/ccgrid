@@ -454,7 +454,11 @@ export const useStore = create<AppState>((set, get) => ({
     setTimeout(() => get().removeToast(id), 3000);
   },
 
-  removeToast: (id) => set(state => ({ toasts: state.toasts.filter(t => t.id !== id) })),
+  removeToast: (id) => set(state => {
+    const filtered = state.toasts.filter(t => t.id !== id);
+    if (filtered.length === state.toasts.length) return state;
+    return { toasts: filtered };
+  }),
 }));
 
 // ---- Browser back/forward support ----
