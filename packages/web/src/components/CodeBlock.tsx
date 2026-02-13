@@ -177,7 +177,27 @@ export function CodeBlock({
   return <HighlightedCode code={code} language={language} />;
 }
 
+/** Inline image — constrain to thumbnail size */
+function InlineImage(props: React.ImgHTMLAttributes<HTMLImageElement>) {
+  return (
+    <img
+      {...props}
+      style={{
+        maxWidth: 240,
+        maxHeight: 180,
+        borderRadius: 10,
+        objectFit: 'cover',
+        display: 'inline-block',
+        verticalAlign: 'top',
+        margin: '4px 0',
+        boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+      }}
+    />
+  );
+}
+
 /** Components object to pass to react-markdown */
 export const markdownComponents = {
   code: CodeBlock,
+  img: InlineImage,
 };
