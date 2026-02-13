@@ -5,7 +5,7 @@ import remarkBreaks from 'remark-breaks';
 import { useStore } from '../../store/useStore';
 import { useShallow } from 'zustand/shallow';
 import { FollowUpInput } from '../FollowUpInput';
-import { applyTwemojiToElement } from '../../utils/twemoji';
+import { rehypeTwemoji, TwemojiIcon } from '../../utils/twemoji';
 import { markdownComponents } from '../CodeBlock';
 import type { FollowUpImage } from '../../store/useStore';
 import type { Teammate } from '@ccgrid/shared';
@@ -14,6 +14,7 @@ const STABLE_EMPTY_MAP = new Map<number, FollowUpImage[]>();
 
 // Stable plugin arrays (avoid recreating on every render)
 const remarkPlugins = [remarkGfm, remarkBreaks];
+const rehypePlugins = [rehypeTwemoji];
 
 const SEPARATOR = '\n\n<!-- follow-up -->\n\n';
 const LEGACY_SEPARATOR = '\n\n---\n\n';
@@ -26,22 +27,11 @@ function cleanSdkOutput(text: string): string {
   return text.replace(SDK_TAG_RE, '').replace(/\n{3,}/g, '\n\n');
 }
 
-/** Memoized Markdown — renders fast with native emoji, then applies Twemoji after paint */
+/** Memoized Markdown — uses rehypeTwemoji to replace emoji in AST (React-safe) */
 const MemoMarkdown = memo(function MemoMarkdown({ content }: { content: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!ref.current) return;
-    // Apply Twemoji after the browser paints the native-emoji version
-    const id = requestAnimationFrame(() => {
-      if (ref.current) applyTwemojiToElement(ref.current);
-    });
-    return () => cancelAnimationFrame(id);
-  }, [content]);
-
   return (
-    <div ref={ref} className={proseClass}>
-      <Markdown remarkPlugins={remarkPlugins} components={markdownComponents}>
+    <div className={proseClass}>
+      <Markdown remarkPlugins={remarkPlugins} rehypePlugins={rehypePlugins} components={markdownComponents}>
         {cleanSdkOutput(content)}
       </Markdown>
     </div>
@@ -150,17 +140,7 @@ function FollowUpAvatar() {
       backgroundColor: '#3b82f6',
       flexShrink: 0,
     }}>
-      <span style={{
-        color: '#ffffff',
-        fontSize: 13,
-        fontWeight: 800,
-        lineHeight: 1,
-        userSelect: 'none',
-        position: 'relative',
-        top: 1,
-      }}>
-        ↩
-      </span>
+      <TwemojiIcon emoji="↩️" size={13} />
     </div>
   );
 }
