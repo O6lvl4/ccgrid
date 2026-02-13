@@ -63,10 +63,7 @@ export function SessionPanel() {
             border: 'none',
             background: '#0ab9e6',
             color: '#fff',
-            fontSize: 15,
-            fontWeight: 700,
             cursor: 'pointer',
-            lineHeight: 1,
             transition: 'background 0.18s, transform 0.12s, box-shadow 0.18s',
             boxShadow: '0 2px 8px rgba(10, 185, 230, 0.3)',
           }}
@@ -83,7 +80,7 @@ export function SessionPanel() {
           onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.92)'; }}
           onMouseUp={e => { e.currentTarget.style.transform = 'scale(1.1)'; }}
         >
-          +
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
         </button>
       </div>
 
