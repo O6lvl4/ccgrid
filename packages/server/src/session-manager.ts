@@ -1,14 +1,16 @@
-import { query, type Query, type CanUseTool, type SDKUserMessage } from '@anthropic-ai/claude-agent-sdk';
+import { query, type Query, type SDKUserMessage } from '@anthropic-ai/claude-agent-sdk';
 import type { ContentBlockParam } from '@anthropic-ai/sdk/resources/messages/messages';
 import { v4 as uuidv4 } from 'uuid';
-import type { Session, Teammate, TeamTask, TeammateSpec, SkillSpec, ServerMessage, PermissionLogEntry, PermissionRule, FileAttachment } from '@ccgrid/shared';
-import { loadAllSessions, saveSession, deleteSessionFile, loadPermissionRules } from './state-store.js';
+import type { Session, Teammate, TeamTask, TeammateSpec, SkillSpec, ServerMessage, PermissionLogEntry, FileAttachment } from '@ccgrid/shared';
+import { loadAllSessions, saveSession, deleteSessionFile } from './state-store.js';
 import { buildPrompt, buildSystemPrompt } from './prompt-builder.js';
 import { processLeadStream } from './lead-stream.js';
 import { createHookHandlers } from './hook-handlers.js';
 import { startTaskWatcher, syncTasks } from './task-watcher.js';
 import { loadTeammateOutputs, readTeammateTranscript } from './transcript-reader.js';
 import { startPolling as startTranscriptPolling, stopPolling as stopTranscriptPolling, stopAllPolling, type PollerDeps } from './transcript-poller.js';
+import { createCanUseTool, type PermissionMaps } from './permission-evaluator.js';
+import { buildAgents, filesToContentBlocks } from './agent-builder.js';
 
 interface ActiveSession {
   query: Query;
@@ -44,7 +46,6 @@ export class SessionManager {
       }
     }
 
-    // Recover missing teammate outputs from transcript files
     this.recoverTeammateOutputs();
   }
 
@@ -131,7 +132,6 @@ export class SessionManager {
   }
 
   getSessions(): Session[] {
-    // Auto-fix stale running/starting sessions that have no active query
     for (const session of this.sessions.values()) {
       if (
         (session.status === 'running' || session.status === 'starting') &&
@@ -160,7 +160,6 @@ export class SessionManager {
   async deleteSession(sessionId: string): Promise<boolean> {
     await this.stopSession(sessionId);
 
-    // Remove in-memory state
     this.sessions.delete(sessionId);
     this.leadOutputs.delete(sessionId);
     this.tasks.delete(sessionId);
@@ -168,7 +167,6 @@ export class SessionManager {
       if (tm.sessionId === sessionId) this.teammates.delete(agentId);
     }
 
-    // Remove persisted file
     deleteSessionFile(sessionId);
     this.broadcast({ type: 'session_deleted', sessionId });
     return true;
@@ -223,16 +221,13 @@ export class SessionManager {
     const isRunningOrCompleted = session.status === 'running' || session.status === 'completed';
     if (!isRunningOrCompleted || !session.sessionId) return undefined;
 
-    // Record the message in lead output
     const marker = `\n\n<!-- teammate-message:${teammateName} -->\n\n> **To ${teammateName}:** ${message.replace(/\n/g, '\n> ')}\n\n`;
     const existing = this.leadOutputs.get(sessionId) ?? '';
     this.leadOutputs.set(sessionId, existing + marker);
     this.broadcast({ type: 'lead_output', sessionId, text: marker });
 
-    // Notify GUI
     this.broadcast({ type: 'teammate_message_relayed', sessionId, teammateName, message });
 
-    // If session is completed, restart Lead with instruction to forward the message
     if (session.status === 'completed') {
       const forwardPrompt = `The user has sent a message to teammate "${teammateName}". Please forward this message by resuming the teammate using the Task tool with the resume parameter:\n\nMessage to ${teammateName}: ${message}`;
 
@@ -242,7 +237,6 @@ export class SessionManager {
 
       this.startAgent(session, undefined, session.maxBudgetUsd, forwardPrompt);
     }
-    // If session is already running, the Lead will see the marker in the output on next check
 
     return session;
   }
@@ -312,35 +306,12 @@ export class SessionManager {
 
   // ---- Internal ----
 
-  private buildAgents(teammateSpecs: TeammateSpec[] | undefined, skillSpecs: SkillSpec[] | undefined): Record<string, { description: string; prompt: string; skills?: string[] }> | undefined {
-    if (!teammateSpecs || teammateSpecs.length === 0) return undefined;
-    const skillMap = new Map((skillSpecs ?? []).map(s => [s.id, s]));
-    const agents: Record<string, { description: string; prompt: string; skills?: string[] }> = {};
-
-    // Build team context section listing all members
-    const teamMembers = teammateSpecs.map(s => `- ${s.name}: ${s.role}`).join('\n');
-    const teamContext = `\n\n## TEAM CONTEXT
-You are a member of a team. Other members:
-${teamMembers}
-
-The Lead coordinates the team and relays information between members.
-- If you discover something that other members need to know, clearly state it in your output.
-- The Lead may send you additional context from other members' results during your work.
-- Focus on your assigned task, but be aware that your output may inform other members' work.`;
-
-    for (const spec of teammateSpecs) {
-      const skillNames = (spec.skillIds ?? [])
-        .map(id => skillMap.get(id))
-        .filter((s): s is SkillSpec => s != null)
-        .map(s => s.name);
-      const basePrompt = spec.instructions ?? `You are a ${spec.role}. Complete the assigned task thoroughly.`;
-      agents[spec.name] = {
-        description: spec.role,
-        prompt: basePrompt + teamContext,
-        ...(skillNames.length > 0 ? { skills: skillNames } : {}),
-      };
-    }
-    return agents;
+  private permissionMaps(): PermissionMaps {
+    return {
+      pendingPermissions: this.pendingPermissions,
+      pendingPermissionInputs: this.pendingPermissionInputs,
+      pendingPermissionMeta: this.pendingPermissionMeta,
+    };
   }
 
   private startAgent(session: Session, teammateSpecs: TeammateSpec[] | undefined, maxBudgetUsd: number | undefined, resumePrompt?: string, skillSpecs?: SkillSpec[], files?: FileAttachment[]): void {
@@ -361,87 +332,10 @@ The Lead coordinates the team and relays information between members.
     });
 
     const prompt = resumePrompt ?? buildPrompt(teammateSpecs, session.taskDescription, skillSpecs);
-    const agents = resumePrompt ? undefined : this.buildAgents(teammateSpecs, skillSpecs);
+    const agents = resumePrompt ? undefined : buildAgents(teammateSpecs, skillSpecs);
 
     const isBypass = session.permissionMode === 'bypassPermissions';
-
-    // canUseTool callback: check rules first, then send permission request to GUI
-    const canUseTool: CanUseTool = (toolName, input, options) => {
-      console.log(`[canUseTool] session=${session.id.slice(0, 8)} tool=${toolName} agent=${options.agentID ?? 'lead'} toolUseID=${options.toolUseID}`);
-
-      // Check permission rules for auto-judgment
-      const rules = loadPermissionRules();
-      const matchedRule = rules.find(r => {
-        if (r.toolName !== '*' && r.toolName !== toolName) return false;
-        if (r.pathPattern) {
-          const inputObj = input as Record<string, unknown>;
-          const filePath = (inputObj.file_path ?? inputObj.path ?? inputObj.command ?? '') as string;
-          if (!filePath.includes(r.pathPattern.replace(/\*\*/g, '').replace(/\*/g, ''))) return false;
-        }
-        return true;
-      });
-
-      if (matchedRule) {
-        console.log(`[canUseTool:auto] rule=${matchedRule.id.slice(0, 8)} behavior=${matchedRule.behavior} tool=${toolName}`);
-        const entry: PermissionLogEntry = {
-          requestId: `auto-${Date.now()}`,
-          sessionId: session.id,
-          toolName,
-          input: input as Record<string, unknown>,
-          description: options.decisionReason,
-          agentId: options.agentID,
-          behavior: 'auto',
-          rule: `${matchedRule.toolName}${matchedRule.pathPattern ? ` (${matchedRule.pathPattern})` : ''}: ${matchedRule.behavior}`,
-          timestamp: new Date().toISOString(),
-        };
-        this.broadcast({ type: 'permission_resolved', entry });
-
-        if (matchedRule.behavior === 'allow') {
-          return Promise.resolve({ behavior: 'allow' as const, updatedInput: input as Record<string, unknown> });
-        } else {
-          return Promise.resolve({ behavior: 'deny' as const, message: `Denied by rule: ${matchedRule.toolName}` });
-        }
-      }
-
-      return new Promise((resolve) => {
-        const requestId = uuidv4();
-        const wrappedResolve = (result: { behavior: 'allow'; updatedInput?: Record<string, unknown> } | { behavior: 'deny'; message: string }) => {
-          console.log(`[canUseTool:resolved] requestId=${requestId.slice(0, 8)} behavior=${result.behavior} tool=${toolName}`);
-          resolve(result);
-        };
-        this.pendingPermissions.set(requestId, { resolve: wrappedResolve });
-        this.pendingPermissionInputs.set(requestId, input as Record<string, unknown>);
-        this.pendingPermissionMeta.set(requestId, { sessionId: session.id, toolName, description: options.decisionReason, agentId: options.agentID });
-
-        console.log(`[canUseTool:broadcast] requestId=${requestId.slice(0, 8)}`);
-        this.broadcast({
-          type: 'permission_request',
-          sessionId: session.id,
-          requestId,
-          toolName,
-          input,
-          description: options.decisionReason,
-          agentId: options.agentID,
-        });
-
-        if (options.signal.aborted) {
-          console.log(`[canUseTool:already-aborted] requestId=${requestId.slice(0, 8)}`);
-          this.pendingPermissions.delete(requestId);
-          this.pendingPermissionInputs.delete(requestId);
-          this.pendingPermissionMeta.delete(requestId);
-          wrappedResolve({ behavior: 'deny', message: 'Already aborted' });
-          return;
-        }
-
-        options.signal.addEventListener('abort', () => {
-          console.log(`[canUseTool:abort] requestId=${requestId.slice(0, 8)} tool=${toolName}`);
-          this.pendingPermissions.delete(requestId);
-          this.pendingPermissionInputs.delete(requestId);
-          this.pendingPermissionMeta.delete(requestId);
-          wrappedResolve({ behavior: 'deny', message: 'Aborted' });
-        });
-      });
-    };
+    const canUseTool = isBypass ? undefined : createCanUseTool(session.id, this.broadcast, this.permissionMaps());
 
     let agentQuery: Query;
     const hasFiles = files && files.length > 0;
@@ -549,31 +443,4 @@ The Lead coordinates the team and relays information between members.
       persistSession: (id: string) => this.persistSession(id),
     };
   }
-}
-
-function filesToContentBlocks(files: FileAttachment[]): ContentBlockParam[] {
-  return files.map(f => {
-    if (f.mimeType.startsWith('image/')) {
-      return {
-        type: 'image' as const,
-        source: {
-          type: 'base64' as const,
-          media_type: f.mimeType as 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp',
-          data: f.base64Data,
-        },
-      };
-    }
-    if (f.mimeType === 'application/pdf') {
-      return {
-        type: 'document' as const,
-        source: { type: 'base64' as const, media_type: 'application/pdf' as const, data: f.base64Data },
-        title: f.name,
-      };
-    }
-    return {
-      type: 'document' as const,
-      source: { type: 'text' as const, media_type: 'text/plain' as const, data: Buffer.from(f.base64Data, 'base64').toString('utf-8') },
-      title: f.name,
-    };
-  });
 }

@@ -160,8 +160,8 @@ export function NewSkillSpecDialog({ open, onClose }: { open: boolean; onClose: 
                         style={{
                           padding: '10px 14px',
                           borderRadius: 12,
-                          border: `1px solid ${isSelected ? '#0ab9e6' : alreadyAdded ? '#f0f1f3' : '#e5e7eb'}`,
-                          background: isSelected ? 'rgba(10, 185, 230, 0.06)' : alreadyAdded ? '#f9fafb' : '#fff',
+                          border: `1px solid ${isSelected ? '#0ab9e6' : (alreadyAdded ? '#f0f1f3' : '#e5e7eb')}`,
+                          background: isSelected ? 'rgba(10, 185, 230, 0.06)' : (alreadyAdded ? '#f9fafb' : '#fff'),
                           cursor: alreadyAdded ? 'default' : 'pointer',
                           opacity: alreadyAdded ? 0.5 : 1,
                           display: 'flex',
@@ -248,25 +248,35 @@ export function NewSkillSpecDialog({ open, onClose }: { open: boolean; onClose: 
           </>
         )}
 
-        <button
-          onClick={handleCreate}
-          disabled={skillType === 'official' ? !selectedOfficial || submitting : !name.trim() || submitting}
-          style={{
-            alignSelf: 'flex-start',
-            padding: '8px 20px',
-            borderRadius: 14,
-            border: 'none',
-            background: (skillType === 'official' ? !selectedOfficial || submitting : !name.trim() || submitting) ? '#e8eaed' : '#0ab9e6',
-            color: (skillType === 'official' ? !selectedOfficial || submitting : !name.trim() || submitting) ? '#b0b8c4' : '#fff',
-            fontSize: 13,
-            fontWeight: 700,
-            cursor: (skillType === 'official' ? !selectedOfficial || submitting : !name.trim() || submitting) ? 'default' : 'pointer',
-            transition: 'background 0.18s',
-            boxShadow: (skillType === 'official' ? !selectedOfficial || submitting : !name.trim() || submitting) ? 'none' : '0 2px 8px rgba(10, 185, 230, 0.25)',
-          }}
-        >
-          {submitting ? 'Creating...' : skillType === 'official' ? 'Add Official Skill' : 'Create Skill Spec'}
-        </button>
+        {(() => {
+          const isDisabled = skillType === 'official'
+            ? !selectedOfficial || submitting
+            : !name.trim() || submitting;
+          const buttonLabel = submitting
+            ? 'Creating...'
+            : (skillType === 'official' ? 'Add Official Skill' : 'Create Skill Spec');
+          return (
+            <button
+              onClick={handleCreate}
+              disabled={isDisabled}
+              style={{
+                alignSelf: 'flex-start',
+                padding: '8px 20px',
+                borderRadius: 14,
+                border: 'none',
+                background: isDisabled ? '#e8eaed' : '#0ab9e6',
+                color: isDisabled ? '#b0b8c4' : '#fff',
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: isDisabled ? 'default' : 'pointer',
+                transition: 'background 0.18s',
+                boxShadow: isDisabled ? 'none' : '0 2px 8px rgba(10, 185, 230, 0.25)',
+              }}
+            >
+              {buttonLabel}
+            </button>
+          );
+        })()}
       </div>
     </DialogOverlay>
   );

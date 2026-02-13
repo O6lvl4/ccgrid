@@ -107,8 +107,16 @@ export function replaceEmoji(text: string): React.ReactNode[] {
  * rehype plugin for react-markdown: replaces emoji text nodes with <img> elements
  * within the AST, so React controls all DOM nodes (no post-render mutation).
  */
+interface HastNode {
+  type: string;
+  tagName?: string;
+  value?: string;
+  properties?: Record<string, unknown>;
+  children?: HastNode[];
+}
+
 export function rehypeTwemoji() {
-  return (tree: any) => {
+  return (tree: HastNode) => {
     visitTextNodes(tree);
   };
 }
@@ -161,10 +169,10 @@ export function applyTwemojiToElement(container: HTMLElement): void {
   }
 }
 
-function visitTextNodes(node: any) {
+function visitTextNodes(node: HastNode) {
   if (!node.children) return;
 
-  const newChildren: any[] = [];
+  const newChildren: HastNode[] = [];
   let changed = false;
 
   for (const child of node.children) {

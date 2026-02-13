@@ -60,7 +60,9 @@ export function OverviewTab({ session }: { session: Session }) {
     ? Math.min(100, (session.costUsd / session.maxBudgetUsd!) * 100)
     : 0;
   const totalTokens = session.inputTokens + session.outputTokens;
-  const budgetColor = budgetPercent > 80 ? '#ef4444' : budgetPercent > 50 ? '#eab308' : '#0ab9e6';
+  let budgetColor = '#0ab9e6';
+  if (budgetPercent > 80) budgetColor = '#ef4444';
+  else if (budgetPercent > 50) budgetColor = '#eab308';
 
   return (
     <div style={{ flex: 1, overflow: 'auto' }}>

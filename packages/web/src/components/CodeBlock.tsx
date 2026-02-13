@@ -128,22 +128,24 @@ const HighlightedCode = memo(function HighlightedCode({ code, language }: { code
   );
 });
 
-/** Try to guess language from content heuristics */
+const LANGUAGE_PATTERNS: [RegExp, string][] = [
+  [/^(import |from |export |const |let |var |function |class |=>)/, 'typescript'],
+  [/^(def |class |import |from |if __name__)/, 'python'],
+  [/^(<\?php|namespace |use )/, 'php'],
+  [/^(package |func |import \()/, 'go'],
+  [/^(#include|int main|void )/, 'c'],
+  [/^(<!DOCTYPE|<html|<div)/, 'html'],
+  [/^(apiVersion:|kind:|metadata:)/, 'yaml'],
+  [/^(FROM |RUN |COPY |CMD )/, 'dockerfile'],
+  [/^(SELECT |INSERT |CREATE |ALTER |DROP )/i, 'sql'],
+  [/^(#!\/|if \[|for |while |echo |export )/, 'bash'],
+  [/^(@description|param |targetScope)/, 'typescript'],
+];
+
 function guessLanguage(code: string): string {
   const first = code.trimStart().slice(0, 200);
-  if (/^(import |from |export |const |let |var |function |class |=>)/.test(first)) return 'typescript';
-  if (/^(def |class |import |from |if __name__)/.test(first)) return 'python';
-  if (/^(<\?php|namespace |use )/.test(first)) return 'php';
-  if (/^(package |func |import \()/.test(first)) return 'go';
-  if (/^(#include|int main|void )/.test(first)) return 'c';
-  if (/^(<!DOCTYPE|<html|<div)/.test(first)) return 'html';
   if (/^\{/.test(first) && /\}$/.test(code.trimEnd())) return 'json';
-  if (/^(apiVersion:|kind:|metadata:)/.test(first)) return 'yaml';
-  if (/^(FROM |RUN |COPY |CMD )/.test(first)) return 'dockerfile';
-  if (/^(SELECT |INSERT |CREATE |ALTER |DROP )/i.test(first)) return 'sql';
-  if (/^#!\//.test(first) || /^(if \[|for |while |echo |export )/.test(first)) return 'bash';
-  if (/^(@description|param |targetScope)/.test(first)) return 'typescript';
-  return 'text';
+  return LANGUAGE_PATTERNS.find(([re]) => re.test(first))?.[1] ?? 'text';
 }
 
 /**

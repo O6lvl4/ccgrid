@@ -83,7 +83,7 @@ function TeammateMessageInput({ sessionId, teammateName }: { sessionId: string; 
     }
   }, [api, sessionId, teammateName, message, sending]);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
       e.preventDefault();
       handleSend();
@@ -126,7 +126,7 @@ function TeammateMessageInput({ sessionId, teammateName }: { sessionId: string; 
       <textarea
         value={message}
         onChange={e => setMessage(e.target.value)}
-        onKeyDown={handleKeyDown as any}
+        onKeyDown={handleKeyDown}
         placeholder={`${teammateName} への指示を入力... (Cmd+Enter で送信)`}
         disabled={sending}
         rows={3}

@@ -7,9 +7,9 @@ const PROJECTS_DIR = join(process.env.HOME ?? '', '.claude', 'projects');
 function extractToolResultText(content: unknown): string {
   if (typeof content === 'string') return content;
   if (Array.isArray(content)) {
-    return content
-      .filter((item: any) => item.type === 'text' && item.text)
-      .map((item: any) => item.text)
+    return (content as Record<string, unknown>[])
+      .filter((item) => item.type === 'text' && item.text)
+      .map((item) => item.text as string)
       .join('\n');
   }
   return '';
@@ -20,48 +20,65 @@ function truncate(text: string, max: number): string {
   return text.slice(0, max) + '…';
 }
 
+function collectAssistantText(content: unknown[], toolUseMap: Map<string, string>): string[] {
+  const parts: string[] = [];
+  for (const block of content) {
+    const b = block as Record<string, unknown>;
+    if (b.type === 'text' && b.text) {
+      parts.push(b.text as string);
+    }
+    if (b.type === 'tool_use' && b.id && b.name) {
+      toolUseMap.set(b.id as string, b.name as string);
+    }
+  }
+  return parts;
+}
+
+function collectToolResults(content: unknown[], toolUseMap: Map<string, string>): string[] {
+  const parts: string[] = [];
+  for (const block of content) {
+    const b = block as Record<string, unknown>;
+    if (b.type !== 'tool_result' || !b.tool_use_id) continue;
+    const toolName = toolUseMap.get(b.tool_use_id as string) ?? 'Tool';
+    const resultText = extractToolResultText(b.content);
+    if (resultText) {
+      parts.push(`**${toolName}**:\n\`\`\`\n${truncate(resultText, 2000)}\n\`\`\``);
+    }
+  }
+  return parts;
+}
+
+function parseTranscriptLine(line: string, toolUseMap: Map<string, string>): string[] {
+  const msg = JSON.parse(line);
+
+  if (msg.type === 'assistant' && Array.isArray(msg.message?.content)) {
+    return collectAssistantText(msg.message.content, toolUseMap);
+  }
+
+  if (msg.type === 'user') {
+    const userContent = msg.content ?? msg.message?.content ?? [];
+    if (Array.isArray(userContent)) {
+      return collectToolResults(userContent, toolUseMap);
+    }
+  }
+
+  if (msg.type === 'result' && msg.result_text) {
+    return [msg.result_text];
+  }
+
+  return [];
+}
+
 export async function readTranscriptFromPath(filePath: string): Promise<string | undefined> {
   try {
     const content = await readFile(filePath, 'utf-8');
     const lines = content.trim().split('\n');
     const parts: string[] = [];
-
-    // Map tool_use_id -> tool name for matching results
     const toolUseMap = new Map<string, string>();
 
     for (const line of lines) {
       try {
-        const msg = JSON.parse(line);
-
-        if (msg.type === 'assistant' && Array.isArray(msg.message?.content)) {
-          for (const block of msg.message.content) {
-            if (block.type === 'text' && block.text) {
-              parts.push(block.text);
-            }
-            if (block.type === 'tool_use' && block.id && block.name) {
-              toolUseMap.set(block.id, block.name);
-            }
-          }
-        }
-
-        if (msg.type === 'user') {
-          const userContent = msg.content ?? msg.message?.content ?? [];
-          if (Array.isArray(userContent)) {
-            for (const block of userContent) {
-              if (block.type === 'tool_result' && block.tool_use_id) {
-                const toolName = toolUseMap.get(block.tool_use_id) ?? 'Tool';
-                const resultText = extractToolResultText(block.content);
-                if (resultText) {
-                  parts.push(`**${toolName}**:\n\`\`\`\n${truncate(resultText, 2000)}\n\`\`\``);
-                }
-              }
-            }
-          }
-        }
-
-        if (msg.type === 'result' && msg.result_text) {
-          parts.push(msg.result_text);
-        }
+        parts.push(...parseTranscriptLine(line, toolUseMap));
       } catch {
         // skip unparsable lines
       }

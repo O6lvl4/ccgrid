@@ -39,7 +39,7 @@ export function FollowUpInput({ sessionId }: { sessionId: string }) {
     }
   }, [api, sessionId, prompt, sending, attachedFiles]);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
       e.preventDefault();
       handleSend();
@@ -118,7 +118,7 @@ export function FollowUpInput({ sessionId }: { sessionId: string }) {
         <textarea
           value={prompt}
           onChange={e => setPrompt(e.target.value)}
-          onKeyDown={handleKeyDown as any}
+          onKeyDown={handleKeyDown}
           onPaste={handlePaste}
           placeholder="追加の指示を入力..."
           disabled={sending}

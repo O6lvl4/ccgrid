@@ -3,6 +3,9 @@ import { DirPicker } from './DirPicker';
 import { FileChip } from './FileChip';
 import { useStore } from '../store/useStore';
 import { readFilesAsAttachments, FILE_ACCEPT } from '../utils/fileUtils';
+import { inputStyle, textareaStyle, labelStyle, sectionStyle, focusBorder, blurBorder } from './session/FormStyles';
+import { PillOption } from './session/PillOption';
+import { TeammateSelector } from './session/TeammateSelector';
 import type { Api } from '../hooks/useApi';
 
 const MODELS = [
@@ -10,92 +13,6 @@ const MODELS = [
   { value: 'claude-opus-4-6', label: 'Opus 4.6' },
   { value: 'claude-haiku-4-5-20251001', label: 'Haiku 4.5' },
 ];
-
-/* ---- shared styles ---- */
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  boxSizing: 'border-box',
-  height: 38,
-  padding: '0 12px',
-  borderRadius: 10,
-  border: '1px solid #e5e7eb',
-  background: '#f9fafb',
-  color: '#1a1d24',
-  fontSize: 13,
-  fontFamily: 'inherit',
-  outline: 'none',
-  transition: 'border-color 0.15s',
-};
-
-const textareaStyle: React.CSSProperties = {
-  ...inputStyle,
-  height: 'auto',
-  minHeight: 72,
-  padding: '10px 12px',
-  lineHeight: 1.5,
-  resize: 'vertical',
-};
-
-const labelStyle: React.CSSProperties = {
-  fontSize: 11,
-  fontWeight: 600,
-  color: '#8b95a3',
-  letterSpacing: 0.4,
-  textTransform: 'uppercase',
-  marginBottom: 6,
-};
-
-const sectionStyle: React.CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-};
-
-function focusBorder(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) {
-  e.currentTarget.style.borderColor = '#0ab9e6';
-}
-function blurBorder(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) {
-  e.currentTarget.style.borderColor = '#e5e7eb';
-}
-
-/* ---- pill button for model / permission selectors ---- */
-
-function PillOption({ selected, color, label, onClick }: {
-  selected: boolean;
-  color: string;
-  label: string;
-  onClick: () => void;
-}) {
-  const bg = selected ? color : '#f3f4f6';
-  const fg = selected ? '#fff' : '#6b7280';
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{
-        height: 30,
-        padding: '0 14px',
-        borderRadius: 15,
-        border: 'none',
-        background: bg,
-        color: fg,
-        fontSize: 12,
-        fontWeight: selected ? 700 : 500,
-        cursor: 'pointer',
-        transition: 'background 0.15s, transform 0.1s',
-        boxShadow: selected ? `0 2px 8px ${color}40` : 'none',
-      }}
-      onMouseEnter={e => { if (!selected) e.currentTarget.style.background = '#e9eaed'; }}
-      onMouseLeave={e => { if (!selected) e.currentTarget.style.background = '#f3f4f6'; }}
-      onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.96)'; }}
-      onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)'; }}
-    >
-      {label}
-    </button>
-  );
-}
-
-/* ---- main component ---- */
 
 export function SessionConfig({ api, onCreated }: { api: Api; onCreated?: () => void }) {
   const allSpecs = useStore(s => s.teammateSpecs);
@@ -178,7 +95,7 @@ export function SessionConfig({ api, onCreated }: { api: Api; onCreated?: () => 
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      {/* Name & Directory — side by side */}
+      {/* Name & Directory */}
       <div style={{ display: 'flex', gap: 12 }}>
         <div style={{ ...sectionStyle, flex: 1 }}>
           <label style={labelStyle}>Name</label>
@@ -322,7 +239,7 @@ export function SessionConfig({ api, onCreated }: { api: Api; onCreated?: () => 
       {/* Divider */}
       <div style={{ height: 1, background: '#f0f1f3' }} />
 
-      {/* Model & Permission & Budget — compact row */}
+      {/* Model & Permission & Budget */}
       <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
         <div style={sectionStyle}>
           <label style={labelStyle}>Model</label>
@@ -378,74 +295,12 @@ export function SessionConfig({ api, onCreated }: { api: Api; onCreated?: () => 
       </div>
 
       {/* Teammate Specs */}
-      {allSpecs.length > 0 && (
-        <div style={sectionStyle}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <label style={{ ...labelStyle, marginBottom: 0 }}>Teammates</label>
-            <button
-              type="button"
-              onClick={() => navigate({ view: 'teammate_spec_list' })}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#0ab9e6',
-                fontSize: 11,
-                fontWeight: 600,
-                cursor: 'pointer',
-                padding: 0,
-              }}
-              onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline'; }}
-              onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none'; }}
-            >
-              Manage
-            </button>
-          </div>
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {allSpecs.map(spec => {
-              const selected = selectedSpecIds.has(spec.id);
-              return (
-                <button
-                  key={spec.id}
-                  type="button"
-                  onClick={() => toggleSpec(spec.id)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    height: 34,
-                    padding: '0 14px',
-                    borderRadius: 17,
-                    border: selected ? '1.5px solid #0ab9e6' : '1px solid #e5e7eb',
-                    background: selected ? '#e8f8fd' : '#fff',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s',
-                  }}
-                  onMouseEnter={e => { if (!selected) e.currentTarget.style.borderColor = '#d1d5db'; }}
-                  onMouseLeave={e => { if (!selected) e.currentTarget.style.borderColor = '#e5e7eb'; }}
-                >
-                  {/* Checkbox dot */}
-                  <span style={{
-                    width: 14,
-                    height: 14,
-                    borderRadius: 7,
-                    border: selected ? 'none' : '1.5px solid #d1d5db',
-                    background: selected ? '#0ab9e6' : '#fff',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                    transition: 'all 0.15s',
-                  }}>
-                    {selected && <span style={{ color: '#fff', fontSize: 10, fontWeight: 800, lineHeight: 1 }}>✓</span>}
-                  </span>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: '#3c4257' }}>{spec.name}</span>
-                  <span style={{ fontSize: 11, color: '#9ca3af' }}>{spec.role}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
+      <TeammateSelector
+        allSpecs={allSpecs}
+        selectedSpecIds={selectedSpecIds}
+        toggleSpec={toggleSpec}
+        onManage={() => navigate({ view: 'teammate_spec_list' })}
+      />
 
       {/* Submit */}
       <button

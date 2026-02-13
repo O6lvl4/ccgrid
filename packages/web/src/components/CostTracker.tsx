@@ -7,8 +7,9 @@ export function CostTracker({ session }: { session: Session }) {
     ? Math.min(100, (session.costUsd / session.maxBudgetUsd!) * 100)
     : 0;
 
-  const barColor =
-    budgetPercent > 80 ? '#ef4444' : budgetPercent > 50 ? '#eab308' : '#0ab9e6';
+  let barColor = '#0ab9e6';
+  if (budgetPercent > 80) barColor = '#ef4444';
+  else if (budgetPercent > 50) barColor = '#eab308';
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginLeft: 'auto', flexShrink: 0 }}>

@@ -4,7 +4,7 @@ interface InlineEditProps {
   value: string;
   onSave: (value: string) => void;
   fontSize?: number;
-  fontWeight?: string;
+  fontWeight?: React.CSSProperties['fontWeight'];
 }
 
 export function InlineEdit({ value, onSave, fontSize = 13, fontWeight = '600' }: InlineEditProps) {
@@ -51,7 +51,7 @@ export function InlineEdit({ value, onSave, fontSize = 13, fontWeight = '600' }:
         }}
         style={{
           fontSize,
-          fontWeight: fontWeight as any,
+          fontWeight,
           color: '#1a1d24',
           background: 'transparent',
           border: 'none',
@@ -70,7 +70,7 @@ export function InlineEdit({ value, onSave, fontSize = 13, fontWeight = '600' }:
       onClick={() => setEditing(true)}
       style={{
         fontSize,
-        fontWeight: fontWeight as any,
+        fontWeight,
         color: '#1a1d24',
         cursor: 'pointer',
         borderBottom: '1px solid transparent',
