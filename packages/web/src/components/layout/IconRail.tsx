@@ -27,15 +27,17 @@ export function IconRail() {
       {/* Logo */}
       <div
         style={{
-          width: 38,
-          height: 38,
+          width: 40,
+          height: 40,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           marginBottom: 10,
+          borderRadius: 12,
+          background: 'rgba(255,255,255,0.08)',
         }}
       >
-        <TwemojiIcon emoji="⊞" size={24} />
+        <TwemojiIcon emoji="🔲" size={26} />
       </div>
 
       {/* Section icons */}
