@@ -6,6 +6,7 @@ import { join } from 'path';
 import os from 'os';
 import { randomUUID } from 'crypto';
 import { SessionManager } from './session-manager.js';
+import { getUsage } from './usage-tracker.js';
 import { loadTeammateSpecs, saveTeammateSpecs, loadSkillSpecs, saveSkillSpecs, loadPermissionRules, savePermissionRules } from './state-store.js';
 import type { ServerMessage, TeammateSpec, SkillSpec, PermissionRule } from '@ccgrid/shared';
 
@@ -252,6 +253,11 @@ app.delete('/api/permission-rules/:id', (c) => {
 });
 
 // ---- REST: Utilities ----
+
+app.get('/api/usage', async (c) => {
+  const data = await getUsage();
+  return c.json(data);
+});
 
 app.get('/api/health', (c) => {
   return c.json({ status: 'ok' });

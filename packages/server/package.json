@@ -2,12 +2,15 @@
   "name": "@ccgrid/server",
   "private": true,
   "type": "module",
-  "scripts": { "dev": "tsx watch src/index.ts" },
+  "scripts": {
+    "dev": "tsx watch src/index.ts"
+  },
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "^0.2.37",
     "@ccgrid/shared": "*",
-    "hono": "^4.7.0",
     "@hono/node-server": "^1.13.0",
+    "ccusage": "^18.0.5",
+    "hono": "^4.7.0",
     "uuid": "^11.1.0",
     "ws": "^8.18.0"
   },
