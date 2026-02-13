@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import { YStack, XStack, Text, Button, ScrollView } from 'tamagui';
 import { useStore } from '../store/useStore';
 import { useApi } from '../hooks/useApi';
 import type { PermissionLogEntry } from '@ccgrid/shared';
@@ -84,7 +83,6 @@ export function PermissionBadge({ sessionId }: { sessionId: string }) {
 function PermissionCard({
   req,
   onRespond,
-  sessionId,
 }: {
   req: { requestId: string; toolName: string; input: Record<string, unknown>; description?: string; agentId?: string };
   onRespond: (requestId: string, behavior: 'allow' | 'deny', message?: string, updatedInput?: Record<string, unknown>) => void;
@@ -127,141 +125,188 @@ function PermissionCard({
   };
 
   return (
-    <YStack
-      bg="$yellow2"
-      borderWidth={1}
-      borderColor="$yellow8"
-      rounded="$4"
-      p="$3"
-      gap="$2"
-      elevation="$4"
-      shadowColor="rgba(0,0,0,0.2)"
-      shadowRadius={12}
-    >
-      <XStack ai="center" gap="$2">
-        <Text fontSize={12} fontWeight="700" color="$yellow11">
+    <div style={{
+      background: '#fefce8',
+      border: '1px solid #facc15',
+      borderRadius: 16,
+      padding: 16,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 10,
+      boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ fontSize: 12, fontWeight: 700, color: '#a16207' }}>
           Permission Request
-        </Text>
+        </span>
         {req.agentId && (
-          <Text fontSize={11} color="$gray8" fontFamily="monospace">
+          <span style={{ fontSize: 11, color: '#8b95a3', fontFamily: 'monospace' }}>
             agent: {req.agentId.slice(0, 8)}
-          </Text>
+          </span>
         )}
-      </XStack>
+      </div>
 
-      <XStack gap="$2" items="baseline">
-        <Text fontSize={11} color="$gray9" fontWeight="600" width={50}>Tool</Text>
-        <Text fontSize={12} color="$gray12" fontFamily="monospace">{req.toolName}</Text>
-      </XStack>
+      <div style={{ display: 'flex', gap: 10, alignItems: 'baseline' }}>
+        <span style={{ fontSize: 11, color: '#8b95a3', fontWeight: 600, width: 50, flexShrink: 0 }}>Tool</span>
+        <span style={{ fontSize: 12, color: '#1a1d24', fontFamily: 'monospace' }}>{req.toolName}</span>
+      </div>
 
       {req.description && (
-        <XStack gap="$2" items="baseline">
-          <Text fontSize={11} color="$gray9" fontWeight="600" width={50}>Reason</Text>
-          <Text fontSize={12} color="$gray11" flex={1}>{req.description}</Text>
-        </XStack>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'baseline' }}>
+          <span style={{ fontSize: 11, color: '#8b95a3', fontWeight: 600, width: 50, flexShrink: 0 }}>Reason</span>
+          <span style={{ fontSize: 12, color: '#555e6b', flex: 1 }}>{req.description}</span>
+        </div>
       )}
 
-      <YStack>
-        <XStack jc="space-between" ai="center" mb="$1">
-          <Text fontSize={11} color="$gray9" fontWeight="600">Input</Text>
-          {!editing && (
-            <Button
-              size="$1"
-              chromeless
-              color="$blue10"
-              fontSize={11}
-              onPress={handleEdit}
+      <div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+          <span style={{ fontSize: 11, color: '#8b95a3', fontWeight: 600 }}>Input</span>
+          {!editing ? (
+            <button
+              onClick={handleEdit}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#0ab9e6',
+                fontSize: 11,
+                fontWeight: 600,
+                cursor: 'pointer',
+                padding: '2px 6px',
+              }}
             >
               Edit
-            </Button>
-          )}
-          {editing && (
-            <Button
-              size="$1"
-              chromeless
-              color="$gray9"
-              fontSize={11}
-              onPress={() => setEditing(false)}
+            </button>
+          ) : (
+            <button
+              onClick={() => setEditing(false)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#8b95a3',
+                fontSize: 11,
+                fontWeight: 600,
+                cursor: 'pointer',
+                padding: '2px 6px',
+              }}
             >
               Cancel
-            </Button>
+            </button>
           )}
-        </XStack>
+        </div>
 
         {editing ? (
-          <YStack>
+          <div>
             <textarea
               value={editValue}
               onChange={(e) => handleChange(e.target.value)}
               style={{
                 fontFamily: 'monospace',
                 fontSize: 11,
-                padding: 8,
-                borderRadius: 6,
-                border: parseError ? '1px solid #e54d2e' : '1px solid #ddd',
-                backgroundColor: parseError ? '#fff0ee' : '#f5f5f5',
+                padding: 10,
+                borderRadius: 10,
+                border: parseError ? '1px solid #ef4444' : '1px solid #e5e7eb',
+                backgroundColor: parseError ? '#fef2f2' : '#f9fafb',
                 minHeight: 80,
                 maxHeight: 200,
                 resize: 'vertical',
                 width: '100%',
                 boxSizing: 'border-box',
+                outline: 'none',
+                lineHeight: 1.5,
               }}
+              onFocus={e => { if (!parseError) e.currentTarget.style.borderColor = '#0ab9e6'; }}
+              onBlur={e => { if (!parseError) e.currentTarget.style.borderColor = '#e5e7eb'; }}
             />
             {parseError && (
-              <Text fontSize={10} color="$red10" mt="$1">Invalid JSON</Text>
+              <span style={{ fontSize: 10, color: '#ef4444', marginTop: 4, display: 'block' }}>Invalid JSON</span>
             )}
-          </YStack>
+          </div>
         ) : (
-          <ScrollView
-            horizontal={false}
-            maxHeight={120}
-            bg="$gray3"
-            rounded="$2"
-            p="$2"
-          >
-            <Text fontSize={11} fontFamily="monospace" color="$gray11" whiteSpace="pre-wrap">
+          <div style={{
+            maxHeight: 120,
+            overflow: 'auto',
+            background: '#f9fafb',
+            borderRadius: 10,
+            padding: 10,
+            border: '1px solid #f0f1f3',
+          }}>
+            <pre style={{
+              fontSize: 11,
+              fontFamily: 'monospace',
+              color: '#555e6b',
+              whiteSpace: 'pre-wrap',
+              margin: 0,
+              lineHeight: 1.5,
+            }}>
               {JSON.stringify(req.input, null, 2)}
-            </Text>
-          </ScrollView>
+            </pre>
+          </div>
         )}
-      </YStack>
+      </div>
 
-      <XStack gap="$2" jc="flex-end" mt="$1">
-        <Button
-          size="$2"
-          bg="$gray5"
-          color="$gray11"
-          hoverStyle={{ bg: '$gray6' }}
-          onPress={() => onRespond(req.requestId, 'deny', 'User denied')}
+      <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}>
+        <button
+          onClick={() => onRespond(req.requestId, 'deny', 'User denied')}
+          style={{
+            padding: '6px 16px',
+            borderRadius: 12,
+            border: 'none',
+            background: '#f3f4f6',
+            color: '#555e6b',
+            fontSize: 12,
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'background 0.15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = '#e5e7eb'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = '#f3f4f6'; }}
         >
           Deny
-        </Button>
-        <Button
-          size="$2"
-          bg="$blue8"
-          color="white"
-          hoverStyle={{ bg: '$blue7' }}
-          fontSize={11}
-          onPress={() => {
+        </button>
+        <button
+          onClick={() => {
             api.createPermissionRule({ toolName: req.toolName, behavior: 'allow' }).catch(console.error);
             handleAllow();
           }}
+          style={{
+            padding: '6px 16px',
+            borderRadius: 12,
+            border: 'none',
+            background: '#0ab9e6',
+            color: '#fff',
+            fontSize: 11,
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'background 0.15s',
+            boxShadow: '0 2px 8px rgba(10, 185, 230, 0.25)',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = '#09a8d2'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = '#0ab9e6'; }}
         >
           Always Allow {req.toolName}
-        </Button>
-        <Button
-          size="$2"
-          bg="$green9"
-          color="white"
-          hoverStyle={{ bg: '$green8' }}
+        </button>
+        <button
+          onClick={handleAllow}
           disabled={editing && parseError}
-          opacity={editing && parseError ? 0.5 : 1}
-          onPress={handleAllow}
+          style={{
+            padding: '6px 16px',
+            borderRadius: 12,
+            border: 'none',
+            background: editing && parseError ? '#e5e7eb' : '#16a34a',
+            color: editing && parseError ? '#b0b8c4' : '#fff',
+            fontSize: 12,
+            fontWeight: 600,
+            cursor: editing && parseError ? 'default' : 'pointer',
+            transition: 'background 0.15s',
+            boxShadow: editing && parseError ? 'none' : '0 2px 8px rgba(22, 163, 74, 0.25)',
+          }}
+          onMouseEnter={e => { if (!(editing && parseError)) e.currentTarget.style.background = '#15803d'; }}
+          onMouseLeave={e => { if (!(editing && parseError)) e.currentTarget.style.background = '#16a34a'; }}
         >
           Allow
-        </Button>
-      </XStack>
-    </YStack>
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -273,48 +318,62 @@ export function PermissionHistory({ sessionId }: { sessionId: string }) {
   if (history.length === 0) return null;
 
   return (
-    <YStack p="$2">
-      <XStack
-        ai="center"
-        gap="$2"
-        cursor="pointer"
-        onPress={() => setOpen(!open)}
-        py="$1"
+    <div style={{ padding: 10 }}>
+      <div
+        onClick={() => setOpen(!open)}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          cursor: 'pointer',
+          padding: '4px 0',
+        }}
       >
-        <Text fontSize={11} color="$gray9" userSelect="none">
+        <span style={{ fontSize: 11, color: '#8b95a3', userSelect: 'none' }}>
           {open ? '\u25BC' : '\u25B6'}
-        </Text>
-        <Text fontSize={11} fontWeight="600" color="$gray9">
+        </span>
+        <span style={{ fontSize: 11, fontWeight: 600, color: '#8b95a3' }}>
           Permission History ({history.length})
-        </Text>
-      </XStack>
+        </span>
+      </div>
       {open && (
-        <ScrollView maxHeight={200} mt="$1">
-          <YStack gap="$1">
+        <div style={{ maxHeight: 200, overflow: 'auto', marginTop: 6 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {[...history].reverse().map(entry => (
               <PermissionLogRow key={entry.requestId} entry={entry} />
             ))}
-          </YStack>
-        </ScrollView>
+          </div>
+        </div>
       )}
-    </YStack>
+    </div>
   );
 }
 
 function PermissionLogRow({ entry }: { entry: PermissionLogEntry }) {
-  const bgColor = entry.behavior === 'allow' ? '$green3' : entry.behavior === 'auto' ? '$blue3' : '$red3';
-  const fgColor = entry.behavior === 'allow' ? '$green11' : entry.behavior === 'auto' ? '$blue11' : '$red11';
+  const colorMap: Record<string, { bg: string; fg: string }> = {
+    allow: { bg: '#dcfce7', fg: '#166534' },
+    auto: { bg: '#dbeafe', fg: '#1e40af' },
+    deny: { bg: '#fef2f2', fg: '#991b1b' },
+  };
+  const colors = colorMap[entry.behavior] ?? colorMap.deny;
   const label = entry.behavior === 'auto' ? `auto (${entry.rule ?? 'rule'})` : entry.behavior;
   const time = new Date(entry.timestamp).toLocaleTimeString();
 
   return (
-    <XStack ai="center" gap="$2" px="$2" py="$1" bg={bgColor} rounded="$2">
-      <Text fontSize={10} fontWeight="700" color={fgColor} width={40}>{label}</Text>
-      <Text fontSize={11} fontFamily="monospace" color="$gray11" flex={1}>{entry.toolName}</Text>
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8,
+      padding: '4px 10px',
+      background: colors.bg,
+      borderRadius: 8,
+    }}>
+      <span style={{ fontSize: 10, fontWeight: 700, color: colors.fg, width: 40, flexShrink: 0 }}>{label}</span>
+      <span style={{ fontSize: 11, fontFamily: 'monospace', color: '#555e6b', flex: 1 }}>{entry.toolName}</span>
       {entry.agentId && (
-        <Text fontSize={10} color="$gray8" fontFamily="monospace">{entry.agentId.slice(0, 6)}</Text>
+        <span style={{ fontSize: 10, color: '#8b95a3', fontFamily: 'monospace' }}>{entry.agentId.slice(0, 6)}</span>
       )}
-      <Text fontSize={10} color="$gray8">{time}</Text>
-    </XStack>
+      <span style={{ fontSize: 10, color: '#8b95a3' }}>{time}</span>
+    </div>
   );
 }

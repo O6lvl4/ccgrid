@@ -1,14 +1,12 @@
-import { useState, useEffect, useMemo } from 'react';
-import { Checkbox, ScrollView, Text, TextArea, XStack, YStack } from 'tamagui';
-import { Check } from '@tamagui/lucide-icons';
+import { useState, useEffect } from 'react';
 import { useStore } from '../../store/useStore';
 import { InlineEdit } from '../InlineEdit';
 import type { Api } from '../../hooks/useApi';
 
 const SKILL_TYPE_COLORS: Record<string, { bg: string; fg: string }> = {
-  official: { bg: '#dbeafe', fg: '#1e40af' },
-  external: { bg: '#dcfce7', fg: '#166534' },
-  internal: { bg: '#f3f4f6', fg: '#374151' },
+  official: { bg: 'rgba(10, 185, 230, 0.1)', fg: '#0a9ec4' },
+  external: { bg: 'rgba(22, 163, 74, 0.1)', fg: '#16a34a' },
+  internal: { bg: '#f0f1f3', fg: '#555e6b' },
 };
 
 export function TeammateSpecDetailView({ specId, api }: { specId: string; api: Api }) {
@@ -47,84 +45,115 @@ export function TeammateSpecDetailView({ specId, api }: { specId: string; api: A
   };
 
   return (
-    <YStack flex={1} overflow="hidden">
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
       {/* Header */}
-      <XStack
-        px="$4"
-        py="$2"
-        bg="$gray2"
-        borderBottomWidth={1}
-        borderBottomColor="$gray4"
-        shrink={0}
-        ai="center"
-        gap="$3"
-      >
-        <Text
-          fontSize={12}
-          color="$gray9"
-          cursor="pointer"
-          hoverStyle={{ color: '$gray12' }}
-          onPress={goBack}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        padding: '14px 24px',
+        background: '#ffffff',
+        borderBottom: '1px solid #f0f1f3',
+        flexShrink: 0,
+      }}>
+        <span
+          style={{
+            fontSize: 12,
+            color: '#b0b8c4',
+            cursor: 'pointer',
+            lineHeight: 1,
+            fontWeight: 600,
+            transition: 'color 0.15s',
+          }}
+          onClick={goBack}
+          onMouseEnter={e => { e.currentTarget.style.color = '#1a1d24'; }}
+          onMouseLeave={e => { e.currentTarget.style.color = '#b0b8c4'; }}
         >
-          &larr; Back
-        </Text>
+          ← Back
+        </span>
         <InlineEdit value={spec.name} onSave={(v) => updateField('name', v)} fontSize={15} fontWeight="700" />
-        <Text
-          fontSize={11}
-          color="$gray7"
-          cursor="pointer"
-          hoverStyle={{ color: '$red9' }}
-          marginLeft="auto"
-          onPress={async () => {
+        <span
+          style={{
+            fontSize: 11,
+            color: '#b0b8c4',
+            cursor: 'pointer',
+            marginLeft: 'auto',
+            fontWeight: 500,
+            transition: 'color 0.15s',
+          }}
+          onClick={async () => {
             await api.deleteSpec(specId);
             setTeammateSpecs(specs.filter(s => s.id !== specId));
           }}
+          onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; }}
+          onMouseLeave={e => { e.currentTarget.style.color = '#b0b8c4'; }}
         >
           Delete
-        </Text>
-      </XStack>
+        </span>
+      </div>
 
       {/* Content */}
-      <ScrollView flex={1}>
-        <YStack p="$4" gap="$4" maxWidth={640} alignSelf="center" width="100%">
+      <div style={{ flex: 1, overflow: 'auto' }}>
+        <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 640, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
           {/* Metadata */}
-          <YStack bg="$gray2" borderColor="$gray4" borderWidth={1} rounded="$3" p="$3" gap="$2">
-            <XStack gap="$3" ai="center">
-              <Text fontSize={12} color="$gray8" width={80}>Name</Text>
+          <div style={{
+            background: '#f9fafb',
+            border: '1px solid #f0f1f3',
+            borderRadius: 14,
+            padding: '14px 18px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <span style={{ fontSize: 12, color: '#8b95a3', width: 80, flexShrink: 0, fontWeight: 500 }}>Name</span>
               <InlineEdit value={spec.name} onSave={(v) => updateField('name', v)} fontSize={13} fontWeight="500" />
-            </XStack>
-            <XStack gap="$3" ai="center">
-              <Text fontSize={12} color="$gray8" width={80}>Role</Text>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <span style={{ fontSize: 12, color: '#8b95a3', width: 80, flexShrink: 0, fontWeight: 500 }}>Role</span>
               <InlineEdit value={spec.role} onSave={(v) => updateField('role', v)} fontSize={13} fontWeight="500" />
-            </XStack>
-            <XStack gap="$3" ai="center">
-              <Text fontSize={12} color="$gray8" width={80}>Created</Text>
-              <Text fontSize={12} color="$gray9">{new Date(spec.createdAt).toLocaleString()}</Text>
-            </XStack>
-          </YStack>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <span style={{ fontSize: 12, color: '#8b95a3', width: 80, flexShrink: 0, fontWeight: 500 }}>Created</span>
+              <span style={{ fontSize: 12, color: '#555e6b' }}>{new Date(spec.createdAt).toLocaleString()}</span>
+            </div>
+          </div>
 
           {/* Skills */}
-          <YStack gap="$2">
-            <XStack ai="center" jc="space-between">
-              <Text fontSize={11} fontWeight="600" color="$gray8" textTransform="uppercase" letterSpacing={0.5}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+              <div style={{ fontSize: 11, fontWeight: 800, color: '#8b95a3', textTransform: 'uppercase', letterSpacing: 0.8 }}>
                 Skills
-              </Text>
-              <Text
-                fontSize={11}
-                color="$blue9"
-                cursor="pointer"
-                hoverStyle={{ color: '$blue10' }}
-                onPress={() => navigate({ view: 'skill_spec_list' })}
+              </div>
+              <span
+                style={{
+                  fontSize: 11,
+                  color: '#0ab9e6',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  transition: 'color 0.15s',
+                }}
+                onClick={() => navigate({ view: 'skill_spec_list' })}
+                onMouseEnter={e => { e.currentTarget.style.color = '#09a8d2'; }}
+                onMouseLeave={e => { e.currentTarget.style.color = '#0ab9e6'; }}
               >
                 Manage Skills
-              </Text>
-            </XStack>
+              </span>
+            </div>
             {skillSpecs.length === 0 ? (
-              <Text fontSize={12} color="$gray7" fontStyle="italic">
+              <span style={{ fontSize: 12, color: '#b0b8c4', fontStyle: 'italic' }}>
                 No skills defined yet
-              </Text>
+              </span>
             ) : (
-              <YStack bg="$gray2" borderColor="$gray4" borderWidth={1} rounded="$3" p="$2" gap="$1">
+              <div style={{
+                background: '#f9fafb',
+                border: '1px solid #f0f1f3',
+                borderRadius: 12,
+                padding: 8,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2,
+              }}>
                 {skillSpecs.map(skill => {
                   const selected = spec.skillIds?.includes(skill.id) ?? false;
                   const colors = SKILL_TYPE_COLORS[skill.skillType] ?? SKILL_TYPE_COLORS.internal;
@@ -147,33 +176,41 @@ export function TeammateSpecDetailView({ specId, api }: { specId: string; api: A
                       style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: 8,
-                        padding: '6px 8px',
-                        borderRadius: 6,
+                        gap: 10,
+                        padding: '7px 10px',
+                        borderRadius: 8,
                         cursor: 'pointer',
+                        transition: 'background 0.12s',
                       }}
-                      onMouseEnter={e => (e.currentTarget.style.background = '#f3f4f6')}
-                      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                      onMouseEnter={e => { e.currentTarget.style.background = '#f0f1f3'; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
                     >
-                      <Checkbox
-                        size="$1"
-                        checked={selected}
-                        onCheckedChange={toggleSkill}
-                        bg={selected ? '$blue9' : '$gray4'}
-                        borderColor={selected ? '$blue9' : '$gray6'}
-                      >
-                        <Checkbox.Indicator>
-                          <Check size={10} />
-                        </Checkbox.Indicator>
-                      </Checkbox>
-                      <span style={{ fontSize: 12, color: '#111827', fontWeight: 500, flex: 1 }}>
+                      <div style={{
+                        width: 18,
+                        height: 18,
+                        borderRadius: 5,
+                        border: `2px solid ${selected ? '#0ab9e6' : '#d1d5db'}`,
+                        background: selected ? '#0ab9e6' : 'transparent',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                        transition: 'all 0.15s',
+                      }}>
+                        {selected && (
+                          <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                            <path d="M2 5L4 7L8 3" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        )}
+                      </div>
+                      <span style={{ fontSize: 12, color: '#1a1d24', fontWeight: 500, flex: 1 }}>
                         {skill.name}
                       </span>
                       <span style={{
                         fontSize: 10,
                         fontWeight: 600,
-                        padding: '1px 6px',
-                        borderRadius: 9999,
+                        padding: '2px 8px',
+                        borderRadius: 8,
                         backgroundColor: colors.bg,
                         color: colors.fg,
                       }}>
@@ -182,32 +219,42 @@ export function TeammateSpecDetailView({ specId, api }: { specId: string; api: A
                     </div>
                   );
                 })}
-              </YStack>
+              </div>
             )}
-          </YStack>
+          </div>
 
           {/* Instructions */}
-          <YStack gap="$2">
-            <Text fontSize={11} fontWeight="600" color="$gray8" textTransform="uppercase" letterSpacing={0.5}>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 800, color: '#8b95a3', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>
               Instructions
-            </Text>
-            <TextArea
+            </div>
+            <textarea
               value={instructions}
-              onChangeText={setInstructions}
+              onChange={e => setInstructions(e.target.value)}
               onBlur={handleInstructionsSave}
-              numberOfLines={10}
               placeholder="Detailed instructions for this teammate..."
-              bg="$gray2"
-              borderColor="$gray4"
-              rounded="$3"
-              focusStyle={{ borderColor: '$blue9' }}
-              fontSize={13}
-              lineHeight={20}
-              minHeight={200}
+              rows={10}
+              style={{
+                width: '100%',
+                boxSizing: 'border-box',
+                minHeight: 200,
+                padding: '12px 14px',
+                borderRadius: 12,
+                border: '1px solid #e5e7eb',
+                background: '#f9fafb',
+                color: '#1a1d24',
+                fontSize: 13,
+                fontFamily: 'inherit',
+                lineHeight: 1.6,
+                resize: 'vertical',
+                outline: 'none',
+                transition: 'border-color 0.15s',
+              }}
+              onFocus={e => { e.currentTarget.style.borderColor = '#0ab9e6'; }}
             />
-          </YStack>
-        </YStack>
-      </ScrollView>
-    </YStack>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

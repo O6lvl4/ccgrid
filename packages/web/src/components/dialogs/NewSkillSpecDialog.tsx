@@ -1,5 +1,4 @@
 import { useState, useMemo } from 'react';
-import { Button, Input, Text, TextArea, XStack, YStack } from 'tamagui';
 import { useStore } from '../../store/useStore';
 import { useApi } from '../../hooks/useApi';
 import { DialogOverlay } from './DialogOverlay';
@@ -42,10 +41,10 @@ const OFFICIAL_SKILLS: { name: string; description: string; category: string }[]
   { name: 'claude-opus-4-5-migration', category: 'Other', description: 'Opus 4.5へのモデル移行を自動化' },
 ];
 
-const SKILL_TYPE_COLORS: Record<SkillType, { bg: string; color: string }> = {
-  official: { bg: '$blue3', color: '$blue10' },
-  external: { bg: '$green3', color: '$green10' },
-  internal: { bg: '$gray3', color: '$gray10' },
+const SKILL_TYPE_COLORS: Record<SkillType, { bg: string; color: string; border: string }> = {
+  official: { bg: 'rgba(10, 185, 230, 0.08)', color: '#0a9ec4', border: '#0ab9e6' },
+  external: { bg: 'rgba(22, 163, 74, 0.08)', color: '#16a34a', border: '#16a34a' },
+  internal: { bg: '#f7f8fa', color: '#555e6b', border: '#d1d5db' },
 };
 
 export function NewSkillSpecDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -107,131 +106,168 @@ export function NewSkillSpecDialog({ open, onClose }: { open: boolean; onClose: 
 
   return (
     <DialogOverlay open={open} onClose={onClose} title="New Skill Spec">
-      <YStack gap="$3">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
         {/* Type selector */}
-        <YStack>
-          <Text fontSize={11} color="$gray9" mb="$1">Type</Text>
-          <XStack gap="$1">
-            {SKILL_TYPE_OPTIONS.map(opt => (
-              <Text
-                key={opt}
-                fontSize={12}
-                px="$2"
-                py="$1.5"
-                rounded="$2"
-                cursor="pointer"
-                bg={skillType === opt ? SKILL_TYPE_COLORS[opt].bg : '$gray2'}
-                color={skillType === opt ? SKILL_TYPE_COLORS[opt].color : '$gray8'}
-                borderWidth={1}
-                borderColor={skillType === opt ? SKILL_TYPE_COLORS[opt].color : '$gray5'}
-                fontWeight={skillType === opt ? '600' : '400'}
-                hoverStyle={{ borderColor: SKILL_TYPE_COLORS[opt].color }}
-                onPress={() => { setSkillType(opt); setSelectedOfficial(null); }}
-              >
-                {opt}
-              </Text>
-            ))}
-          </XStack>
-        </YStack>
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 800, color: '#8b95a3', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>Type</div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            {SKILL_TYPE_OPTIONS.map(opt => {
+              const active = skillType === opt;
+              const c = SKILL_TYPE_COLORS[opt];
+              return (
+                <button
+                  key={opt}
+                  onClick={() => { setSkillType(opt); setSelectedOfficial(null); }}
+                  style={{
+                    fontSize: 12,
+                    padding: '6px 14px',
+                    borderRadius: 10,
+                    cursor: 'pointer',
+                    background: active ? c.bg : 'transparent',
+                    color: active ? c.color : '#8b95a3',
+                    border: `1px solid ${active ? c.border : '#e5e7eb'}`,
+                    fontWeight: active ? 600 : 400,
+                    transition: 'all 0.15s',
+                  }}
+                  onMouseEnter={e => { if (!active) e.currentTarget.style.borderColor = c.border; }}
+                  onMouseLeave={e => { if (!active) e.currentTarget.style.borderColor = '#e5e7eb'; }}
+                >
+                  {opt}
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
         {skillType === 'official' ? (
-          <YStack gap="$3">
-            <Text fontSize={11} color="$gray9">Select an official skill</Text>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ fontSize: 11, color: '#8b95a3' }}>Select an official skill</div>
             {['Workflow', 'Quality', 'Setup', 'Document', 'LSP', 'Other'].map(category => {
               const skills = OFFICIAL_SKILLS.filter(s => s.category === category);
               if (skills.length === 0) return null;
               return (
-                <YStack key={category} gap="$1.5">
-                  <Text fontSize={10} fontWeight="600" color="$gray7" textTransform="uppercase" letterSpacing={0.5}>
+                <div key={category} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <div style={{ fontSize: 10, fontWeight: 600, color: '#b0b8c4', textTransform: 'uppercase', letterSpacing: 0.5 }}>
                     {category}
-                  </Text>
+                  </div>
                   {skills.map(skill => {
                     const alreadyAdded = existingOfficialNames.has(skill.name);
                     const isSelected = selectedOfficial === skill.name;
                     return (
-                      <XStack
+                      <div
                         key={skill.name}
-                        px="$3"
-                        py="$2"
-                        rounded="$2"
-                        borderWidth={1}
-                        borderColor={isSelected ? '$blue9' : alreadyAdded ? '$gray3' : '$gray5'}
-                        bg={isSelected ? '$blue2' : alreadyAdded ? '$gray2' : '$gray1'}
-                        cursor={alreadyAdded ? 'default' : 'pointer'}
-                        opacity={alreadyAdded ? 0.5 : 1}
-                        hoverStyle={alreadyAdded ? {} : { borderColor: '$blue7' }}
-                        onPress={() => { if (!alreadyAdded) setSelectedOfficial(isSelected ? null : skill.name); }}
-                        ai="center"
-                        gap="$3"
+                        onClick={() => { if (!alreadyAdded) setSelectedOfficial(isSelected ? null : skill.name); }}
+                        style={{
+                          padding: '10px 14px',
+                          borderRadius: 12,
+                          border: `1px solid ${isSelected ? '#0ab9e6' : alreadyAdded ? '#f0f1f3' : '#e5e7eb'}`,
+                          background: isSelected ? 'rgba(10, 185, 230, 0.06)' : alreadyAdded ? '#f9fafb' : '#fff',
+                          cursor: alreadyAdded ? 'default' : 'pointer',
+                          opacity: alreadyAdded ? 0.5 : 1,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 14,
+                          transition: 'border-color 0.15s, background 0.15s',
+                        }}
+                        onMouseEnter={e => { if (!alreadyAdded && !isSelected) e.currentTarget.style.borderColor = '#0ab9e6'; }}
+                        onMouseLeave={e => { if (!alreadyAdded && !isSelected) e.currentTarget.style.borderColor = '#e5e7eb'; }}
                       >
-                        <YStack flex={1} gap="$0.5">
-                          <XStack ai="center" gap="$2">
-                            <Text fontSize={13} fontWeight="600" color={alreadyAdded ? '$gray8' : '$gray12'}>
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <span style={{ fontSize: 13, fontWeight: 600, color: alreadyAdded ? '#8b95a3' : '#1a1d24' }}>
                               {skill.name}
-                            </Text>
+                            </span>
                             {alreadyAdded && (
-                              <Text fontSize={10} color="$gray7" fontStyle="italic">Added</Text>
+                              <span style={{ fontSize: 10, color: '#b0b8c4', fontStyle: 'italic' }}>Added</span>
                             )}
-                          </XStack>
-                          <Text fontSize={11} color="$gray8" lineHeight={16}>
+                          </div>
+                          <span style={{ fontSize: 11, color: '#8b95a3', lineHeight: 1.4 }}>
                             {skill.description}
-                          </Text>
-                        </YStack>
+                          </span>
+                        </div>
                         {isSelected && (
-                          <Text fontSize={14} color="$blue9">✓</Text>
+                          <span style={{ fontSize: 14, color: '#0ab9e6', fontWeight: 700 }}>✓</span>
                         )}
-                      </XStack>
+                      </div>
                     );
                   })}
-                </YStack>
+                </div>
               );
             })}
-          </YStack>
+          </div>
         ) : (
           <>
-            <YStack>
-              <Text fontSize={11} color="$gray9" mb="$1">Name</Text>
-              <Input
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 800, color: '#8b95a3', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>Name</div>
+              <input
                 placeholder="e.g. Code Review"
                 value={name}
-                onChangeText={setName}
-                size="$3"
-                bg="$gray3"
-                borderColor="$gray5"
-                focusStyle={{ borderColor: '$blue9' }}
+                onChange={e => setName(e.target.value)}
+                style={{
+                  width: '100%',
+                  boxSizing: 'border-box',
+                  padding: '8px 12px',
+                  borderRadius: 10,
+                  border: '1px solid #e5e7eb',
+                  background: '#f9fafb',
+                  color: '#1a1d24',
+                  fontSize: 13,
+                  outline: 'none',
+                  transition: 'border-color 0.15s',
+                }}
+                onFocus={e => { e.currentTarget.style.borderColor = '#0ab9e6'; }}
+                onBlur={e => { e.currentTarget.style.borderColor = '#e5e7eb'; }}
               />
-            </YStack>
-            <YStack>
-              <Text fontSize={11} color="$gray9" mb="$1">Description</Text>
-              <TextArea
+            </div>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 800, color: '#8b95a3', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>Description</div>
+              <textarea
                 placeholder="Describe what this skill does..."
                 value={description}
-                onChangeText={setDescription}
-                numberOfLines={2}
-                bg="$gray3"
-                borderColor="$gray5"
-                focusStyle={{ borderColor: '$blue9' }}
-                fontSize={13}
+                onChange={e => setDescription(e.target.value)}
+                rows={2}
+                style={{
+                  width: '100%',
+                  boxSizing: 'border-box',
+                  padding: '8px 12px',
+                  borderRadius: 10,
+                  border: '1px solid #e5e7eb',
+                  background: '#f9fafb',
+                  color: '#1a1d24',
+                  fontSize: 13,
+                  fontFamily: 'inherit',
+                  resize: 'vertical',
+                  outline: 'none',
+                  lineHeight: 1.5,
+                  transition: 'border-color 0.15s',
+                }}
+                onFocus={e => { e.currentTarget.style.borderColor = '#0ab9e6'; }}
+                onBlur={e => { e.currentTarget.style.borderColor = '#e5e7eb'; }}
               />
-            </YStack>
+            </div>
           </>
         )}
 
-        <Button
-          size="$3"
-          bg="$blue9"
-          color="white"
-          fontWeight="600"
-          hoverStyle={{ bg: '$blue8' }}
+        <button
+          onClick={handleCreate}
           disabled={skillType === 'official' ? !selectedOfficial || submitting : !name.trim() || submitting}
-          disabledStyle={{ bg: '$gray5', opacity: 0.6 }}
-          rounded="$3"
-          alignSelf="flex-start"
-          onPress={handleCreate}
+          style={{
+            alignSelf: 'flex-start',
+            padding: '8px 20px',
+            borderRadius: 14,
+            border: 'none',
+            background: (skillType === 'official' ? !selectedOfficial || submitting : !name.trim() || submitting) ? '#e8eaed' : '#0ab9e6',
+            color: (skillType === 'official' ? !selectedOfficial || submitting : !name.trim() || submitting) ? '#b0b8c4' : '#fff',
+            fontSize: 13,
+            fontWeight: 700,
+            cursor: (skillType === 'official' ? !selectedOfficial || submitting : !name.trim() || submitting) ? 'default' : 'pointer',
+            transition: 'background 0.18s',
+            boxShadow: (skillType === 'official' ? !selectedOfficial || submitting : !name.trim() || submitting) ? 'none' : '0 2px 8px rgba(10, 185, 230, 0.25)',
+          }}
         >
           {submitting ? 'Creating...' : skillType === 'official' ? 'Add Official Skill' : 'Create Skill Spec'}
-        </Button>
-      </YStack>
+        </button>
+      </div>
     </DialogOverlay>
   );
 }

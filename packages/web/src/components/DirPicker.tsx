@@ -1,6 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Button, ScrollView, Text, XStack, YStack } from 'tamagui';
-import { ChevronRight, CornerLeftUp, FolderOpen, Folder } from '@tamagui/lucide-icons';
 
 interface DirEntry {
   name: string;
@@ -17,48 +15,54 @@ function PathBreadcrumb({ path, onNavigate }: { path: string; onNavigate: (path:
   const segments = path.split('/').filter(Boolean);
 
   return (
-    <XStack ai="center" gap="$0.5" flexWrap="wrap" minHeight={20}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap', minHeight: 20 }}>
       {/* Root */}
-      <Text
-        fontSize={12}
-        fontFamily="monospace"
-        color="$gray9"
-        cursor="pointer"
-        onPress={() => onNavigate('/')}
-        px="$1"
-        py="$0.5"
-        rounded="$1"
-        hoverStyle={{ color: '$blue9', bg: '$gray3' }}
+      <span
+        onClick={() => onNavigate('/')}
+        style={{
+          fontSize: 12,
+          fontFamily: 'monospace',
+          color: '#8b95a3',
+          cursor: 'pointer',
+          padding: '2px 4px',
+          borderRadius: 4,
+          transition: 'color 0.15s, background 0.15s',
+        }}
+        onMouseEnter={e => { e.currentTarget.style.color = '#0ab9e6'; e.currentTarget.style.background = '#f0f1f3'; }}
+        onMouseLeave={e => { e.currentTarget.style.color = '#8b95a3'; e.currentTarget.style.background = 'transparent'; }}
       >
         /
-      </Text>
+      </span>
 
       {segments.map((seg, i) => {
         const segPath = '/' + segments.slice(0, i + 1).join('/');
         const isLast = i === segments.length - 1;
         return (
-          <XStack key={segPath} ai="center" gap="$0.5">
-            <ChevronRight size={10} color="$gray7" />
-            <Text
-              fontSize={12}
-              fontFamily="monospace"
-              color={isLast ? '$gray12' : '$gray9'}
-              fontWeight={isLast ? '600' : '400'}
-              cursor={isLast ? 'default' : 'pointer'}
-              px="$1"
-              py="$0.5"
-              rounded="$1"
-              {...(!isLast && {
-                hoverStyle: { color: '$blue9', bg: '$gray3' },
-                onPress: () => onNavigate(segPath),
-              })}
+          <div key={segPath} style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <path d="M3.5 2L6.5 5L3.5 8" stroke="#b0b8c4" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span
+              onClick={isLast ? undefined : () => onNavigate(segPath)}
+              style={{
+                fontSize: 12,
+                fontFamily: 'monospace',
+                color: isLast ? '#1a1d24' : '#8b95a3',
+                fontWeight: isLast ? 600 : 400,
+                cursor: isLast ? 'default' : 'pointer',
+                padding: '2px 4px',
+                borderRadius: 4,
+                transition: 'color 0.15s, background 0.15s',
+              }}
+              onMouseEnter={e => { if (!isLast) { e.currentTarget.style.color = '#0ab9e6'; e.currentTarget.style.background = '#f0f1f3'; } }}
+              onMouseLeave={e => { if (!isLast) { e.currentTarget.style.color = '#8b95a3'; e.currentTarget.style.background = 'transparent'; } }}
             >
               {seg}
-            </Text>
-          </XStack>
+            </span>
+          </div>
         );
       })}
-    </XStack>
+    </div>
   );
 }
 
@@ -94,119 +98,176 @@ export function DirPicker({
 
   if (!listing) {
     return (
-      <YStack bg="$gray2" borderColor="$gray4" borderWidth={1} rounded="$3" p="$4" ai="center">
-        <Text fontSize={12} color="$gray9">Loading...</Text>
-      </YStack>
+      <div style={{
+        background: '#f9fafb',
+        border: '1px solid #f0f1f3',
+        borderRadius: 14,
+        padding: 20,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+        <span style={{ fontSize: 12, color: '#8b95a3' }}>Loading...</span>
+      </div>
     );
   }
 
   return (
-    <YStack bg="$gray2" borderColor="$gray4" borderWidth={1} rounded="$3" overflow="hidden">
+    <div style={{
+      background: '#f9fafb',
+      border: '1px solid #f0f1f3',
+      borderRadius: 14,
+      overflow: 'hidden',
+    }}>
       {/* Header: breadcrumb path + up button */}
-      <XStack
-        ai="center"
-        gap="$2"
-        px="$3"
-        py="$2"
-        borderBottomWidth={1}
-        borderBottomColor="$gray4"
-        bg="$gray3"
-      >
-        <YStack
-          tag="button"
-          cursor="pointer"
-          p="$1"
-          rounded="$2"
-          hoverStyle={{ bg: '$gray4' }}
-          onPress={() => fetchDirs(listing.parent)}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10,
+        padding: '10px 16px',
+        borderBottom: '1px solid #f0f1f3',
+        background: '#f7f8fa',
+      }}>
+        <button
+          onClick={() => fetchDirs(listing.parent)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 28,
+            height: 28,
+            borderRadius: 8,
+            border: 'none',
+            background: 'transparent',
+            cursor: 'pointer',
+            transition: 'background 0.15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = '#e5e7eb'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
         >
-          <CornerLeftUp size={14} color="$gray9" />
-        </YStack>
-        <YStack flex={1} minWidth={0}>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M5 10L2 7L5 4" stroke="#8b95a3" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M2 7H9C10.6569 7 12 5.65685 12 4V3" stroke="#8b95a3" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+        <div style={{ flex: 1, minWidth: 0 }}>
           <PathBreadcrumb path={listing.current} onNavigate={fetchDirs} />
-        </YStack>
-      </XStack>
+        </div>
+      </div>
 
       {/* Directory list */}
-      <ScrollView maxHeight={280}>
+      <div style={{ maxHeight: 280, overflow: 'auto' }}>
         {loading ? (
-          <YStack px="$3" py="$6" ai="center">
-            <Text fontSize={12} color="$gray9">Loading...</Text>
-          </YStack>
+          <div style={{ padding: '32px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ fontSize: 12, color: '#8b95a3' }}>Loading...</span>
+          </div>
         ) : listing.dirs.length === 0 ? (
-          <YStack px="$3" py="$6" ai="center" gap="$1">
-            <FolderOpen size={20} color="$gray6" />
-            <Text fontSize={12} color="$gray7">No subdirectories</Text>
-          </YStack>
+          <div style={{ padding: '32px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M2 5C2 3.89543 2.89543 3 4 3H7.17157C7.70201 3 8.21071 3.21071 8.58579 3.58579L9.41421 4.41421C9.78929 4.78929 10.298 5 10.8284 5H16C17.1046 5 18 5.89543 18 7V15C18 16.1046 17.1046 17 16 17H4C2.89543 17 2 16.1046 2 15V5Z" stroke="#b0b8c4" strokeWidth="1.5" fill="none"/>
+            </svg>
+            <span style={{ fontSize: 12, color: '#b0b8c4' }}>No subdirectories</span>
+          </div>
         ) : (
-          <YStack py="$1">
+          <div style={{ padding: '4px 0' }}>
             {listing.dirs.map(dir => (
-              <XStack
+              <button
                 key={dir.path}
-                tag="button"
-                width="100%"
-                px="$3"
-                py="$2"
-                ai="center"
-                gap="$2"
-                cursor="pointer"
-                hoverStyle={{ bg: '$gray3' }}
-                onPress={() => fetchDirs(dir.path)}
+                onClick={() => fetchDirs(dir.path)}
+                style={{
+                  display: 'flex',
+                  width: '100%',
+                  padding: '8px 16px',
+                  alignItems: 'center',
+                  gap: 10,
+                  cursor: 'pointer',
+                  border: 'none',
+                  background: 'transparent',
+                  textAlign: 'left',
+                  transition: 'background 0.12s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = '#f0f1f3'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
               >
-                <Folder size={14} color="$gray8" />
-                <Text fontSize={13} fontFamily="monospace" color="$gray11" flex={1}>
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M1.5 3.5C1.5 2.67157 2.17157 2 3 2H5.37868C5.77695 2 6.15909 2.15804 6.44065 2.43934L7.06066 3.06066C7.34196 3.34196 7.72435 3.5 8.12132 3.5H11C11.8284 3.5 12.5 4.17157 12.5 5V10.5C12.5 11.3284 11.8284 12 11 12H3C2.17157 12 1.5 11.3284 1.5 10.5V3.5Z" stroke="#8b95a3" strokeWidth="1.2" fill="none"/>
+                </svg>
+                <span style={{ fontSize: 13, fontFamily: 'monospace', color: '#3c4257', flex: 1 }}>
                   {dir.name}
-                </Text>
-                <ChevronRight size={12} color="$gray6" />
-              </XStack>
+                </span>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M4.5 2.5L8 6L4.5 9.5" stroke="#b0b8c4" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
             ))}
-          </YStack>
+          </div>
         )}
-      </ScrollView>
+      </div>
 
       {/* Footer: selected path + actions */}
-      <XStack
-        ai="center"
-        gap="$3"
-        px="$3"
-        py="$2.5"
-        borderTopWidth={1}
-        borderTopColor="$gray4"
-        bg="$gray3"
-      >
-        <XStack flex={1} ai="center" gap="$1.5" minWidth={0}>
-          <FolderOpen size={13} color="$blue9" />
-          <Text fontSize={12} fontFamily="monospace" color="$gray11" numberOfLines={1} flex={1}>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 14,
+        padding: '10px 16px',
+        borderTop: '1px solid #f0f1f3',
+        background: '#f7f8fa',
+      }}>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+          <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+            <path d="M1.5 3.5C1.5 2.67157 2.17157 2 3 2H5.37868C5.77695 2 6.15909 2.15804 6.44065 2.43934L7.06066 3.06066C7.34196 3.34196 7.72435 3.5 8.12132 3.5H11C11.8284 3.5 12.5 4.17157 12.5 5V10.5C12.5 11.3284 11.8284 12 11 12H3C2.17157 12 1.5 11.3284 1.5 10.5V3.5Z" stroke="#0ab9e6" strokeWidth="1.2" fill="none"/>
+          </svg>
+          <span style={{
+            fontSize: 12,
+            fontFamily: 'monospace',
+            color: '#3c4257',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            flex: 1,
+          }}>
             {listing.current}
-          </Text>
-        </XStack>
-        <XStack gap="$2.5" ai="center" shrink={0}>
-          <Button
-            size="$2"
-            chromeless
-            color="$gray9"
-            fontWeight="400"
-            fontSize={12}
-            hoverStyle={{ color: '$gray12' }}
-            onPress={onClose}
+          </span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#8b95a3',
+              fontSize: 12,
+              fontWeight: 500,
+              cursor: 'pointer',
+              padding: '4px 8px',
+              transition: 'color 0.15s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#1a1d24'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = '#8b95a3'; }}
           >
             Cancel
-          </Button>
-          <Button
-            size="$2"
-            bg="$blue9"
-            color="white"
-            fontWeight="500"
-            fontSize={12}
-            hoverStyle={{ bg: '$blue8' }}
-            pressStyle={{ bg: '$blue10' }}
-            rounded="$2"
-            onPress={() => onSelect(listing.current)}
+          </button>
+          <button
+            onClick={() => onSelect(listing.current)}
+            style={{
+              padding: '6px 16px',
+              borderRadius: 12,
+              border: 'none',
+              background: '#0ab9e6',
+              color: '#fff',
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'background 0.15s',
+              boxShadow: '0 2px 8px rgba(10, 185, 230, 0.25)',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#09a8d2'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = '#0ab9e6'; }}
           >
             Select Folder
-          </Button>
-        </XStack>
-      </XStack>
-    </YStack>
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

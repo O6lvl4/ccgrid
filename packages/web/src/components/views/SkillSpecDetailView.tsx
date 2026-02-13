@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { ScrollView, Text, TextArea, XStack, YStack } from 'tamagui';
 import { useStore } from '../../store/useStore';
 import { InlineEdit } from '../InlineEdit';
 import type { Api } from '../../hooks/useApi';
@@ -7,10 +6,10 @@ import type { Api } from '../../hooks/useApi';
 const SKILL_TYPE_OPTIONS = ['official', 'external', 'internal'] as const;
 type SkillType = typeof SKILL_TYPE_OPTIONS[number];
 
-const SKILL_TYPE_COLORS: Record<SkillType, { bg: string; color: string }> = {
-  official: { bg: '$blue3', color: '$blue10' },
-  external: { bg: '$green3', color: '$green10' },
-  internal: { bg: '$gray3', color: '$gray10' },
+const SKILL_TYPE_COLORS: Record<SkillType, { bg: string; color: string; border: string }> = {
+  official: { bg: 'rgba(10, 185, 230, 0.08)', color: '#0a9ec4', border: '#0ab9e6' },
+  external: { bg: 'rgba(22, 163, 74, 0.08)', color: '#16a34a', border: '#16a34a' },
+  internal: { bg: '#f7f8fa', color: '#555e6b', border: '#d1d5db' },
 };
 
 export function SkillSpecDetailView({ specId, api }: { specId: string; api: Api }) {
@@ -48,104 +47,138 @@ export function SkillSpecDetailView({ specId, api }: { specId: string; api: Api 
   };
 
   return (
-    <YStack flex={1} overflow="hidden">
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
       {/* Header */}
-      <XStack
-        px="$4"
-        py="$2"
-        bg="$gray2"
-        borderBottomWidth={1}
-        borderBottomColor="$gray4"
-        shrink={0}
-        ai="center"
-        gap="$3"
-      >
-        <Text
-          fontSize={12}
-          color="$gray9"
-          cursor="pointer"
-          hoverStyle={{ color: '$gray12' }}
-          onPress={goBack}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        padding: '14px 24px',
+        background: '#ffffff',
+        borderBottom: '1px solid #f0f1f3',
+        flexShrink: 0,
+      }}>
+        <span
+          style={{
+            fontSize: 12,
+            color: '#b0b8c4',
+            cursor: 'pointer',
+            lineHeight: 1,
+            fontWeight: 600,
+            transition: 'color 0.15s',
+          }}
+          onClick={goBack}
+          onMouseEnter={e => { e.currentTarget.style.color = '#1a1d24'; }}
+          onMouseLeave={e => { e.currentTarget.style.color = '#b0b8c4'; }}
         >
-          &larr; Back
-        </Text>
+          ← Back
+        </span>
         <InlineEdit value={spec.name} onSave={(v) => updateField('name', v)} fontSize={15} fontWeight="700" />
-        <Text
-          fontSize={11}
-          color="$gray7"
-          cursor="pointer"
-          hoverStyle={{ color: '$red9' }}
-          marginLeft="auto"
-          onPress={async () => {
+        <span
+          style={{
+            fontSize: 11,
+            color: '#b0b8c4',
+            cursor: 'pointer',
+            marginLeft: 'auto',
+            fontWeight: 500,
+            transition: 'color 0.15s',
+          }}
+          onClick={async () => {
             await api.deleteSkillSpec(specId);
             setSkillSpecs(skillSpecs.filter(s => s.id !== specId));
           }}
+          onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; }}
+          onMouseLeave={e => { e.currentTarget.style.color = '#b0b8c4'; }}
         >
           Delete
-        </Text>
-      </XStack>
+        </span>
+      </div>
 
       {/* Content */}
-      <ScrollView flex={1}>
-        <YStack p="$4" gap="$4" maxWidth={640} alignSelf="center" width="100%">
+      <div style={{ flex: 1, overflow: 'auto' }}>
+        <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 640, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
           {/* Metadata */}
-          <YStack bg="$gray2" borderColor="$gray4" borderWidth={1} rounded="$3" p="$3" gap="$2">
-            <XStack gap="$3" ai="center">
-              <Text fontSize={12} color="$gray8" width={80}>Name</Text>
+          <div style={{
+            background: '#f9fafb',
+            border: '1px solid #f0f1f3',
+            borderRadius: 14,
+            padding: '14px 18px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <span style={{ fontSize: 12, color: '#8b95a3', width: 80, flexShrink: 0, fontWeight: 500 }}>Name</span>
               <InlineEdit value={spec.name} onSave={(v) => updateField('name', v)} fontSize={13} fontWeight="500" />
-            </XStack>
-            <XStack gap="$3" ai="center">
-              <Text fontSize={12} color="$gray8" width={80}>Type</Text>
-              <XStack gap="$1">
-                {SKILL_TYPE_OPTIONS.map(opt => (
-                  <Text
-                    key={opt}
-                    fontSize={11}
-                    px="$2"
-                    py="$1"
-                    rounded="$2"
-                    cursor="pointer"
-                    bg={spec.skillType === opt ? SKILL_TYPE_COLORS[opt].bg : '$gray2'}
-                    color={spec.skillType === opt ? SKILL_TYPE_COLORS[opt].color : '$gray8'}
-                    borderWidth={1}
-                    borderColor={spec.skillType === opt ? SKILL_TYPE_COLORS[opt].color : '$gray5'}
-                    fontWeight={spec.skillType === opt ? '600' : '400'}
-                    hoverStyle={{ borderColor: SKILL_TYPE_COLORS[opt].color }}
-                    onPress={() => updateField('skillType', opt)}
-                  >
-                    {opt}
-                  </Text>
-                ))}
-              </XStack>
-            </XStack>
-            <XStack gap="$3" ai="center">
-              <Text fontSize={12} color="$gray8" width={80}>Created</Text>
-              <Text fontSize={12} color="$gray9">{new Date(spec.createdAt).toLocaleString()}</Text>
-            </XStack>
-          </YStack>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <span style={{ fontSize: 12, color: '#8b95a3', width: 80, flexShrink: 0, fontWeight: 500 }}>Type</span>
+              <div style={{ display: 'flex', gap: 4 }}>
+                {SKILL_TYPE_OPTIONS.map(opt => {
+                  const active = spec.skillType === opt;
+                  const c = SKILL_TYPE_COLORS[opt];
+                  return (
+                    <button
+                      key={opt}
+                      onClick={() => updateField('skillType', opt)}
+                      style={{
+                        fontSize: 11,
+                        padding: '4px 10px',
+                        borderRadius: 8,
+                        cursor: 'pointer',
+                        background: active ? c.bg : 'transparent',
+                        color: active ? c.color : '#8b95a3',
+                        border: `1px solid ${active ? c.border : '#e5e7eb'}`,
+                        fontWeight: active ? 600 : 400,
+                        transition: 'all 0.15s',
+                      }}
+                      onMouseEnter={e => { if (!active) e.currentTarget.style.borderColor = c.border; }}
+                      onMouseLeave={e => { if (!active) e.currentTarget.style.borderColor = '#e5e7eb'; }}
+                    >
+                      {opt}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <span style={{ fontSize: 12, color: '#8b95a3', width: 80, flexShrink: 0, fontWeight: 500 }}>Created</span>
+              <span style={{ fontSize: 12, color: '#555e6b' }}>{new Date(spec.createdAt).toLocaleString()}</span>
+            </div>
+          </div>
 
           {/* Description */}
-          <YStack gap="$2">
-            <Text fontSize={11} fontWeight="600" color="$gray8" textTransform="uppercase" letterSpacing={0.5}>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 800, color: '#8b95a3', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>
               Description
-            </Text>
-            <TextArea
+            </div>
+            <textarea
               value={description}
-              onChangeText={setDescription}
+              onChange={e => setDescription(e.target.value)}
               onBlur={handleDescriptionSave}
-              numberOfLines={10}
               placeholder="Describe what this skill does..."
-              bg="$gray2"
-              borderColor="$gray4"
-              rounded="$3"
-              focusStyle={{ borderColor: '$blue9' }}
-              fontSize={13}
-              lineHeight={20}
-              minHeight={200}
+              rows={10}
+              style={{
+                width: '100%',
+                boxSizing: 'border-box',
+                minHeight: 200,
+                padding: '12px 14px',
+                borderRadius: 12,
+                border: '1px solid #e5e7eb',
+                background: '#f9fafb',
+                color: '#1a1d24',
+                fontSize: 13,
+                fontFamily: 'inherit',
+                lineHeight: 1.6,
+                resize: 'vertical',
+                outline: 'none',
+                transition: 'border-color 0.15s',
+              }}
+              onFocus={e => { e.currentTarget.style.borderColor = '#0ab9e6'; }}
             />
-          </YStack>
-        </YStack>
-      </ScrollView>
-    </YStack>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
