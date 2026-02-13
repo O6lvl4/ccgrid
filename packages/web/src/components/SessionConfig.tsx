@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { YStack, XStack, Text, Input, TextArea, Button, Checkbox, ScrollView } from 'tamagui';
 import { Check } from '@tamagui/lucide-icons';
 import { DirPicker } from './DirPicker';
@@ -80,6 +80,23 @@ export function SessionConfig({ api, onCreated }: { api: Api; onCreated?: () => 
     }
   };
 
+  const handlePaste = useCallback((e: React.ClipboardEvent) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    const files: File[] = [];
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.kind === 'file') {
+        const file = item.getAsFile();
+        if (file) files.push(file);
+      }
+    }
+    if (files.length > 0) {
+      e.preventDefault();
+      setAttachedFiles(prev => [...prev, ...files]);
+    }
+  }, []);
+
   const canSubmit = name.trim() && cwd.trim() && taskDescription.trim() && !submitting;
 
   return (
@@ -140,33 +157,37 @@ export function SessionConfig({ api, onCreated }: { api: Api; onCreated?: () => 
       {/* Task Description */}
       <YStack>
         <FieldLabel>Task Description</FieldLabel>
-        <TextArea
-          placeholder="What should the team work on?"
-          value={taskDescription}
-          onChangeText={setTaskDescription}
-          numberOfLines={3}
-          bg="$gray3"
-          borderColor="$gray5"
-          color="$gray12"
-          fontSize={13}
-          focusStyle={{ borderColor: '$blue9' }}
-        />
+        <div onPaste={handlePaste}>
+          <TextArea
+            placeholder="What should the team work on?"
+            value={taskDescription}
+            onChangeText={setTaskDescription}
+            numberOfLines={3}
+            bg="$gray3"
+            borderColor="$gray5"
+            color="$gray12"
+            fontSize={13}
+            focusStyle={{ borderColor: '$blue9' }}
+          />
+        </div>
       </YStack>
 
       {/* Custom Instructions */}
       <YStack>
         <FieldLabel>Custom Instructions (optional)</FieldLabel>
-        <TextArea
-          placeholder="Lead Agent への追加指示 (コーディング規約、使用言語、注意事項など)"
-          value={customInstructions}
-          onChangeText={setCustomInstructions}
-          numberOfLines={2}
-          bg="$gray3"
-          borderColor="$gray5"
-          color="$gray12"
-          fontSize={12}
-          focusStyle={{ borderColor: '$blue9' }}
-        />
+        <div onPaste={handlePaste}>
+          <TextArea
+            placeholder="Lead Agent への追加指示 (コーディング規約、使用言語、注意事項など)"
+            value={customInstructions}
+            onChangeText={setCustomInstructions}
+            numberOfLines={2}
+            bg="$gray3"
+            borderColor="$gray5"
+            color="$gray12"
+            fontSize={12}
+            focusStyle={{ borderColor: '$blue9' }}
+          />
+        </div>
       </YStack>
 
       {/* File Attachments */}

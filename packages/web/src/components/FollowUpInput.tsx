@@ -34,6 +34,23 @@ export function FollowUpInput({ sessionId }: { sessionId: string }) {
     }
   }, [handleSend]);
 
+  const handlePaste = useCallback((e: React.ClipboardEvent) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    const files: File[] = [];
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.kind === 'file') {
+        const file = item.getAsFile();
+        if (file) files.push(file);
+      }
+    }
+    if (files.length > 0) {
+      e.preventDefault();
+      setAttachedFiles(prev => [...prev, ...files]);
+    }
+  }, []);
+
   const canSend = (prompt.trim() || attachedFiles.length > 0) && !sending;
 
   return (
@@ -109,6 +126,7 @@ export function FollowUpInput({ sessionId }: { sessionId: string }) {
           value={prompt}
           onChange={e => setPrompt(e.target.value)}
           onKeyDown={handleKeyDown as any}
+          onPaste={handlePaste}
           placeholder="追加の指示を入力..."
           disabled={sending}
           rows={3}
