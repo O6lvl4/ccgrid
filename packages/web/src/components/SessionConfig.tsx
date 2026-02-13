@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { YStack, XStack, Text, Input, TextArea, Button, Checkbox, ScrollView } from 'tamagui';
 import { Check } from '@tamagui/lucide-icons';
 import { DirPicker } from './DirPicker';
+import { FileChip } from './FileChip';
 import { useStore } from '../store/useStore';
 import { readFilesAsAttachments, FILE_ACCEPT } from '../utils/fileUtils';
 import type { Api } from '../hooks/useApi';
@@ -207,34 +208,15 @@ export function SessionConfig({ api, onCreated }: { api: Api; onCreated?: () => 
           }}
         />
         {attachedFiles.length > 0 && (
-          <XStack gap="$1.5" flexWrap="wrap" mb="$2">
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8, alignItems: 'flex-end' }}>
             {attachedFiles.map((f, i) => (
-              <XStack
+              <FileChip
                 key={`${f.name}-${i}`}
-                ai="center"
-                gap="$1"
-                px="$2"
-                py="$1"
-                bg="$gray3"
-                borderWidth={1}
-                borderColor="$gray5"
-                rounded="$2"
-              >
-                <Text fontSize={11} color="$gray11">
-                  {f.type.startsWith('image/') ? '\uD83D\uDDBC' : f.type === 'application/pdf' ? '\uD83D\uDCC4' : '\uD83D\uDCDD'} {f.name}
-                </Text>
-                <Text
-                  fontSize={11}
-                  color="$gray8"
-                  cursor="pointer"
-                  hoverStyle={{ color: '$red9' }}
-                  onPress={() => setAttachedFiles(prev => prev.filter((_, j) => j !== i))}
-                >
-                  x
-                </Text>
-              </XStack>
+                file={f}
+                onRemove={() => setAttachedFiles(prev => prev.filter((_, j) => j !== i))}
+              />
             ))}
-          </XStack>
+          </div>
         )}
         <Button
           size="$2"

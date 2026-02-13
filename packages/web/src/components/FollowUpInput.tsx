@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { useApi } from '../hooks/useApi';
 import { readFilesAsAttachments, FILE_ACCEPT } from '../utils/fileUtils';
+import { FileChip } from './FileChip';
 
 export function FollowUpInput({ sessionId }: { sessionId: string }) {
   const api = useApi();
@@ -92,32 +93,13 @@ export function FollowUpInput({ sessionId }: { sessionId: string }) {
       <div style={{ padding: '12px 16px 14px' }}>
         {/* Attached files preview */}
         {attachedFiles.length > 0 && (
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10, alignItems: 'flex-end' }}>
             {attachedFiles.map((f, i) => (
-              <div
+              <FileChip
                 key={`${f.name}-${i}`}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  padding: '4px 10px',
-                  background: '#f5f7fa',
-                  borderRadius: 12,
-                  fontSize: 11,
-                  color: '#5a6376',
-                  fontWeight: 500,
-                }}
-              >
-                <span>{f.type.startsWith('image/') ? '\uD83D\uDDBC' : f.type === 'application/pdf' ? '\uD83D\uDCC4' : '\uD83D\uDCDD'} {f.name}</span>
-                <span
-                  style={{ cursor: 'pointer', color: '#b0b8c4', fontSize: 13, lineHeight: 1, fontWeight: 400 }}
-                  onMouseEnter={e => { e.currentTarget.style.color = '#e5484d'; }}
-                  onMouseLeave={e => { e.currentTarget.style.color = '#b0b8c4'; }}
-                  onClick={() => setAttachedFiles(prev => prev.filter((_, j) => j !== i))}
-                >
-                  ×
-                </span>
-              </div>
+                file={f}
+                onRemove={() => setAttachedFiles(prev => prev.filter((_, j) => j !== i))}
+              />
             ))}
           </div>
         )}
