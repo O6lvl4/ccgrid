@@ -39,6 +39,8 @@ export function FollowUpInput({ sessionId }: { sessionId: string }) {
 
   return (
     <div style={{
+      width: '100%',
+      boxSizing: 'border-box' as const,
       background: '#fff',
       borderRadius: 16,
       boxShadow: '0 1px 6px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04)',
