@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import type { Session, TeammateSpec, SkillSpec, PermissionRule } from '@ccgrid/shared';
+import type { Session, TeammateSpec, SkillSpec, PermissionRule, FileAttachment } from '@ccgrid/shared';
 
 export interface Api {
   createSession: (params: {
@@ -11,11 +11,12 @@ export interface Api {
     taskDescription: string;
     permissionMode?: 'acceptEdits' | 'bypassPermissions';
     customInstructions?: string;
+    files?: FileAttachment[];
   }) => Promise<Session>;
   updateSession: (id: string, updates: { name?: string }) => Promise<Session>;
   deleteSession: (id: string) => Promise<void>;
   stopSession: (id: string) => Promise<Session>;
-  continueSession: (id: string, prompt: string) => Promise<Session>;
+  continueSession: (id: string, prompt: string, files?: FileAttachment[]) => Promise<Session>;
   createSpec: (params: { name: string; role: string; instructions?: string; skillIds?: string[] }) => Promise<TeammateSpec>;
   updateSpec: (id: string, updates: { name?: string; role?: string; instructions?: string; skillIds?: string[] }) => Promise<TeammateSpec>;
   deleteSpec: (id: string) => Promise<void>;
@@ -53,6 +54,7 @@ export function useApi(): Api {
     taskDescription: string;
     permissionMode?: 'acceptEdits' | 'bypassPermissions';
     customInstructions?: string;
+    files?: FileAttachment[];
   }) => request<Session>('POST', '/sessions', params), []);
 
   const updateSession = useCallback((id: string, updates: { name?: string }) =>
@@ -64,8 +66,8 @@ export function useApi(): Api {
   const stopSession = useCallback((id: string) =>
     request<Session>('POST', `/sessions/${id}/stop`), []);
 
-  const continueSession = useCallback((id: string, prompt: string) =>
-    request<Session>('POST', `/sessions/${id}/continue`, { prompt }), []);
+  const continueSession = useCallback((id: string, prompt: string, files?: FileAttachment[]) =>
+    request<Session>('POST', `/sessions/${id}/continue`, { prompt, ...(files && files.length > 0 ? { files } : {}) }), []);
 
   const createSpec = useCallback((params: { name: string; role: string; instructions?: string; skillIds?: string[] }) =>
     request<TeammateSpec>('POST', '/teammate-specs', params), []);

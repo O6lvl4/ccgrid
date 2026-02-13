@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { YStack, XStack, Text, Input, TextArea, Button, Checkbox, ScrollView } from 'tamagui';
 import { Check } from '@tamagui/lucide-icons';
 import { DirPicker } from './DirPicker';
 import { useStore } from '../store/useStore';
+import { readFilesAsAttachments, FILE_ACCEPT } from '../utils/fileUtils';
 import type { Api } from '../hooks/useApi';
 
 const MODELS = [
@@ -31,6 +32,8 @@ export function SessionConfig({ api, onCreated }: { api: Api; onCreated?: () => 
   const [maxBudget, setMaxBudget] = useState('');
   const [taskDescription, setTaskDescription] = useState('');
   const [customInstructions, setCustomInstructions] = useState('');
+  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [showDirPicker, setShowDirPicker] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -51,6 +54,9 @@ export function SessionConfig({ api, onCreated }: { api: Api; onCreated?: () => 
       .map(s => ({ id: s.id, name: s.name, role: s.role, instructions: s.instructions, skillIds: s.skillIds, createdAt: s.createdAt }));
     setSubmitting(true);
     try {
+      const files = attachedFiles.length > 0
+        ? await readFilesAsAttachments(attachedFiles)
+        : undefined;
       await api.createSession({
         name: name.trim(),
         cwd: cwd.trim(),
@@ -60,9 +66,11 @@ export function SessionConfig({ api, onCreated }: { api: Api; onCreated?: () => 
         taskDescription: taskDescription.trim(),
         permissionMode,
         ...(customInstructions.trim() ? { customInstructions: customInstructions.trim() } : {}),
+        ...(files ? { files } : {}),
       });
       setName('');
       setTaskDescription('');
+      setAttachedFiles([]);
       setSelectedSpecIds(new Set());
       onCreated?.();
     } catch (err) {
@@ -159,6 +167,66 @@ export function SessionConfig({ api, onCreated }: { api: Api; onCreated?: () => 
           fontSize={12}
           focusStyle={{ borderColor: '$blue9' }}
         />
+      </YStack>
+
+      {/* File Attachments */}
+      <YStack>
+        <FieldLabel>Attachments (optional)</FieldLabel>
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept={FILE_ACCEPT}
+          style={{ display: 'none' }}
+          onChange={(e) => {
+            if (e.target.files) {
+              setAttachedFiles(prev => [...prev, ...Array.from(e.target.files!)]);
+              e.target.value = '';
+            }
+          }}
+        />
+        {attachedFiles.length > 0 && (
+          <XStack gap="$1.5" flexWrap="wrap" mb="$2">
+            {attachedFiles.map((f, i) => (
+              <XStack
+                key={`${f.name}-${i}`}
+                ai="center"
+                gap="$1"
+                px="$2"
+                py="$1"
+                bg="$gray3"
+                borderWidth={1}
+                borderColor="$gray5"
+                rounded="$2"
+              >
+                <Text fontSize={11} color="$gray11">
+                  {f.type.startsWith('image/') ? '\uD83D\uDDBC' : f.type === 'application/pdf' ? '\uD83D\uDCC4' : '\uD83D\uDCDD'} {f.name}
+                </Text>
+                <Text
+                  fontSize={11}
+                  color="$gray8"
+                  cursor="pointer"
+                  hoverStyle={{ color: '$red9' }}
+                  onPress={() => setAttachedFiles(prev => prev.filter((_, j) => j !== i))}
+                >
+                  x
+                </Text>
+              </XStack>
+            ))}
+          </XStack>
+        )}
+        <Button
+          size="$2"
+          bg="$gray3"
+          color="$gray11"
+          borderWidth={1}
+          borderColor="$gray5"
+          hoverStyle={{ bg: '$gray4' }}
+          alignSelf="flex-start"
+          onPress={() => fileInputRef.current?.click()}
+        >
+          + Attach Files
+        </Button>
       </YStack>
 
       {/* Model & Options */}

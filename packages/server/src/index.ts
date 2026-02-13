@@ -36,12 +36,12 @@ let permissionRules: PermissionRule[] = loadPermissionRules();
 // ---- REST: Sessions CRUD ----
 
 app.post('/api/sessions', async (c) => {
-  const { name, cwd, model, teammateSpecs, maxBudgetUsd, taskDescription, permissionMode, customInstructions } = await c.req.json();
+  const { name, cwd, model, teammateSpecs, maxBudgetUsd, taskDescription, permissionMode, customInstructions, files } = await c.req.json();
   if (!name || !cwd || !model || !taskDescription) {
     return c.json({ error: 'name, cwd, model, taskDescription are required' }, 400);
   }
   try {
-    const session = await sm.createSession(name, cwd, model, teammateSpecs, maxBudgetUsd, taskDescription, permissionMode, skillSpecs, customInstructions);
+    const session = await sm.createSession(name, cwd, model, teammateSpecs, maxBudgetUsd, taskDescription, permissionMode, skillSpecs, customInstructions, files);
     return c.json(session, 201);
   } catch (err) {
     return c.json({ error: String(err) }, 500);
@@ -81,9 +81,9 @@ app.post('/api/sessions/:id/stop', async (c) => {
 
 // Continue a completed session with a follow-up prompt
 app.post('/api/sessions/:id/continue', async (c) => {
-  const { prompt } = await c.req.json();
+  const { prompt, files } = await c.req.json();
   if (!prompt) return c.json({ error: 'prompt required' }, 400);
-  const session = sm.continueSession(c.req.param('id'), prompt);
+  const session = sm.continueSession(c.req.param('id'), prompt, files);
   if (!session) return c.json({ error: 'Session not found or not completed' }, 404);
   return c.json(session);
 });

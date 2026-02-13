@@ -75,6 +75,13 @@ export interface PermissionLogEntry {
   timestamp: string;
 }
 
+// ---- File attachment ----
+export interface FileAttachment {
+  name: string;
+  mimeType: string;
+  base64Data: string;
+}
+
 // ---- Permission rule (auto-judgment) ----
 export interface PermissionRule {
   id: string;

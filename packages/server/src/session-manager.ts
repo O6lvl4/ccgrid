@@ -1,6 +1,7 @@
-import { query, type Query, type CanUseTool } from '@anthropic-ai/claude-agent-sdk';
+import { query, type Query, type CanUseTool, type SDKUserMessage } from '@anthropic-ai/claude-agent-sdk';
+import type { ContentBlockParam } from '@anthropic-ai/sdk/resources/messages/messages';
 import { v4 as uuidv4 } from 'uuid';
-import type { Session, Teammate, TeamTask, TeammateSpec, SkillSpec, ServerMessage, PermissionLogEntry, PermissionRule } from '@ccgrid/shared';
+import type { Session, Teammate, TeamTask, TeammateSpec, SkillSpec, ServerMessage, PermissionLogEntry, PermissionRule, FileAttachment } from '@ccgrid/shared';
 import { loadAllSessions, saveSession, deleteSessionFile, loadPermissionRules } from './state-store.js';
 import { buildPrompt, buildSystemPrompt } from './prompt-builder.js';
 import { processLeadStream } from './lead-stream.js';
@@ -103,6 +104,7 @@ export class SessionManager {
     permissionMode?: 'acceptEdits' | 'bypassPermissions',
     skillSpecs?: SkillSpec[],
     customInstructions?: string,
+    files?: FileAttachment[],
   ): Promise<Session> {
     const session: Session = {
       id: uuidv4(),
@@ -124,7 +126,7 @@ export class SessionManager {
     this.persistSession(session.id);
     this.broadcast({ type: 'session_created', session });
 
-    this.startAgent(session, teammateSpecs, maxBudgetUsd, undefined, skillSpecs);
+    this.startAgent(session, teammateSpecs, maxBudgetUsd, undefined, skillSpecs, files);
     return session;
   }
 
@@ -191,12 +193,15 @@ export class SessionManager {
     }
   }
 
-  continueSession(sessionId: string, prompt: string): Session | undefined {
+  continueSession(sessionId: string, prompt: string, files?: FileAttachment[]): Session | undefined {
     const session = this.sessions.get(sessionId);
     console.log(`[continueSession] sessionId=${sessionId} sdkSessionId=${session?.sessionId} status=${session?.status}`);
     if (!session?.sessionId || session.status !== 'completed') return undefined;
 
-    const userBlock = `\n\n<!-- follow-up -->\n\n> ${prompt.replace(/\n/g, '\n> ')}\n\n`;
+    const fileNames = files && files.length > 0
+      ? `\n\n📎 ${files.map(f => f.name).join(', ')}`
+      : '';
+    const userBlock = `\n\n<!-- follow-up -->\n\n> ${prompt.replace(/\n/g, '\n> ')}${fileNames}\n\n`;
     const existing = this.leadOutputs.get(sessionId) ?? '';
     this.leadOutputs.set(sessionId, existing + userBlock);
     this.broadcast({ type: 'lead_output', sessionId, text: userBlock });
@@ -205,7 +210,7 @@ export class SessionManager {
     this.persistSession(sessionId);
     this.broadcast({ type: 'session_status', sessionId, status: 'running' });
 
-    this.startAgent(session, undefined, session.maxBudgetUsd, prompt);
+    this.startAgent(session, undefined, session.maxBudgetUsd, prompt, undefined, files);
     return session;
   }
 
@@ -338,7 +343,7 @@ The Lead coordinates the team and relays information between members.
     return agents;
   }
 
-  private startAgent(session: Session, teammateSpecs: TeammateSpec[] | undefined, maxBudgetUsd: number | undefined, resumePrompt?: string, skillSpecs?: SkillSpec[]): void {
+  private startAgent(session: Session, teammateSpecs: TeammateSpec[] | undefined, maxBudgetUsd: number | undefined, resumePrompt?: string, skillSpecs?: SkillSpec[], files?: FileAttachment[]): void {
     const abortController = new AbortController();
 
     const hooks = createHookHandlers({
@@ -439,9 +444,25 @@ The Lead coordinates the team and relays information between members.
     };
 
     let agentQuery: Query;
+    const hasFiles = files && files.length > 0;
+    const promptOrStream: string | AsyncIterable<SDKUserMessage> = hasFiles
+      ? (async function*() {
+          const contentBlocks: ContentBlockParam[] = [
+            { type: 'text', text: prompt },
+            ...filesToContentBlocks(files),
+          ];
+          yield {
+            type: 'user' as const,
+            message: { role: 'user' as const, content: contentBlocks },
+            parent_tool_use_id: null,
+            session_id: '',
+          };
+        })()
+      : prompt;
+
     try {
       agentQuery = query({
-        prompt,
+        prompt: promptOrStream,
         options: {
           ...(resumePrompt && session.sessionId ? { resume: session.sessionId } : {}),
           cwd: session.cwd,
@@ -528,4 +549,31 @@ The Lead coordinates the team and relays information between members.
       persistSession: (id: string) => this.persistSession(id),
     };
   }
+}
+
+function filesToContentBlocks(files: FileAttachment[]): ContentBlockParam[] {
+  return files.map(f => {
+    if (f.mimeType.startsWith('image/')) {
+      return {
+        type: 'image' as const,
+        source: {
+          type: 'base64' as const,
+          media_type: f.mimeType as 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp',
+          data: f.base64Data,
+        },
+      };
+    }
+    if (f.mimeType === 'application/pdf') {
+      return {
+        type: 'document' as const,
+        source: { type: 'base64' as const, media_type: 'application/pdf' as const, data: f.base64Data },
+        title: f.name,
+      };
+    }
+    return {
+      type: 'document' as const,
+      source: { type: 'text' as const, media_type: 'text/plain' as const, data: Buffer.from(f.base64Data, 'base64').toString('utf-8') },
+      title: f.name,
+    };
+  });
 }
