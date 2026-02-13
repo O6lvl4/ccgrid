@@ -2,18 +2,25 @@ import { useCallback, useEffect, useState } from 'react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
-import { Button, ScrollView, Text, TextArea, XStack, YStack } from 'tamagui';
 import { useStore, type TeammateMessage } from '../../store/useStore';
 import { useApi } from '../../hooks/useApi';
 import { StatusBadge } from '../StatusBadge';
 import { markdownComponents } from '../CodeBlock';
 
-function InfoRow({ label, children }: { label: string; children: React.ReactNode }) {
+function InfoRow({ label, children, mono }: { label: string; children: React.ReactNode; mono?: boolean }) {
   return (
-    <XStack gap="$3" ai="center" py="$1">
-      <Text fontSize={12} color="$gray8" width={80}>{label}</Text>
-      <Text fontSize={13} color="$gray12" minWidth={0} flex={1}>{children}</Text>
-    </XStack>
+    <div style={{ display: 'flex', alignItems: 'baseline', gap: 16, padding: '5px 0' }}>
+      <span style={{ fontSize: 12, color: '#8b95a3', flexShrink: 0, width: 90, fontWeight: 500 }}>{label}</span>
+      <span style={{
+        fontSize: 13,
+        color: '#1a1d24',
+        minWidth: 0,
+        flex: 1,
+        ...(mono ? { fontFamily: 'monospace', fontSize: 11, color: '#555e6b' } : {}),
+      }}>
+        {children}
+      </span>
+    </div>
   );
 }
 
@@ -22,22 +29,38 @@ function MessageBubble({ msg }: { msg: TeammateMessage }) {
   const timeStr = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
   return (
-    <YStack
-      bg="$blue3"
-      borderColor="$blue5"
-      borderWidth={1}
-      rounded="$3"
-      p="$3"
-      gap="$1"
-    >
-      <XStack jc="space-between" ai="center">
-        <Text fontSize={11} fontWeight="600" color="$blue11">
+    <div style={{
+      background: 'rgba(10, 185, 230, 0.06)',
+      border: '1px solid rgba(10, 185, 230, 0.15)',
+      borderRadius: 14,
+      padding: '12px 16px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 6,
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ fontSize: 11, fontWeight: 700, color: '#0a9ec4' }}>
           You → {msg.teammateName}
-        </Text>
-        <Text fontSize={10} color="$gray8">{timeStr}</Text>
-      </XStack>
-      <Text fontSize={13} color="$gray12">{msg.message}</Text>
-    </YStack>
+        </span>
+        <span style={{ fontSize: 10, color: '#b0b8c4' }}>{timeStr}</span>
+      </div>
+      <span style={{ fontSize: 13, color: '#1a1d24', lineHeight: 1.5 }}>{msg.message}</span>
+    </div>
+  );
+}
+
+function SectionLabel({ children }: { children: string }) {
+  return (
+    <div style={{
+      fontSize: 11,
+      fontWeight: 800,
+      color: '#8b95a3',
+      textTransform: 'uppercase',
+      letterSpacing: 0.8,
+      marginBottom: 10,
+    }}>
+      {children}
+    </div>
   );
 }
 
@@ -67,16 +90,19 @@ function TeammateMessageInput({ sessionId, teammateName }: { sessionId: string; 
     }
   }, [handleSend]);
 
+  const canSend = message.trim() && !sending;
+
   return (
-    <YStack
-      borderTopWidth={1}
-      borderColor="$gray4"
-      bg="$gray2"
-      p="$3"
-      gap="$2"
-      flexShrink={0}
-    >
-      <XStack ai="center" gap="$2">
+    <div style={{
+      borderTop: '1px solid #f0f1f3',
+      background: '#f9fafb',
+      padding: '14px 18px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 10,
+      flexShrink: 0,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -85,44 +111,82 @@ function TeammateMessageInput({ sessionId, teammateName }: { sessionId: string; 
           height: 24,
           minWidth: 24,
           borderRadius: 12,
-          backgroundColor: '#3b82f6',
+          backgroundColor: '#0ab9e6',
           flexShrink: 0,
         }}>
           <span style={{ color: '#fff', fontSize: 11, fontWeight: 800, lineHeight: 1 }}>✎</span>
         </div>
-        <Text color="$gray12" fontWeight="600" fontSize={13}>
+        <span style={{ color: '#1a1d24', fontWeight: 700, fontSize: 13 }}>
           Message to {teammateName}
-        </Text>
-        <Text color="$gray8" fontSize={11} flex={1} textAlign="right">
+        </span>
+        <span style={{ color: '#b0b8c4', fontSize: 11, flex: 1, textAlign: 'right' }}>
           Relayed via Lead
-        </Text>
-      </XStack>
-      <TextArea
+        </span>
+      </div>
+      <textarea
         value={message}
-        onChangeText={setMessage}
+        onChange={e => setMessage(e.target.value)}
+        onKeyDown={handleKeyDown as any}
         placeholder={`${teammateName} への指示を入力... (Cmd+Enter で送信)`}
         disabled={sending}
-        minHeight={60}
-        bg="$gray1"
-        borderColor="$gray4"
-        color="$gray12"
-        fontSize={13}
-        onKeyDown={handleKeyDown}
+        rows={3}
+        style={{
+          width: '100%',
+          boxSizing: 'border-box',
+          minHeight: 64,
+          padding: '10px 12px',
+          borderRadius: 12,
+          border: '1px solid #e5e7eb',
+          background: '#fff',
+          color: '#1a1d24',
+          fontSize: 13,
+          lineHeight: 1.5,
+          fontFamily: 'inherit',
+          resize: 'vertical',
+          outline: 'none',
+          transition: 'border-color 0.15s',
+        }}
+        onFocus={e => { e.currentTarget.style.borderColor = '#0ab9e6'; }}
+        onBlur={e => { e.currentTarget.style.borderColor = '#e5e7eb'; }}
       />
-      <XStack jc="flex-end">
-        <Button
-          size="$2"
-          theme="active"
-          disabled={!message.trim() || sending}
-          opacity={!message.trim() || sending ? 0.5 : 1}
-          onPress={handleSend}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 10 }}>
+        <span style={{ fontSize: 11, color: '#b0b8c4', letterSpacing: 0.2 }}>⌘ Enter</span>
+        <button
+          type="button"
+          onClick={handleSend}
+          disabled={!canSend}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: 34,
+            minWidth: 72,
+            paddingLeft: 18,
+            paddingRight: 18,
+            borderRadius: 17,
+            border: 'none',
+            background: canSend ? '#0ab9e6' : '#e8eaed',
+            color: canSend ? '#fff' : '#b0b8c4',
+            fontSize: 13,
+            fontWeight: 700,
+            letterSpacing: 0.4,
+            cursor: canSend ? 'pointer' : 'default',
+            transition: 'background 0.2s, transform 0.12s, box-shadow 0.2s',
+            boxShadow: canSend ? '0 2px 8px rgba(10,185,230,0.25)' : 'none',
+          }}
+          onMouseEnter={e => { if (canSend) { e.currentTarget.style.background = '#09a8d2'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(10,185,230,0.35)'; } }}
+          onMouseLeave={e => { if (canSend) { e.currentTarget.style.background = '#0ab9e6'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(10,185,230,0.25)'; } e.currentTarget.style.transform = 'scale(1)'; }}
+          onMouseDown={e => { if (canSend) e.currentTarget.style.transform = 'scale(0.95)'; }}
+          onMouseUp={e => { if (canSend) e.currentTarget.style.transform = 'scale(1)'; }}
         >
-          {sending ? 'Sending...' : 'Send'}
-        </Button>
-      </XStack>
-    </YStack>
+          {sending ? '...' : 'Send'}
+        </button>
+      </div>
+    </div>
   );
 }
+
+const proseClass = 'prose prose-sm max-w-none prose-pre:bg-gray-100 prose-pre:border prose-pre:border-gray-200 prose-code:text-blue-600 prose-headings:text-gray-900 prose-p:text-gray-700 prose-li:text-gray-700 prose-strong:text-gray-900 prose-a:text-blue-600';
 
 export function TeammateDetailView({ sessionId, agentId }: { sessionId: string; agentId: string }) {
   const teammate = useStore(s => s.teammates.get(agentId));
@@ -144,91 +208,102 @@ export function TeammateDetailView({ sessionId, agentId }: { sessionId: string; 
   if (!teammate) return null;
 
   return (
-    <YStack flex={1} overflow="hidden">
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
       {/* Header */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
           gap: 12,
-          padding: '10px 16px',
-          background: 'var(--gray2, #f9fafb)',
-          borderBottom: '1px solid var(--gray4, #e5e7eb)',
+          padding: '14px 24px',
+          background: '#ffffff',
+          borderBottom: '1px solid #f0f1f3',
           flexShrink: 0,
         }}
       >
         <span
-          style={{ fontSize: 12, color: '#9ca3af', cursor: 'pointer', lineHeight: 1 }}
+          style={{
+            fontSize: 12,
+            color: '#b0b8c4',
+            cursor: 'pointer',
+            lineHeight: 1,
+            fontWeight: 600,
+            transition: 'color 0.15s',
+          }}
           onClick={goBack}
-          onMouseEnter={e => { e.currentTarget.style.color = '#111827'; }}
-          onMouseLeave={e => { e.currentTarget.style.color = '#9ca3af'; }}
+          onMouseEnter={e => { e.currentTarget.style.color = '#1a1d24'; }}
+          onMouseLeave={e => { e.currentTarget.style.color = '#b0b8c4'; }}
         >
-          &larr; Back
+          ← Back
         </span>
-        <span style={{ fontWeight: 700, fontSize: 15, color: '#111827', lineHeight: 1 }}>
+        <span style={{ fontWeight: 800, fontSize: 16, color: '#1a1d24', lineHeight: 1 }}>
           {teammate.name ?? teammate.agentId.slice(0, 8)}
         </span>
         <StatusBadge status={teammate.status} />
-        <span style={{ fontSize: 11, color: '#9ca3af', lineHeight: 1 }}>{teammate.agentType}</span>
+        <span style={{
+          fontSize: 11,
+          color: '#8b95a3',
+          fontWeight: 500,
+          padding: '2px 8px',
+          borderRadius: 8,
+          background: '#f0f1f3',
+        }}>
+          {teammate.agentType}
+        </span>
       </div>
 
       {/* Content */}
-      <ScrollView flex={1}>
-        <YStack p="$4" gap="$4" width="100%">
+      <div style={{ flex: 1, overflow: 'auto' }}>
+        <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 24, width: '100%', boxSizing: 'border-box' }}>
           {/* Metadata */}
-          <YStack bg="$gray2" borderColor="$gray4" borderWidth={1} rounded="$3" p="$3" gap="$0.5">
-            <InfoRow label="Agent ID">
-              <Text fontSize={11} color="$gray11" fontFamily="monospace">{teammate.agentId}</Text>
-            </InfoRow>
+          <div style={{
+            background: '#f9fafb',
+            border: '1px solid #f0f1f3',
+            borderRadius: 14,
+            padding: '14px 18px',
+          }}>
+            <InfoRow label="Agent ID" mono>{teammate.agentId}</InfoRow>
             <InfoRow label="Type">{teammate.agentType}</InfoRow>
             <InfoRow label="Status"><StatusBadge status={teammate.status} /></InfoRow>
             {teammate.name && <InfoRow label="Name">{teammate.name}</InfoRow>}
             {teammate.transcriptPath && (
-              <InfoRow label="Transcript">
-                <Text fontSize={11} color="$gray9" fontFamily="monospace" numberOfLines={1}>
-                  {teammate.transcriptPath}
-                </Text>
-              </InfoRow>
+              <InfoRow label="Transcript" mono>{teammate.transcriptPath}</InfoRow>
             )}
-          </YStack>
+          </div>
 
           {/* Output */}
-          <YStack gap="$2">
-            <Text fontSize={11} fontWeight="600" color="$gray8" textTransform="uppercase" letterSpacing={0.5}>
-              Output
-            </Text>
+          <div>
+            <SectionLabel>Output</SectionLabel>
             {teammate.output ? (
               <div
-                style={{ backgroundColor: '#ffffff', borderRadius: 8, padding: 16, border: '1px solid #e5e7eb' }}
-                className="prose prose-sm max-w-none prose-pre:bg-gray-100 prose-pre:border prose-pre:border-gray-200 prose-code:text-blue-600 prose-headings:text-gray-900 prose-p:text-gray-700 prose-li:text-gray-700 prose-strong:text-gray-900 prose-a:text-blue-600"
+                style={{ backgroundColor: '#ffffff', borderRadius: 14, padding: 18, border: '1px solid #f0f1f3' }}
+                className={proseClass}
               >
                 <Markdown remarkPlugins={[remarkGfm, remarkBreaks]} components={markdownComponents}>{teammate.output}</Markdown>
               </div>
             ) : (
-              <Text fontSize={13} color="$gray7" fontStyle="italic">No output yet</Text>
+              <span style={{ fontSize: 13, color: '#b0b8c4', fontStyle: 'italic' }}>No output yet</span>
             )}
-          </YStack>
+          </div>
 
           {/* Sent messages history */}
           {teammateMessages.length > 0 && (
-            <YStack gap="$2">
-              <Text fontSize={11} fontWeight="600" color="$gray8" textTransform="uppercase" letterSpacing={0.5}>
-                Messages
-              </Text>
-              <YStack gap="$2">
+            <div>
+              <SectionLabel>Messages</SectionLabel>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {teammateMessages.map((msg, i) => (
                   <MessageBubble key={i} msg={msg} />
                 ))}
-              </YStack>
-            </YStack>
+              </div>
+            </div>
           )}
-        </YStack>
-      </ScrollView>
+        </div>
+      </div>
 
       {/* Message input */}
       {canSendMessage && (
         <TeammateMessageInput sessionId={sessionId} teammateName={teammate.name!} />
       )}
-    </YStack>
+    </div>
   );
 }

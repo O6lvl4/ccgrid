@@ -3,9 +3,9 @@ import { useStore } from '../../store/useStore';
 import type { TeamTask, Teammate } from '@ccgrid/shared';
 
 const COLUMNS: { key: TeamTask['status']; label: string; color: string; bg: string }[] = [
-  { key: 'pending', label: 'To Do', color: '#6b7280', bg: '#f3f4f6' },
-  { key: 'in_progress', label: 'In Progress', color: '#2563eb', bg: '#eff6ff' },
-  { key: 'completed', label: 'Done', color: '#16a34a', bg: '#f0fdf4' },
+  { key: 'pending', label: 'To Do', color: '#8b95a3', bg: '#f0f1f3' },
+  { key: 'in_progress', label: 'In Progress', color: '#0ab9e6', bg: 'rgba(10,185,230,0.08)' },
+  { key: 'completed', label: 'Done', color: '#22c55e', bg: 'rgba(34,197,94,0.08)' },
 ];
 
 const AVATAR_COLORS = [
@@ -41,7 +41,6 @@ export function TasksTab({ sessionId }: { sessionId: string }) {
     );
   }, [tasksMap, sessionId, sessionDone]);
 
-  // Build agentId -> Teammate lookup for this session
   const teammateMap = useMemo(() => {
     const map = new Map<string, Teammate>();
     for (const tm of teammates.values()) {
@@ -61,7 +60,7 @@ export function TasksTab({ sessionId }: { sessionId: string }) {
   if (tasks.length === 0) {
     return (
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <span style={{ color: '#9ca3af', fontSize: 13 }}>
+        <span style={{ color: '#b0b8c4', fontSize: 13 }}>
           Tasks will appear here as the lead creates them.
         </span>
       </div>
@@ -72,12 +71,12 @@ export function TasksTab({ sessionId }: { sessionId: string }) {
     <div style={{
       flex: 1,
       overflow: 'hidden',
-      padding: '12px 16px',
-      background: '#f8f9fa',
+      padding: '14px 18px',
+      background: '#f7f8fa',
     }}>
       <div style={{
         display: 'flex',
-        gap: 12,
+        gap: 14,
         height: '100%',
         overflow: 'hidden',
       }}>
@@ -92,9 +91,10 @@ export function TasksTab({ sessionId }: { sessionId: string }) {
                 display: 'flex',
                 flexDirection: 'column',
                 background: '#ffffff',
-                borderRadius: 12,
-                border: '1px solid #e5e7eb',
+                borderRadius: 16,
+                border: '1px solid #f0f1f3',
                 overflow: 'hidden',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.03)',
               }}
             >
               {/* Column header */}
@@ -102,19 +102,20 @@ export function TasksTab({ sessionId }: { sessionId: string }) {
                 display: 'flex',
                 alignItems: 'center',
                 gap: 8,
-                padding: '12px 14px',
-                borderBottom: '1px solid #f0f0f0',
+                padding: '14px 16px',
+                borderBottom: '1px solid #f0f1f3',
               }}>
                 <span style={{
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: 6,
-                  fontSize: 12,
-                  fontWeight: 600,
+                  fontSize: 11,
+                  fontWeight: 700,
                   color: col.color,
                   background: col.bg,
-                  padding: '3px 10px',
-                  borderRadius: 99,
+                  padding: '4px 12px',
+                  borderRadius: 12,
+                  letterSpacing: 0.3,
                 }}>
                   <span style={{
                     width: 7,
@@ -122,13 +123,14 @@ export function TasksTab({ sessionId }: { sessionId: string }) {
                     borderRadius: '50%',
                     background: col.color,
                     flexShrink: 0,
+                    boxShadow: col.key === 'in_progress' ? `0 0 6px ${col.color}` : 'none',
                   }} />
                   {col.label}
                 </span>
                 <span style={{
                   fontSize: 12,
-                  fontWeight: 600,
-                  color: '#9ca3af',
+                  fontWeight: 700,
+                  color: '#b0b8c4',
                   marginLeft: 'auto',
                 }}>
                   {items.length}
@@ -139,7 +141,7 @@ export function TasksTab({ sessionId }: { sessionId: string }) {
               <div style={{
                 flex: 1,
                 overflowY: 'auto',
-                padding: '8px 10px',
+                padding: '10px 12px',
               }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {items.map(task => (
@@ -153,7 +155,7 @@ export function TasksTab({ sessionId }: { sessionId: string }) {
                   ))}
                   {items.length === 0 && (
                     <div style={{
-                      padding: '24px 12px',
+                      padding: '28px 12px',
                       textAlign: 'center',
                       color: '#d1d5db',
                       fontSize: 12,
@@ -177,7 +179,6 @@ function TaskCard({ task, columnColor, teammate, onClick }: {
   teammate?: Teammate;
   onClick: () => void;
 }) {
-  // subject is used as the agent role name in team tasks
   const assigneeName = teammate?.name ?? task.assignedAgentId ?? task.subject;
 
   return (
@@ -186,32 +187,30 @@ function TaskCard({ task, columnColor, teammate, onClick }: {
       onClick={onClick}
       style={{
         background: '#ffffff',
-        border: '1px solid #e5e7eb',
-        borderRadius: 8,
-        padding: '10px 12px',
+        border: '1px solid #f0f1f3',
+        borderRadius: 12,
+        padding: '12px 14px',
         cursor: 'pointer',
         display: 'flex',
         flexDirection: 'column',
         gap: 6,
-        transition: 'box-shadow 0.15s, border-color 0.15s',
+        transition: 'box-shadow 0.18s, border-color 0.18s, transform 0.12s',
         borderLeft: `3px solid ${columnColor}`,
       }}
       onMouseEnter={e => {
-        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
-        e.currentTarget.style.borderColor = '#d1d5db';
-        e.currentTarget.style.borderLeftColor = columnColor;
+        e.currentTarget.style.boxShadow = '0 2px 10px rgba(0,0,0,0.06)';
+        e.currentTarget.style.transform = 'translateY(-1px)';
       }}
       onMouseLeave={e => {
         e.currentTarget.style.boxShadow = 'none';
-        e.currentTarget.style.borderColor = '#e5e7eb';
-        e.currentTarget.style.borderLeftColor = columnColor;
+        e.currentTarget.style.transform = 'translateY(0)';
       }}
     >
       {/* Title */}
       <div style={{
         fontSize: 13,
-        fontWeight: 500,
-        color: '#111827',
+        fontWeight: 600,
+        color: '#1a1d24',
         lineHeight: 1.4,
         overflow: 'hidden',
         display: '-webkit-box',
@@ -225,7 +224,7 @@ function TaskCard({ task, columnColor, teammate, onClick }: {
       {task.description && (
         <div style={{
           fontSize: 11,
-          color: '#6b7280',
+          color: '#8b95a3',
           lineHeight: 1.5,
           overflow: 'hidden',
           display: '-webkit-box',
@@ -238,7 +237,6 @@ function TaskCard({ task, columnColor, teammate, onClick }: {
 
       {/* Footer */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
-        {/* Dependencies */}
         {task.blockedBy.length > 0 && (
           <span style={{
             display: 'inline-flex',
@@ -246,10 +244,10 @@ function TaskCard({ task, columnColor, teammate, onClick }: {
             gap: 3,
             fontSize: 10,
             color: '#ef4444',
-            background: '#fef2f2',
-            padding: '2px 6px',
-            borderRadius: 4,
-            fontWeight: 500,
+            background: '#fff5f5',
+            padding: '3px 8px',
+            borderRadius: 8,
+            fontWeight: 600,
           }}>
             Blocked {task.blockedBy.length}
           </span>
@@ -260,34 +258,33 @@ function TaskCard({ task, columnColor, teammate, onClick }: {
             alignItems: 'center',
             gap: 3,
             fontSize: 10,
-            color: '#2563eb',
-            background: '#eff6ff',
-            padding: '2px 6px',
-            borderRadius: 4,
-            fontWeight: 500,
+            color: '#0ab9e6',
+            background: 'rgba(10,185,230,0.08)',
+            padding: '3px 8px',
+            borderRadius: 8,
+            fontWeight: 600,
           }}>
             Blocks {task.blocks.length}
           </span>
         )}
 
-        {/* Assignee avatar */}
         {assigneeName && (
           <div style={{
             marginLeft: 'auto',
             display: 'inline-flex',
             alignItems: 'center',
-            gap: 5,
+            gap: 6,
           }}>
             <div style={{
-              width: 20,
-              height: 20,
-              borderRadius: '50%',
+              width: 22,
+              height: 22,
+              borderRadius: 11,
               background: avatarColor(task.assignedAgentId ?? task.subject),
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontSize: 10,
-              fontWeight: 700,
+              fontWeight: 800,
               color: '#ffffff',
               flexShrink: 0,
             }}>
@@ -295,7 +292,8 @@ function TaskCard({ task, columnColor, teammate, onClick }: {
             </div>
             <span style={{
               fontSize: 11,
-              color: '#6b7280',
+              color: '#8b95a3',
+              fontWeight: 500,
               maxWidth: 90,
               overflow: 'hidden',
               textOverflow: 'ellipsis',

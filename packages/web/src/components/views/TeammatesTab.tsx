@@ -13,15 +13,8 @@ export function TeammatesTab({ sessionId }: { sessionId: string }) {
 
   if (tmList.length === 0) {
     return (
-      <div
-        style={{
-          flex: 1,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <span style={{ color: '#9ca3af', fontSize: 13 }}>
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <span style={{ color: '#b0b8c4', fontSize: 13 }}>
           Teammates will appear here as the lead agent spawns them.
         </span>
       </div>
@@ -76,32 +69,34 @@ function TeammateCard({
       onClick={onClick}
       style={{
         background: '#ffffff',
-        border: '1px solid #e5e7eb',
-        borderRadius: 8,
-        padding: 14,
+        border: '1px solid #f0f1f3',
+        borderRadius: 14,
+        padding: 16,
         cursor: 'pointer',
         display: 'flex',
         flexDirection: 'column',
-        gap: 8,
-        transition: 'border-color 0.15s, box-shadow 0.15s',
+        gap: 10,
+        transition: 'border-color 0.18s, box-shadow 0.18s, transform 0.12s',
       }}
       onMouseEnter={e => {
-        e.currentTarget.style.borderColor = '#d1d5db';
-        e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)';
+        e.currentTarget.style.borderColor = '#e0e3e8';
+        e.currentTarget.style.boxShadow = '0 2px 10px rgba(0,0,0,0.05)';
+        e.currentTarget.style.transform = 'translateY(-1px)';
       }}
       onMouseLeave={e => {
-        e.currentTarget.style.borderColor = '#e5e7eb';
+        e.currentTarget.style.borderColor = '#f0f1f3';
         e.currentTarget.style.boxShadow = 'none';
+        e.currentTarget.style.transform = 'translateY(0)';
       }}
     >
       {/* Header: status + name */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <StatusBadge status={status} showLabel={false} />
         <span
           style={{
-            fontWeight: 600,
+            fontWeight: 700,
             fontSize: 13,
-            color: '#111827',
+            color: '#1a1d24',
             flex: 1,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -117,11 +112,12 @@ function TeammateCard({
         <span
           style={{
             fontSize: 10,
-            color: '#6b7280',
-            background: '#f3f4f6',
-            padding: '2px 6px',
-            borderRadius: 4,
-            fontWeight: 500,
+            color: '#8b95a3',
+            background: '#f0f1f3',
+            padding: '3px 8px',
+            borderRadius: 8,
+            fontWeight: 600,
+            letterSpacing: 0.2,
           }}
         >
           {agentType}
@@ -132,7 +128,7 @@ function TeammateCard({
       <div
         style={{
           fontSize: 12,
-          color: output ? '#6b7280' : '#9ca3af',
+          color: output ? '#555e6b' : '#b0b8c4',
           fontStyle: output ? 'normal' : 'italic',
           lineHeight: 1.5,
           overflow: 'hidden',

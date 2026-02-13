@@ -1,4 +1,3 @@
-import { Text, XStack, YStack } from 'tamagui';
 import type { Session } from '@ccgrid/shared';
 
 export function CostTracker({ session }: { session: Session }) {
@@ -9,44 +8,37 @@ export function CostTracker({ session }: { session: Session }) {
     : 0;
 
   const barColor =
-    budgetPercent > 80 ? '$red5' : budgetPercent > 50 ? '$yellow5' : '$blue5';
+    budgetPercent > 80 ? '#ef4444' : budgetPercent > 50 ? '#eab308' : '#0ab9e6';
 
   return (
-    <XStack ai="center" gap="$3" ml="auto" shrink={0}>
-      <XStack ai="center" gap="$1.5">
-        <Text fontSize={12} color="$gray4">
-          Cost:
-        </Text>
-        <Text fontSize={12} fontFamily="monospace" color="$gray2">
+    <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginLeft: 'auto', flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span style={{ fontSize: 12, color: '#8b95a3' }}>Cost:</span>
+        <span style={{ fontSize: 12, fontFamily: 'monospace', color: '#1a1d24', fontWeight: 600 }}>
           ${session.costUsd.toFixed(4)}
-        </Text>
+        </span>
         {hasBudget && (
-          <Text fontSize={12} color="$gray6">
+          <span style={{ fontSize: 12, color: '#b0b8c4' }}>
             / ${session.maxBudgetUsd!.toFixed(2)}
-          </Text>
+          </span>
         )}
-      </XStack>
+      </div>
 
       {hasBudget && (
-        <YStack
-          width={80}
-          height={6}
-          bg="$gray8"
-          rounded="$10"
-          overflow="hidden"
-        >
-          <YStack
-            height="100%"
-            rounded="$10"
-            bg={barColor}
-            width={`${budgetPercent}%` as any}
-          />
-        </YStack>
+        <div style={{ width: 80, height: 6, background: '#e8eaed', borderRadius: 3, overflow: 'hidden' }}>
+          <div style={{
+            height: '100%',
+            borderRadius: 3,
+            background: barColor,
+            width: `${budgetPercent}%`,
+            transition: 'width 0.3s ease',
+          }} />
+        </div>
       )}
 
-      <Text fontSize={12} fontFamily="monospace" color="$gray4">
+      <span style={{ fontSize: 12, fontFamily: 'monospace', color: '#8b95a3' }}>
         {totalTokens.toLocaleString()} tokens
-      </Text>
-    </XStack>
+      </span>
+    </div>
   );
 }
