@@ -33,11 +33,9 @@ export function IconRail() {
           alignItems: 'center',
           justifyContent: 'center',
           marginBottom: 10,
-          borderRadius: 12,
-          background: 'rgba(10, 185, 230, 0.12)',
         }}
       >
-        <span style={{ fontSize: 18, color: '#0ab9e6', lineHeight: 1, fontWeight: 900 }}>AG</span>
+        <TwemojiIcon emoji="⊞" size={24} />
       </div>
 
       {/* Section icons */}
