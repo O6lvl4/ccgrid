@@ -297,22 +297,24 @@ export function SessionConfig({ api, onCreated }: { api: Api; onCreated?: () => 
           )}
         </YStack>
 
-        <YStack>
-          <FieldLabel>Budget (USD)</FieldLabel>
-          <Input
-            size="$3"
-            inputMode="decimal"
-            placeholder="No limit"
-            value={maxBudget}
-            onChangeText={setMaxBudget}
-            bg="$gray3"
-            borderColor="$gray5"
-            color="$gray12"
-            focusStyle={{ borderColor: '$blue9' }}
-            width={120}
-          />
-        </YStack>
       </XStack>
+
+      {/* Budget */}
+      <YStack>
+        <FieldLabel>Budget (USD)</FieldLabel>
+        <Input
+          size="$3"
+          inputMode="decimal"
+          placeholder="No limit"
+          value={maxBudget}
+          onChangeText={setMaxBudget}
+          bg="$gray3"
+          borderColor="$gray5"
+          color="$gray12"
+          focusStyle={{ borderColor: '$blue9' }}
+          width={120}
+        />
+      </YStack>
 
       {/* Teammate Specs */}
       <YStack>

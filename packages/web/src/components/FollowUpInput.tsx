@@ -125,27 +125,58 @@ export function FollowUpInput({ sessionId }: { sessionId: string }) {
           }}
         />
         <XStack jc="space-between" ai="center">
-          <Button
-            size="$2"
-            bg="$gray3"
-            color="$gray11"
-            borderWidth={1}
-            borderColor="$gray5"
-            hoverStyle={{ bg: '$gray4' }}
-            onPress={() => fileInputRef.current?.click()}
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
             disabled={sending}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 5,
+              padding: '5px 12px',
+              borderRadius: 8,
+              border: '1px solid #e5e7eb',
+              background: '#f9fafb',
+              color: '#6b7280',
+              fontSize: 12,
+              fontWeight: 500,
+              cursor: sending ? 'default' : 'pointer',
+              opacity: sending ? 0.5 : 1,
+              transition: 'background 0.15s, border-color 0.15s',
+            }}
+            onMouseEnter={e => { if (!sending) { e.currentTarget.style.background = '#f3f4f6'; e.currentTarget.style.borderColor = '#d1d5db'; } }}
+            onMouseLeave={e => { e.currentTarget.style.background = '#f9fafb'; e.currentTarget.style.borderColor = '#e5e7eb'; }}
           >
-            + Files
-          </Button>
-          <Button
-            size="$2"
-            theme="active"
-            disabled={!canSend}
-            opacity={!canSend ? 0.5 : 1}
-            onPress={handleSend}
-          >
-            {sending ? 'Sending...' : 'Send'}
-          </Button>
+            <span style={{ fontSize: 14 }}>📎</span>
+            Attach
+          </button>
+          <XStack ai="center" gap="$3">
+            <Text fontSize={11} color="$gray8">
+              ⌘+Enter
+            </Text>
+            <button
+              type="button"
+              onClick={handleSend}
+              disabled={!canSend}
+              style={{
+                padding: '6px 16px',
+                borderRadius: 8,
+                border: 'none',
+                background: canSend ? '#3b82f6' : '#e5e7eb',
+                color: canSend ? '#fff' : '#9ca3af',
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: canSend ? 'pointer' : 'default',
+                transition: 'background 0.15s, transform 0.1s',
+              }}
+              onMouseEnter={e => { if (canSend) e.currentTarget.style.background = '#2563eb'; }}
+              onMouseLeave={e => { if (canSend) e.currentTarget.style.background = '#3b82f6'; }}
+              onMouseDown={e => { if (canSend) e.currentTarget.style.transform = 'scale(0.97)'; }}
+              onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+            >
+              {sending ? 'Sending...' : 'Send'}
+            </button>
+          </XStack>
         </XStack>
       </YStack>
     </YStack>
