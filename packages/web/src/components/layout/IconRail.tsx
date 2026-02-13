@@ -14,28 +14,30 @@ export function IconRail() {
   return (
     <div
       style={{
-        width: 48,
-        background: '#1a1a2e',
+        width: 56,
+        background: '#1a1d24',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         flexShrink: 0,
-        paddingTop: 12,
-        gap: 4,
+        paddingTop: 14,
+        gap: 6,
       }}
     >
       {/* Logo */}
       <div
         style={{
-          width: 36,
-          height: 36,
+          width: 38,
+          height: 38,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          marginBottom: 12,
+          marginBottom: 10,
+          borderRadius: 12,
+          background: 'rgba(10, 185, 230, 0.12)',
         }}
       >
-        <span style={{ fontSize: 20, color: '#818cf8', lineHeight: 1 }}>⊞</span>
+        <span style={{ fontSize: 18, color: '#0ab9e6', lineHeight: 1, fontWeight: 900 }}>AG</span>
       </div>
 
       {/* Section icons */}
@@ -47,39 +49,42 @@ export function IconRail() {
             title={label}
             onClick={() => setActiveSection(section)}
             style={{
-              width: 36,
-              height: 36,
+              width: 40,
+              height: 40,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              borderRadius: 8,
+              borderRadius: 12,
               border: 'none',
-              background: isActive ? 'rgba(129, 140, 248, 0.2)' : 'transparent',
+              background: isActive ? 'rgba(10, 185, 230, 0.18)' : 'transparent',
               cursor: 'pointer',
-              transition: 'background 0.15s',
+              transition: 'background 0.18s, transform 0.12s',
               position: 'relative',
             }}
             onMouseEnter={e => {
-              if (!isActive) e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
+              if (!isActive) e.currentTarget.style.background = 'rgba(255,255,255,0.06)';
+              e.currentTarget.style.transform = 'scale(1.08)';
             }}
             onMouseLeave={e => {
               if (!isActive) e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.transform = 'scale(1)';
             }}
           >
             {isActive && (
               <div
                 style={{
                   position: 'absolute',
-                  left: -6,
-                  top: 8,
-                  bottom: 8,
+                  left: -4,
+                  top: 10,
+                  bottom: 10,
                   width: 3,
-                  borderRadius: 2,
-                  background: '#818cf8',
+                  borderRadius: 3,
+                  background: '#0ab9e6',
+                  boxShadow: '0 0 6px rgba(10, 185, 230, 0.5)',
                 }}
               />
             )}
-            <TwemojiIcon emoji={emoji} size={16} />
+            <TwemojiIcon emoji={emoji} size={18} />
           </button>
         );
       })}

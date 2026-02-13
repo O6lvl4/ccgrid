@@ -3,7 +3,7 @@ import { SidebarPanel } from './SidebarPanel';
 
 export function ViewShell({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ height: '100vh', display: 'flex', background: '#f9fafb' }}>
+    <div style={{ height: '100vh', display: 'flex', background: '#f7f8fa' }}>
       <IconRail />
       <SidebarPanel />
       <div

@@ -9,8 +9,8 @@ export function SidebarPanel() {
   return (
     <div
       style={{
-        width: 260,
-        borderRight: '1px solid #e5e7eb',
+        width: 268,
+        borderRight: '1px solid #f0f1f3',
         display: 'flex',
         flexDirection: 'column',
         background: '#ffffff',

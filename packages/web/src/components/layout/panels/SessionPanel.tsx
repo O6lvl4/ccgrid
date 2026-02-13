@@ -7,7 +7,7 @@ import { NewSessionDialog } from '../../dialogs/NewSessionDialog';
 const STATUS_DOT: Record<string, { color: string; pulse?: boolean }> = {
   starting:  { color: '#eab308' },
   running:   { color: '#22c55e', pulse: true },
-  completed: { color: '#6b7280' },
+  completed: { color: '#8b95a3' },
   error:     { color: '#ef4444' },
 };
 
@@ -36,11 +36,17 @@ export function SessionPanel() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '14px 16px 10px',
+          padding: '16px 18px 12px',
           flexShrink: 0,
         }}
       >
-        <span style={{ fontSize: 12, fontWeight: 600, color: '#6b7280', letterSpacing: 0.3 }}>
+        <span style={{
+          fontSize: 11,
+          fontWeight: 800,
+          color: '#8b95a3',
+          letterSpacing: 0.8,
+          textTransform: 'uppercase',
+        }}>
           Sessions
         </span>
         <button
@@ -50,33 +56,39 @@ export function SessionPanel() {
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: 24,
-            height: 24,
+            width: 26,
+            height: 26,
             padding: 0,
-            borderRadius: 6,
-            border: '1px solid #e5e7eb',
-            background: '#ffffff',
-            color: '#6b7280',
-            fontSize: 16,
+            borderRadius: 13,
+            border: 'none',
+            background: '#0ab9e6',
+            color: '#fff',
+            fontSize: 15,
+            fontWeight: 700,
             cursor: 'pointer',
-            lineHeight: '24px',
-            transition: 'background 0.15s, color 0.15s',
+            lineHeight: 1,
+            transition: 'background 0.18s, transform 0.12s, box-shadow 0.18s',
+            boxShadow: '0 2px 8px rgba(10, 185, 230, 0.3)',
           }}
           onMouseEnter={e => {
-            e.currentTarget.style.background = '#f3f4f6';
-            e.currentTarget.style.color = '#111827';
+            e.currentTarget.style.background = '#09a8d2';
+            e.currentTarget.style.transform = 'scale(1.1)';
+            e.currentTarget.style.boxShadow = '0 3px 12px rgba(10, 185, 230, 0.4)';
           }}
           onMouseLeave={e => {
-            e.currentTarget.style.background = '#ffffff';
-            e.currentTarget.style.color = '#6b7280';
+            e.currentTarget.style.background = '#0ab9e6';
+            e.currentTarget.style.transform = 'scale(1)';
+            e.currentTarget.style.boxShadow = '0 2px 8px rgba(10, 185, 230, 0.3)';
           }}
+          onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.92)'; }}
+          onMouseUp={e => { e.currentTarget.style.transform = 'scale(1.1)'; }}
         >
           +
         </button>
       </div>
 
       {/* Session list */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '0 8px 8px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '0 10px 10px' }}>
         {sessionList.map(s => {
           const isActive = s.id === currentSessionId;
           const dot = STATUS_DOT[s.status] ?? STATUS_DOT.completed;
@@ -196,15 +208,15 @@ function SessionItem({
       style={{
         display: 'flex',
         alignItems: 'flex-start',
-        gap: 8,
-        padding: '8px 10px',
-        borderRadius: 6,
+        gap: 10,
+        padding: '10px 12px',
+        borderRadius: 12,
         cursor: 'pointer',
-        background: isActive ? '#f3f4f6' : hovered ? '#f9fafb' : 'transparent',
-        borderLeft: isActive ? '3px solid #3b82f6' : '3px solid transparent',
+        background: isActive ? '#f0f7ff' : hovered ? '#f9fafb' : 'transparent',
         marginBottom: 2,
-        transition: 'background 0.15s',
+        transition: 'background 0.18s',
         position: 'relative',
+        borderLeft: isActive ? '3px solid #0ab9e6' : '3px solid transparent',
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -212,14 +224,15 @@ function SessionItem({
       <div
         className={dotPulse ? 'animate-pulse' : undefined}
         style={{
-          width: 6,
-          height: 6,
-          minWidth: 6,
-          minHeight: 6,
+          width: 7,
+          height: 7,
+          minWidth: 7,
+          minHeight: 7,
           borderRadius: '50%',
           backgroundColor: dotColor,
           marginTop: 5,
           flexShrink: 0,
+          boxShadow: dotPulse ? `0 0 6px ${dotColor}` : 'none',
         }}
       />
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -238,9 +251,9 @@ function SessionItem({
               width: '100%',
               fontSize: 13,
               fontWeight: 600,
-              color: '#111827',
+              color: '#1a1d24',
               border: 'none',
-              borderBottom: '1px solid #3b82f6',
+              borderBottom: '2px solid #0ab9e6',
               outline: 'none',
               background: 'transparent',
               padding: 0,
@@ -252,8 +265,8 @@ function SessionItem({
           <div
             style={{
               fontSize: 13,
-              fontWeight: isActive ? 600 : 400,
-              color: isActive ? '#111827' : '#374151',
+              fontWeight: isActive ? 700 : 500,
+              color: isActive ? '#1a1d24' : '#3c4257',
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
@@ -263,7 +276,13 @@ function SessionItem({
             {name}
           </div>
         )}
-        <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 2, lineHeight: 1 }}>
+        <div style={{
+          fontSize: 11,
+          color: '#b0b8c4',
+          marginTop: 3,
+          lineHeight: 1,
+          letterSpacing: 0.1,
+        }}>
           {status} · {timeAgo(createdAt)}
         </div>
       </div>
@@ -273,27 +292,27 @@ function SessionItem({
           onClick={e => { e.stopPropagation(); onMenuToggle(); }}
           style={{
             position: 'absolute',
-            top: 6,
-            right: 6,
+            top: 8,
+            right: 8,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: 22,
-            height: 22,
-            borderRadius: 4,
+            width: 24,
+            height: 24,
+            borderRadius: 12,
             border: 'none',
-            background: menuOpen ? '#e5e7eb' : '#f3f4f6',
-            color: '#6b7280',
+            background: menuOpen ? '#e8eaed' : 'transparent',
+            color: '#8b95a3',
             fontSize: 14,
             cursor: 'pointer',
             lineHeight: 1,
             padding: 0,
-            transition: 'background 0.1s',
+            transition: 'background 0.15s, color 0.15s',
           }}
-          onMouseEnter={e => { e.currentTarget.style.background = '#e5e7eb'; }}
-          onMouseLeave={e => { if (!menuOpen) e.currentTarget.style.background = '#f3f4f6'; }}
+          onMouseEnter={e => { e.currentTarget.style.background = '#e8eaed'; e.currentTarget.style.color = '#555e6b'; }}
+          onMouseLeave={e => { if (!menuOpen) e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#8b95a3'; }}
         >
-          ⋯
+          ···
         </button>
       )}
 
@@ -302,15 +321,16 @@ function SessionItem({
           ref={menuRef}
           style={{
             position: 'absolute',
-            top: 28,
-            right: 6,
+            top: 32,
+            right: 8,
             zIndex: 100,
             background: '#ffffff',
-            border: '1px solid #e5e7eb',
-            borderRadius: 8,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+            border: '1px solid #f0f1f3',
+            borderRadius: 12,
+            boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.03)',
             padding: '4px 0',
-            minWidth: 120,
+            minWidth: 130,
+            overflow: 'hidden',
           }}
         >
           <MenuItem label="Rename" onClick={e => { e.stopPropagation(); onRenameStart(); }} />
@@ -336,16 +356,17 @@ function MenuItem({
       style={{
         display: 'block',
         width: '100%',
-        padding: '6px 12px',
+        padding: '8px 14px',
         border: 'none',
         background: 'transparent',
-        color: danger ? '#dc2626' : '#374151',
-        fontSize: 12,
+        color: danger ? '#ef4444' : '#3c4257',
+        fontSize: 13,
+        fontWeight: 500,
         textAlign: 'left',
         cursor: 'pointer',
-        transition: 'background 0.1s',
+        transition: 'background 0.12s',
       }}
-      onMouseEnter={e => { e.currentTarget.style.background = danger ? '#fef2f2' : '#f3f4f6'; }}
+      onMouseEnter={e => { e.currentTarget.style.background = danger ? '#fff5f5' : '#f7f8fa'; }}
       onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
     >
       {label}
