@@ -1,5 +1,4 @@
 import { useState, useCallback, useRef } from 'react';
-import { TextArea } from 'tamagui';
 import { useApi } from '../hooks/useApi';
 import { readFilesAsAttachments, FILE_ACCEPT } from '../utils/fileUtils';
 
@@ -106,18 +105,31 @@ export function FollowUpInput({ sessionId }: { sessionId: string }) {
           </div>
         )}
 
-        <TextArea
+        <textarea
           value={prompt}
-          onChangeText={setPrompt}
+          onChange={e => setPrompt(e.target.value)}
+          onKeyDown={handleKeyDown as any}
           placeholder="追加の指示を入力..."
           disabled={sending}
-          minHeight={56}
-          bg="$gray2"
-          borderColor="$gray4"
-          borderRadius={12}
-          color="$gray12"
-          fontSize={13}
-          onKeyDown={handleKeyDown}
+          rows={3}
+          style={{
+            width: '100%',
+            boxSizing: 'border-box' as const,
+            minHeight: 64,
+            padding: '10px 12px',
+            borderRadius: 12,
+            border: '1px solid #e5e7eb',
+            background: '#f9fafb',
+            color: '#1a1d24',
+            fontSize: 13,
+            lineHeight: 1.5,
+            fontFamily: 'inherit',
+            resize: 'vertical' as const,
+            outline: 'none',
+            transition: 'border-color 0.15s',
+          }}
+          onFocus={e => { e.currentTarget.style.borderColor = '#0ab9e6'; }}
+          onBlur={e => { e.currentTarget.style.borderColor = '#e5e7eb'; }}
         />
         <input
           ref={fileInputRef}
