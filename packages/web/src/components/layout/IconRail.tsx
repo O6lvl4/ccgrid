@@ -34,10 +34,15 @@ export function IconRail() {
           justifyContent: 'center',
           marginBottom: 10,
           borderRadius: 12,
-          background: 'rgba(255,255,255,0.08)',
+          background: 'rgba(10, 185, 230, 0.15)',
         }}
       >
-        <TwemojiIcon emoji="🔲" size={26} />
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <rect x="1" y="1" width="7.5" height="7.5" rx="2" fill="#0ab9e6"/>
+          <rect x="11.5" y="1" width="7.5" height="7.5" rx="2" fill="#0ab9e6" opacity="0.6"/>
+          <rect x="1" y="11.5" width="7.5" height="7.5" rx="2" fill="#0ab9e6" opacity="0.6"/>
+          <rect x="11.5" y="11.5" width="7.5" height="7.5" rx="2" fill="#0ab9e6"/>
+        </svg>
       </div>
 
       {/* Section icons */}
