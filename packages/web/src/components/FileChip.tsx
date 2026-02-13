@@ -1,9 +1,15 @@
-import { useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 export function FileChip({ file, onRemove }: { file: File; onRemove: () => void }) {
   const isImage = file.type.startsWith('image/');
-  const url = useMemo(() => isImage ? URL.createObjectURL(file) : null, [file, isImage]);
-  useEffect(() => () => { if (url) URL.revokeObjectURL(url); }, [url]);
+  const [url, setUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isImage) { setUrl(null); return; }
+    const objectUrl = URL.createObjectURL(file);
+    setUrl(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [file, isImage]);
 
   return (
     <div style={{
