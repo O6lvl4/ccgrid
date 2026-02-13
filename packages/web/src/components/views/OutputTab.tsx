@@ -10,7 +10,7 @@ import { markdownComponents } from '../CodeBlock';
 import type { FollowUpImage } from '../../store/useStore';
 import type { Teammate } from '@ccgrid/shared';
 
-const STABLE_EMPTY_ROUNDS: FollowUpImage[][] = [];
+const STABLE_EMPTY_MAP = new Map<number, FollowUpImage[]>();
 
 // Stable plugin arrays (avoid recreating on every render)
 const remarkPlugins = [remarkGfm, remarkBreaks];
@@ -337,7 +337,7 @@ function TimelineConnector() {
 export const OutputTab = memo(function OutputTab({ sessionId }: { sessionId: string }) {
   const session = useStore(s => s.sessions.get(sessionId));
   const output = useStore(s => s.leadOutputs.get(sessionId) ?? '');
-  const imageRounds = useStore(s => s.followUpImages.get(sessionId) ?? STABLE_EMPTY_ROUNDS);
+  const imageMap = useStore(s => s.followUpImages.get(sessionId) ?? STABLE_EMPTY_MAP);
   const allTeammates = useStore(useShallow((s) => {
     const result: Teammate[] = [];
     for (const tm of s.teammates.values()) {
@@ -435,7 +435,7 @@ export const OutputTab = memo(function OutputTab({ sessionId }: { sessionId: str
             {segments.followUps.map((fu, i) => {
               const isLast = i === segments.followUps.length - 1;
               const followUpStatus = isLast && isStreaming ? 'running' : 'completed';
-              const images = imageRounds[i];
+              const images = imageMap.get(i);
               return (
                 <div key={`followup-${i}`}>
                   {fu.userPrompt && (

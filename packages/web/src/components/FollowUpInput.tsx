@@ -20,11 +20,15 @@ export function FollowUpInput({ sessionId }: { sessionId: string }) {
       const files = attachedFiles.length > 0
         ? await readFilesAsAttachments(attachedFiles)
         : undefined;
-      // Save image previews for display in the output timeline
+      // Save image previews keyed by follow-up index for display in the output timeline
       const imagePreviews = (files ?? [])
         .filter(f => f.mimeType.startsWith('image/'))
         .map(f => ({ name: f.name, dataUrl: `data:${f.mimeType};base64,${f.base64Data}` }));
-      pushFollowUpImages(sessionId, imagePreviews);
+      if (imagePreviews.length > 0) {
+        const currentOutput = useStore.getState().leadOutputs.get(sessionId) ?? '';
+        const followUpIndex = (currentOutput.match(/<!-- follow-up -->/g) || []).length;
+        pushFollowUpImages(sessionId, followUpIndex, imagePreviews);
+      }
       await api.continueSession(sessionId, text || '添付ファイルを確認してください', files);
       setPrompt('');
       setAttachedFiles([]);
