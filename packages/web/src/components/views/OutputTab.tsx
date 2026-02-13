@@ -7,6 +7,7 @@ import { useShallow } from 'zustand/shallow';
 import { FollowUpInput } from '../FollowUpInput';
 import { applyTwemojiToElement } from '../../utils/twemoji';
 import { markdownComponents } from '../CodeBlock';
+import { getAttachmentRounds } from '../../utils/followUpAttachments';
 import type { Teammate } from '@ccgrid/shared';
 
 // Stable plugin arrays (avoid recreating on every render)
@@ -252,13 +253,14 @@ const BORDER_COLORS: Record<string, string> = {
   '$indigo5': '#a5b4fc',
 };
 
-const ContentCard = memo(function ContentCard({ icon, title, subtitle, status, content, borderColorOverride }: {
+const ContentCard = memo(function ContentCard({ icon, title, subtitle, status, content, borderColorOverride, children }: {
   icon: ReactNode;
   title: string;
   subtitle?: string;
   status?: string;
   content: string;
   borderColorOverride?: string;
+  children?: ReactNode;
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const borderColor = BORDER_COLORS[borderColorOverride ?? '$gray5'] ?? '#e5e7eb';
@@ -279,6 +281,7 @@ const ContentCard = memo(function ContentCard({ icon, title, subtitle, status, c
           ) : (
             <span style={{ color: '#9ca3af', fontStyle: 'italic', fontSize: 13 }}>No output yet</span>
           )}
+          {children}
         </div>
       )}
     </div>
@@ -429,6 +432,8 @@ export const OutputTab = memo(function OutputTab({ sessionId }: { sessionId: str
             {segments.followUps.map((fu, i) => {
               const isLast = i === segments.followUps.length - 1;
               const followUpStatus = isLast && isStreaming ? 'running' : 'completed';
+              const attachmentRounds = getAttachmentRounds(sessionId);
+              const images = attachmentRounds[i];
               return (
                 <div key={`followup-${i}`}>
                   {fu.userPrompt && (
@@ -439,7 +444,26 @@ export const OutputTab = memo(function OutputTab({ sessionId }: { sessionId: str
                         title="You"
                         content={fu.userPrompt}
                         borderColorOverride="$indigo5"
-                      />
+                      >
+                        {images && images.length > 0 && (
+                          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
+                            {images.map((img, j) => (
+                              <img
+                                key={j}
+                                src={img.dataUrl}
+                                alt={img.name}
+                                style={{
+                                  maxWidth: 200,
+                                  maxHeight: 150,
+                                  borderRadius: 10,
+                                  objectFit: 'cover',
+                                  boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+                                }}
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </ContentCard>
                     </>
                   )}
                   {fu.response && (

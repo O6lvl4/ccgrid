@@ -198,19 +198,10 @@ export class SessionManager {
     console.log(`[continueSession] sessionId=${sessionId} sdkSessionId=${session?.sessionId} status=${session?.status}`);
     if (!session?.sessionId || session.status !== 'completed') return undefined;
 
-    let fileSuffix = '';
-    if (files && files.length > 0) {
-      const parts: string[] = [];
-      for (const f of files) {
-        if (f.mimeType.startsWith('image/')) {
-          parts.push(`> ![${f.name}](data:${f.mimeType};base64,${f.base64Data})`);
-        } else {
-          parts.push(`> 📎 ${f.name}`);
-        }
-      }
-      fileSuffix = '\n' + parts.join('\n');
-    }
-    const userBlock = `\n\n<!-- follow-up -->\n\n> ${prompt.replace(/\n/g, '\n> ')}${fileSuffix}\n\n`;
+    const fileNames = files && files.length > 0
+      ? `\n> 📎 ${files.map(f => f.name).join(', ')}`
+      : '';
+    const userBlock = `\n\n<!-- follow-up -->\n\n> ${prompt.replace(/\n/g, '\n> ')}${fileNames}\n\n`;
     const existing = this.leadOutputs.get(sessionId) ?? '';
     this.leadOutputs.set(sessionId, existing + userBlock);
     this.broadcast({ type: 'lead_output', sessionId, text: userBlock });

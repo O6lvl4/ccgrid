@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { useApi } from '../hooks/useApi';
 import { readFilesAsAttachments, FILE_ACCEPT } from '../utils/fileUtils';
+import { pushAttachments, type AttachmentPreview } from '../utils/followUpAttachments';
 import { FileChip } from './FileChip';
 
 export function FollowUpInput({ sessionId }: { sessionId: string }) {
@@ -18,6 +19,15 @@ export function FollowUpInput({ sessionId }: { sessionId: string }) {
       const files = attachedFiles.length > 0
         ? await readFilesAsAttachments(attachedFiles)
         : undefined;
+      // Save image previews for display in the output timeline
+      if (files && files.length > 0) {
+        const previews: AttachmentPreview[] = files
+          .filter(f => f.mimeType.startsWith('image/'))
+          .map(f => ({ name: f.name, mimeType: f.mimeType, dataUrl: `data:${f.mimeType};base64,${f.base64Data}` }));
+        if (previews.length > 0) {
+          pushAttachments(sessionId, previews);
+        }
+      }
       await api.continueSession(sessionId, text || '添付ファイルを確認してください', files);
       setPrompt('');
       setAttachedFiles([]);
