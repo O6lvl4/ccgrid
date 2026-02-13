@@ -10,8 +10,8 @@ const SECTIONS: { section: SidebarSection; emoji: string; label: string }[] = [
 ];
 
 function usageColor(pct: number): string {
-  if (pct > 80) return '#ef4444';
-  if (pct > 50) return '#eab308';
+  if (pct >= 75) return '#ef4444';
+  if (pct >= 50) return '#eab308';
   return '#22c55e';
 }
 
@@ -33,23 +33,21 @@ function shortModel(name: string): string {
   return name.slice(0, 5);
 }
 
-/** Interpolate green→yellow→red based on percentage */
+/** Smooth gradient mapped to fill height — only shows colors up to current pct */
 function gaugeGradientCSS(pct: number): string {
-  // Bottom = 0%, top = 100%. Fill stops match the fill height.
-  // Color zones baked into the gradient itself so it reads like a fuel gauge.
-  const fillEnd = `${pct}%`;
-  const fadeEnd = `${Math.min(100, pct + 3)}%`;
-  return [
-    'linear-gradient(to top,',
-    '  #22c55e 0%,',        // green zone (0-40%)
-    '  #22c55e 35%,',
-    '  #eab308 55%,',       // yellow zone (40-70%)
-    '  #ef4444 80%,',       // red zone (70-100%)
-    `  #ef4444 ${fillEnd},`,
-    `  rgba(255,255,255,0.06) ${fadeEnd},`,
-    '  rgba(255,255,255,0.06) 100%',
-    ')',
-  ].join('');
+  if (pct <= 50) {
+    // All within green zone
+    return 'linear-gradient(to top, #22c55e, #22c55e)';
+  }
+  if (pct <= 75) {
+    // Green → yellow
+    const greenEnd = (50 / pct) * 100;
+    return `linear-gradient(to top, #22c55e ${greenEnd}%, #eab308 100%)`;
+  }
+  // Green → yellow → red
+  const greenEnd = (50 / pct) * 100;
+  const yellowEnd = (75 / pct) * 100;
+  return `linear-gradient(to top, #22c55e ${greenEnd}%, #eab308 ${yellowEnd}%, #ef4444 100%)`;
 }
 
 export function IconRail() {
@@ -280,7 +278,7 @@ function GaugeBar({ pct, label }: { pct: number; label: string }) {
           left: 0,
           right: 0,
           height: `${pct}%`,
-          backgroundImage: gaugeGradientCSS(100),
+          backgroundImage: gaugeGradientCSS(pct),
           borderRadius: 3,
           transition: 'height 1s ease',
           boxShadow: pct > 0 ? `0 0 8px ${color}40, inset 0 0 4px ${color}20` : 'none',
