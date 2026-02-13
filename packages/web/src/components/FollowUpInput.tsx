@@ -1,25 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
-import { Button, Text, TextArea, XStack, YStack } from 'tamagui';
+import { TextArea } from 'tamagui';
 import { useApi } from '../hooks/useApi';
 import { readFilesAsAttachments, FILE_ACCEPT } from '../utils/fileUtils';
-
-function InputAvatar() {
-  return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      width: 28,
-      height: 28,
-      minWidth: 28,
-      borderRadius: 14,
-      backgroundColor: '#3b82f6',
-      flexShrink: 0,
-    }}>
-      <span style={{ color: '#fff', fontSize: 13, fontWeight: 800, lineHeight: 1 }}>✎</span>
-    </div>
-  );
-}
 
 export function FollowUpInput({ sessionId }: { sessionId: string }) {
   const api = useApi();
@@ -56,57 +38,81 @@ export function FollowUpInput({ sessionId }: { sessionId: string }) {
   const canSend = (prompt.trim() || attachedFiles.length > 0) && !sending;
 
   return (
-    <YStack
-      borderWidth={1}
-      borderColor="$gray5"
-      borderRadius="$3"
-      overflow="hidden"
-    >
-      <XStack ai="center" gap="$2" paddingHorizontal="$3" paddingVertical="$2">
-        <InputAvatar />
-        <Text color="$gray12" fontWeight="600" fontSize={13}>Follow-up</Text>
-      </XStack>
-      <YStack paddingHorizontal="$3" paddingBottom="$3" gap="$2">
+    <div style={{
+      background: '#fff',
+      borderRadius: 16,
+      boxShadow: '0 1px 6px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04)',
+      overflow: 'hidden',
+    }}>
+      {/* Header */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        padding: '10px 16px',
+        borderBottom: '1px solid #f0f1f3',
+      }}>
+        <div style={{
+          width: 6,
+          height: 6,
+          borderRadius: 3,
+          background: '#0ab9e6',
+          flexShrink: 0,
+        }} />
+        <span style={{
+          fontSize: 12,
+          fontWeight: 700,
+          color: '#3c4257',
+          letterSpacing: 0.5,
+          textTransform: 'uppercase' as const,
+        }}>
+          Follow-up
+        </span>
+      </div>
+
+      {/* Body */}
+      <div style={{ padding: '12px 16px 14px' }}>
         {/* Attached files preview */}
         {attachedFiles.length > 0 && (
-          <XStack gap="$1.5" flexWrap="wrap">
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
             {attachedFiles.map((f, i) => (
-              <XStack
+              <div
                 key={`${f.name}-${i}`}
-                ai="center"
-                gap="$1"
-                px="$2"
-                py="$1"
-                bg="$gray3"
-                borderWidth={1}
-                borderColor="$gray5"
-                rounded="$2"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '4px 10px',
+                  background: '#f5f7fa',
+                  borderRadius: 12,
+                  fontSize: 11,
+                  color: '#5a6376',
+                  fontWeight: 500,
+                }}
               >
-                <Text fontSize={11} color="$gray11">
-                  {f.type.startsWith('image/') ? '\uD83D\uDDBC' : f.type === 'application/pdf' ? '\uD83D\uDCC4' : '\uD83D\uDCDD'} {f.name}
-                </Text>
-                <Text
-                  fontSize={11}
-                  color="$gray8"
-                  cursor="pointer"
-                  hoverStyle={{ color: '$red9' }}
-                  onPress={() => setAttachedFiles(prev => prev.filter((_, j) => j !== i))}
+                <span>{f.type.startsWith('image/') ? '\uD83D\uDDBC' : f.type === 'application/pdf' ? '\uD83D\uDCC4' : '\uD83D\uDCDD'} {f.name}</span>
+                <span
+                  style={{ cursor: 'pointer', color: '#b0b8c4', fontSize: 13, lineHeight: 1, fontWeight: 400 }}
+                  onMouseEnter={e => { e.currentTarget.style.color = '#e5484d'; }}
+                  onMouseLeave={e => { e.currentTarget.style.color = '#b0b8c4'; }}
+                  onClick={() => setAttachedFiles(prev => prev.filter((_, j) => j !== i))}
                 >
-                  x
-                </Text>
-              </XStack>
+                  ×
+                </span>
+              </div>
             ))}
-          </XStack>
+          </div>
         )}
 
         <TextArea
           value={prompt}
           onChangeText={setPrompt}
-          placeholder="追加の指示を入力... (Cmd+Enter で送信)"
+          placeholder="追加の指示を入力..."
           disabled={sending}
-          minHeight={60}
+          minHeight={56}
           bg="$gray2"
           borderColor="$gray4"
+          borderRadius={12}
           color="$gray12"
           fontSize={13}
           onKeyDown={handleKeyDown}
@@ -124,61 +130,81 @@ export function FollowUpInput({ sessionId }: { sessionId: string }) {
             }
           }}
         />
-        <XStack jc="space-between" ai="center">
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingTop: 4,
+        }}>
+          {/* Attach — icon-only, quiet */}
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={sending}
+            aria-label="Attach files"
             style={{
-              display: 'inline-flex',
+              display: 'flex',
               alignItems: 'center',
-              gap: 5,
-              padding: '5px 12px',
-              borderRadius: 8,
-              border: '1px solid #e5e7eb',
-              background: '#f9fafb',
-              color: '#6b7280',
-              fontSize: 12,
-              fontWeight: 500,
+              justifyContent: 'center',
+              width: 34,
+              height: 34,
+              borderRadius: 17,
+              border: 'none',
+              background: 'transparent',
+              color: sending ? '#d1d5db' : '#8b95a3',
+              fontSize: 18,
               cursor: sending ? 'default' : 'pointer',
-              opacity: sending ? 0.5 : 1,
-              transition: 'background 0.15s, border-color 0.15s',
+              transition: 'background 0.18s, color 0.18s',
             }}
-            onMouseEnter={e => { if (!sending) { e.currentTarget.style.background = '#f3f4f6'; e.currentTarget.style.borderColor = '#d1d5db'; } }}
-            onMouseLeave={e => { e.currentTarget.style.background = '#f9fafb'; e.currentTarget.style.borderColor = '#e5e7eb'; }}
+            onMouseEnter={e => { if (!sending) { e.currentTarget.style.background = '#f3f4f6'; e.currentTarget.style.color = '#555e6b'; } }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = sending ? '#d1d5db' : '#8b95a3'; }}
           >
-            <span style={{ fontSize: 14 }}>📎</span>
-            Attach
+            +
           </button>
-          <XStack ai="center" gap="$3">
-            <Text fontSize={11} color="$gray8">
-              ⌘+Enter
-            </Text>
+
+          {/* Right side: hint + send */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{
+              fontSize: 11,
+              color: '#b0b8c4',
+              letterSpacing: 0.2,
+              userSelect: 'none',
+            }}>
+              ⌘ Enter
+            </span>
             <button
               type="button"
               onClick={handleSend}
               disabled={!canSend}
               style={{
-                padding: '6px 16px',
-                borderRadius: 8,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: 34,
+                minWidth: 72,
+                paddingLeft: 18,
+                paddingRight: 18,
+                borderRadius: 17,
                 border: 'none',
-                background: canSend ? '#3b82f6' : '#e5e7eb',
-                color: canSend ? '#fff' : '#9ca3af',
-                fontSize: 12,
-                fontWeight: 600,
+                background: canSend ? '#0ab9e6' : '#e8eaed',
+                color: canSend ? '#fff' : '#b0b8c4',
+                fontSize: 13,
+                fontWeight: 700,
+                letterSpacing: 0.4,
                 cursor: canSend ? 'pointer' : 'default',
-                transition: 'background 0.15s, transform 0.1s',
+                transition: 'background 0.2s, transform 0.12s, box-shadow 0.2s',
+                boxShadow: canSend ? '0 2px 8px rgba(10,185,230,0.25)' : 'none',
               }}
-              onMouseEnter={e => { if (canSend) e.currentTarget.style.background = '#2563eb'; }}
-              onMouseLeave={e => { if (canSend) e.currentTarget.style.background = '#3b82f6'; }}
-              onMouseDown={e => { if (canSend) e.currentTarget.style.transform = 'scale(0.97)'; }}
-              onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+              onMouseEnter={e => { if (canSend) { e.currentTarget.style.background = '#09a8d2'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(10,185,230,0.35)'; } }}
+              onMouseLeave={e => { if (canSend) { e.currentTarget.style.background = '#0ab9e6'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(10,185,230,0.25)'; } e.currentTarget.style.transform = 'scale(1)'; }}
+              onMouseDown={e => { if (canSend) { e.currentTarget.style.transform = 'scale(0.95)'; e.currentTarget.style.boxShadow = '0 1px 4px rgba(10,185,230,0.2)'; } }}
+              onMouseUp={e => { if (canSend) { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(10,185,230,0.35)'; } }}
             >
-              {sending ? 'Sending...' : 'Send'}
+              {sending ? '...' : 'Send'}
             </button>
-          </XStack>
-        </XStack>
-      </YStack>
-    </YStack>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
