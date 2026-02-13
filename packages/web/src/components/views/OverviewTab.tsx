@@ -1,21 +1,56 @@
-import { Paragraph, ScrollView, Text, XStack, YStack } from 'tamagui';
 import type { Session } from '@ccgrid/shared';
 import { PermissionRulesPanel } from '../PermissionRulesPanel';
 
 function SectionLabel({ children }: { children: string }) {
   return (
-    <Text fontSize={11} fontWeight="600" color="$gray8" textTransform="uppercase" letterSpacing={0.5} mb="$2">
+    <div style={{
+      fontSize: 11,
+      fontWeight: 800,
+      color: '#8b95a3',
+      textTransform: 'uppercase',
+      letterSpacing: 0.8,
+      marginBottom: 10,
+    }}>
       {children}
-    </Text>
+    </div>
   );
 }
 
-function InfoRow({ label, children }: { label: string; children: React.ReactNode }) {
+function InfoRow({ label, children, mono }: { label: string; children: React.ReactNode; mono?: boolean }) {
   return (
-    <XStack items="baseline" gap="$3" py="$1">
-      <Text fontSize={12} color="$gray8" shrink={0} width={100}>{label}</Text>
-      <Text fontSize={13} color="$gray12" minWidth={0} flex={1}>{children}</Text>
-    </XStack>
+    <div style={{
+      display: 'flex',
+      alignItems: 'baseline',
+      gap: 16,
+      padding: '5px 0',
+    }}>
+      <span style={{ fontSize: 12, color: '#8b95a3', flexShrink: 0, width: 100, fontWeight: 500 }}>
+        {label}
+      </span>
+      <span style={{
+        fontSize: 13,
+        color: '#1a1d24',
+        minWidth: 0,
+        flex: 1,
+        fontFamily: mono ? 'monospace' : 'inherit',
+        ...(mono ? { fontSize: 12, color: '#555e6b' } : {}),
+      }}>
+        {children}
+      </span>
+    </div>
+  );
+}
+
+function Card({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{
+      background: '#f9fafb',
+      border: '1px solid #f0f1f3',
+      borderRadius: 14,
+      padding: '14px 18px',
+    }}>
+      {children}
+    </div>
   );
 }
 
@@ -25,105 +60,151 @@ export function OverviewTab({ session }: { session: Session }) {
     ? Math.min(100, (session.costUsd / session.maxBudgetUsd!) * 100)
     : 0;
   const totalTokens = session.inputTokens + session.outputTokens;
-  const budgetColor = budgetPercent > 80 ? '$red9' : budgetPercent > 50 ? '$yellow9' : '$blue9';
+  const budgetColor = budgetPercent > 80 ? '#ef4444' : budgetPercent > 50 ? '#eab308' : '#0ab9e6';
 
   return (
-    <ScrollView flex={1}>
-      <YStack p="$4" gap="$5" maxWidth={640} alignSelf="center" width="100%">
+    <div style={{ flex: 1, overflow: 'auto' }}>
+      <div style={{
+        padding: 24,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 28,
+        maxWidth: 640,
+        margin: '0 auto',
+        width: '100%',
+        boxSizing: 'border-box',
+      }}>
         {/* Task Description */}
-        <YStack>
+        <div>
           <SectionLabel>Task Description</SectionLabel>
-          <YStack bg="$gray2" borderWidth={1} borderColor="$gray4" rounded="$3" p="$3">
-            <Paragraph fontSize={13} color="$gray11" whiteSpace="pre-wrap" lineHeight={20}>
+          <Card>
+            <p style={{
+              fontSize: 13,
+              color: '#3c4257',
+              whiteSpace: 'pre-wrap',
+              lineHeight: 1.6,
+              margin: 0,
+            }}>
               {session.taskDescription}
-            </Paragraph>
-          </YStack>
-        </YStack>
+            </p>
+          </Card>
+        </div>
 
         {/* Configuration */}
-        <YStack>
+        <div>
           <SectionLabel>Configuration</SectionLabel>
-          <YStack bg="$gray2" borderWidth={1} borderColor="$gray4" rounded="$3" p="$3" gap="$0.5">
+          <Card>
             <InfoRow label="Model">{session.model}</InfoRow>
-            <InfoRow label="Working Dir">
-              <Text fontFamily="monospace" fontSize={12} color="$gray11">{session.cwd}</Text>
-            </InfoRow>
+            <InfoRow label="Working Dir" mono>{session.cwd}</InfoRow>
             {hasBudget && (
               <InfoRow label="Budget">${session.maxBudgetUsd!.toFixed(2)}</InfoRow>
             )}
             <InfoRow label="Created">{new Date(session.createdAt).toLocaleString()}</InfoRow>
             {session.sessionId && (
-              <InfoRow label="Session ID">
-                <Text fontFamily="monospace" fontSize={11} color="$gray9">{session.sessionId}</Text>
-              </InfoRow>
+              <InfoRow label="Session ID" mono>{session.sessionId}</InfoRow>
             )}
-          </YStack>
-        </YStack>
+          </Card>
+        </div>
 
         {/* Teammate Specs */}
         {session.teammateSpecs && session.teammateSpecs.length > 0 && (
-          <YStack>
+          <div>
             <SectionLabel>Teammate Specs</SectionLabel>
-            <YStack gap="$2">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {session.teammateSpecs.map((spec, i) => (
-                <YStack key={i} bg="$gray2" borderWidth={1} borderColor="$gray4" rounded="$3" p="$3">
-                  <XStack items="baseline" gap="$2">
-                    <Text fontWeight="600" fontSize={13} color="$gray12">{spec.name}</Text>
-                    <Text color="$gray9" fontSize={12}>{spec.role}</Text>
-                  </XStack>
+                <Card key={i}>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+                    <span style={{ fontWeight: 700, fontSize: 13, color: '#1a1d24' }}>{spec.name}</span>
+                    <span style={{
+                      fontSize: 11,
+                      color: '#8b95a3',
+                      fontWeight: 500,
+                      padding: '2px 8px',
+                      borderRadius: 8,
+                      background: '#f0f1f3',
+                    }}>
+                      {spec.role}
+                    </span>
+                  </div>
                   {spec.instructions && (
-                    <Text color="$gray9" mt="$1.5" fontSize={12} whiteSpace="pre-wrap" lineHeight={18}>
+                    <p style={{
+                      color: '#555e6b',
+                      marginTop: 8,
+                      marginBottom: 0,
+                      fontSize: 12,
+                      whiteSpace: 'pre-wrap',
+                      lineHeight: 1.5,
+                    }}>
                       {spec.instructions}
-                    </Text>
+                    </p>
                   )}
-                </YStack>
+                </Card>
               ))}
-            </YStack>
-          </YStack>
+            </div>
+          </div>
         )}
 
         {/* Permission Rules */}
-        <YStack>
+        <div>
           <SectionLabel>Permission Rules</SectionLabel>
           <PermissionRulesPanel />
-        </YStack>
+        </div>
 
         {/* Cost & Tokens */}
-        <YStack>
+        <div>
           <SectionLabel>Cost & Tokens</SectionLabel>
-          <YStack bg="$gray2" borderWidth={1} borderColor="$gray4" rounded="$3" p="$3" gap="$2">
-            <XStack ai="center" gap="$3">
-              <Text fontSize={12} color="$gray8" width={100}>Cost</Text>
-              <Text fontFamily="monospace" color="$gray12" fontSize={13} fontWeight="600">
+          <Card>
+            {/* Cost */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '5px 0' }}>
+              <span style={{ fontSize: 12, color: '#8b95a3', width: 100, flexShrink: 0, fontWeight: 500 }}>Cost</span>
+              <span style={{ fontFamily: 'monospace', color: '#1a1d24', fontSize: 14, fontWeight: 700 }}>
                 ${session.costUsd.toFixed(4)}
-              </Text>
+              </span>
               {hasBudget && (
-                <Text color="$gray8" fontSize={12}>/ ${session.maxBudgetUsd!.toFixed(2)}</Text>
+                <span style={{ color: '#b0b8c4', fontSize: 12 }}>/ ${session.maxBudgetUsd!.toFixed(2)}</span>
               )}
-            </XStack>
+            </div>
 
+            {/* Budget bar */}
             {hasBudget && (
-              <XStack ai="center" gap="$3">
-                <Text fontSize={12} color="$gray8" width={100}>Budget</Text>
-                <XStack flex={1} height={6} bg="$gray4" rounded="$10" overflow="hidden" maxWidth={200}>
-                  <YStack height="100%" rounded="$10" bg={budgetColor as any} width={`${budgetPercent}%` as any} />
-                </XStack>
-                <Text fontSize={11} color="$gray9" fontFamily="monospace">{budgetPercent.toFixed(0)}%</Text>
-              </XStack>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '5px 0' }}>
+                <span style={{ fontSize: 12, color: '#8b95a3', width: 100, flexShrink: 0, fontWeight: 500 }}>Budget</span>
+                <div style={{
+                  flex: 1,
+                  height: 6,
+                  background: '#e8eaed',
+                  borderRadius: 3,
+                  overflow: 'hidden',
+                  maxWidth: 200,
+                }}>
+                  <div style={{
+                    height: '100%',
+                    borderRadius: 3,
+                    background: budgetColor,
+                    width: `${budgetPercent}%`,
+                    transition: 'width 0.3s ease',
+                    boxShadow: `0 0 6px ${budgetColor}40`,
+                  }} />
+                </div>
+                <span style={{ fontSize: 11, color: '#8b95a3', fontFamily: 'monospace', fontWeight: 600 }}>
+                  {budgetPercent.toFixed(0)}%
+                </span>
+              </div>
             )}
 
-            <XStack ai="center" gap="$3">
-              <Text fontSize={12} color="$gray8" width={100}>Tokens</Text>
-              <Text fontFamily="monospace" color="$gray12" fontSize={13}>
+            {/* Tokens */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '5px 0' }}>
+              <span style={{ fontSize: 12, color: '#8b95a3', width: 100, flexShrink: 0, fontWeight: 500 }}>Tokens</span>
+              <span style={{ fontFamily: 'monospace', color: '#1a1d24', fontSize: 13, fontWeight: 600 }}>
                 {totalTokens.toLocaleString()}
-              </Text>
-              <Text color="$gray8" fontSize={11}>
+              </span>
+              <span style={{ color: '#b0b8c4', fontSize: 11 }}>
                 ({session.inputTokens.toLocaleString()} in / {session.outputTokens.toLocaleString()} out)
-              </Text>
-            </XStack>
-          </YStack>
-        </YStack>
-      </YStack>
-    </ScrollView>
+              </span>
+            </div>
+          </Card>
+        </div>
+      </div>
+    </div>
   );
 }

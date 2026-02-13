@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { YStack, XStack, Text, Button, Input } from 'tamagui';
 import { useStore } from '../store/useStore';
 import { useApi } from '../hooks/useApi';
 import type { PermissionRule } from '@ccgrid/shared';
@@ -36,12 +35,26 @@ export function PermissionRulesPanel() {
     }
   };
 
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    boxSizing: 'border-box',
+    padding: '8px 12px',
+    borderRadius: 10,
+    border: '1px solid #e5e7eb',
+    background: '#fff',
+    color: '#1a1d24',
+    fontSize: 12,
+    fontFamily: 'monospace',
+    outline: 'none',
+    transition: 'border-color 0.15s',
+  };
+
   return (
-    <YStack gap="$2">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       {rules.length === 0 && !adding && (
-        <Text fontSize={12} color="$gray7" fontStyle="italic">
+        <span style={{ fontSize: 12, color: '#b0b8c4', fontStyle: 'italic' }}>
           No rules configured. Rules auto-approve or deny tool requests.
-        </Text>
+        </span>
       )}
 
       {rules.map(rule => (
@@ -49,130 +62,181 @@ export function PermissionRulesPanel() {
       ))}
 
       {adding ? (
-        <YStack bg="$gray2" borderWidth={1} borderColor="$gray4" rounded="$3" p="$3" gap="$2">
-          <XStack gap="$2" ai="center">
-            <Input
-              size="$2"
-              flex={1}
+        <div style={{
+          background: '#f9fafb',
+          border: '1px solid #f0f1f3',
+          borderRadius: 14,
+          padding: '14px 18px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 10,
+        }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <input
               placeholder='Tool name (e.g. "Bash", "Write", "*")'
               value={toolName}
-              onChangeText={setToolName}
-              bg="$gray1"
-              borderColor="$gray5"
-              fontSize={12}
-              fontFamily="monospace"
+              onChange={e => setToolName(e.target.value)}
+              style={{ ...inputStyle, flex: 1 }}
+              onFocus={e => { e.currentTarget.style.borderColor = '#0ab9e6'; }}
+              onBlur={e => { e.currentTarget.style.borderColor = '#e5e7eb'; }}
             />
-            <XStack gap={4}>
+            <div style={{ display: 'flex', gap: 4 }}>
               {(['allow', 'deny'] as const).map(b => {
                 const selected = behavior === b;
+                const color = b === 'allow' ? '#22c55e' : '#ef4444';
                 return (
-                  <Text
+                  <button
                     key={b}
-                    tag="button"
-                    fontSize={11}
-                    fontWeight={selected ? '600' : '400'}
-                    px="$2"
-                    py="$1"
-                    rounded="$2"
-                    cursor="pointer"
-                    bg={selected ? (b === 'allow' ? '$green9' : '$red9') : '$gray3'}
-                    color={selected ? 'white' : '$gray11'}
-                    borderWidth={1}
-                    borderColor={selected ? (b === 'allow' ? '$green9' : '$red9') : '$gray5'}
-                    onPress={() => setBehavior(b)}
+                    onClick={() => setBehavior(b)}
+                    style={{
+                      fontSize: 11,
+                      fontWeight: selected ? 700 : 500,
+                      padding: '5px 10px',
+                      borderRadius: 10,
+                      cursor: 'pointer',
+                      border: 'none',
+                      background: selected ? color : '#e8eaed',
+                      color: selected ? '#fff' : '#555e6b',
+                      textTransform: 'uppercase',
+                      letterSpacing: 0.3,
+                      transition: 'background 0.15s',
+                    }}
                   >
                     {b}
-                  </Text>
+                  </button>
                 );
               })}
-            </XStack>
-          </XStack>
-          <Input
-            size="$2"
+            </div>
+          </div>
+          <input
             placeholder="Path pattern (optional, e.g. /etc/**)"
             value={pathPattern}
-            onChangeText={setPathPattern}
-            bg="$gray1"
-            borderColor="$gray5"
-            fontSize={12}
-            fontFamily="monospace"
+            onChange={e => setPathPattern(e.target.value)}
+            style={inputStyle}
+            onFocus={e => { e.currentTarget.style.borderColor = '#0ab9e6'; }}
+            onBlur={e => { e.currentTarget.style.borderColor = '#e5e7eb'; }}
           />
-          <XStack gap="$2" jc="flex-end">
-            <Button size="$2" bg="$gray4" color="$gray11" onPress={() => setAdding(false)}>
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+            <button
+              onClick={() => setAdding(false)}
+              style={{
+                padding: '6px 16px',
+                borderRadius: 12,
+                border: 'none',
+                background: '#e8eaed',
+                color: '#555e6b',
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'background 0.15s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = '#dcdfe3'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = '#e8eaed'; }}
+            >
               Cancel
-            </Button>
-            <Button
-              size="$2"
-              bg={toolName.trim() ? '$blue9' : '$gray5'}
-              color={toolName.trim() ? 'white' : '$gray8'}
+            </button>
+            <button
+              onClick={handleAdd}
               disabled={!toolName.trim()}
-              onPress={handleAdd}
+              style={{
+                padding: '6px 16px',
+                borderRadius: 12,
+                border: 'none',
+                background: toolName.trim() ? '#0ab9e6' : '#e8eaed',
+                color: toolName.trim() ? '#fff' : '#b0b8c4',
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: toolName.trim() ? 'pointer' : 'default',
+                transition: 'background 0.18s, box-shadow 0.18s',
+                boxShadow: toolName.trim() ? '0 2px 8px rgba(10, 185, 230, 0.25)' : 'none',
+              }}
+              onMouseEnter={e => { if (toolName.trim()) e.currentTarget.style.background = '#09a8d2'; }}
+              onMouseLeave={e => { if (toolName.trim()) e.currentTarget.style.background = '#0ab9e6'; }}
             >
               Add Rule
-            </Button>
-          </XStack>
-        </YStack>
+            </button>
+          </div>
+        </div>
       ) : (
-        <Button
-          size="$2"
-          bg="$gray3"
-          color="$gray11"
-          borderWidth={1}
-          borderColor="$gray5"
-          hoverStyle={{ bg: '$gray4' }}
-          alignSelf="flex-start"
-          onPress={() => setAdding(true)}
+        <button
+          onClick={() => setAdding(true)}
+          style={{
+            alignSelf: 'flex-start',
+            padding: '6px 16px',
+            borderRadius: 12,
+            border: 'none',
+            background: '#f0f1f3',
+            color: '#555e6b',
+            fontSize: 12,
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'background 0.15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = '#e8eaed'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = '#f0f1f3'; }}
         >
           + Add Rule
-        </Button>
+        </button>
       )}
-    </YStack>
+    </div>
   );
 }
 
 function RuleRow({ rule, onDelete }: { rule: PermissionRule; onDelete: (id: string) => void }) {
   const isAllow = rule.behavior === 'allow';
+  const color = isAllow ? '#22c55e' : '#ef4444';
+
   return (
-    <XStack
-      ai="center"
-      gap="$2"
-      bg="$gray2"
-      borderWidth={1}
-      borderColor="$gray4"
-      rounded="$3"
-      px="$3"
-      py="$2"
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10,
+        background: '#f9fafb',
+        border: '1px solid #f0f1f3',
+        borderRadius: 12,
+        padding: '10px 16px',
+      }}
     >
-      <Text
-        fontSize={10}
-        fontWeight="700"
-        color={isAllow ? '$green11' : '$red11'}
-        bg={isAllow ? '$green3' : '$red3'}
-        px="$1.5"
-        py="$0.5"
-        rounded="$2"
-        textTransform="uppercase"
-      >
+      <span style={{
+        fontSize: 10,
+        fontWeight: 700,
+        color: '#fff',
+        background: color,
+        padding: '3px 8px',
+        borderRadius: 8,
+        textTransform: 'uppercase',
+        letterSpacing: 0.3,
+      }}>
         {rule.behavior}
-      </Text>
-      <Text fontSize={12} fontFamily="monospace" color="$gray12" fontWeight="500">
+      </span>
+      <span style={{ fontSize: 12, fontFamily: 'monospace', color: '#1a1d24', fontWeight: 600 }}>
         {rule.toolName}
-      </Text>
+      </span>
       {rule.pathPattern && (
-        <Text fontSize={11} fontFamily="monospace" color="$gray8">
+        <span style={{ fontSize: 11, fontFamily: 'monospace', color: '#8b95a3' }}>
           {rule.pathPattern}
-        </Text>
+        </span>
       )}
-      <XStack flex={1} />
-      <Text
-        fontSize={11}
-        color="$red9"
-        cursor="pointer"
-        hoverStyle={{ color: '$red11' }}
-        onPress={() => onDelete(rule.id)}
+      <div style={{ flex: 1 }} />
+      <button
+        onClick={() => onDelete(rule.id)}
+        style={{
+          border: 'none',
+          background: 'transparent',
+          fontSize: 11,
+          color: '#ef4444',
+          fontWeight: 600,
+          cursor: 'pointer',
+          padding: '4px 8px',
+          borderRadius: 8,
+          transition: 'background 0.15s',
+        }}
+        onMouseEnter={e => { e.currentTarget.style.background = '#fff5f5'; }}
+        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
       >
         Delete
-      </Text>
-    </XStack>
+      </button>
+    </div>
   );
 }
