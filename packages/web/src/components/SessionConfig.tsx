@@ -1,6 +1,4 @@
 import { useState, useRef, useCallback } from 'react';
-import { YStack, XStack, Text, Input, TextArea, Button, Checkbox, ScrollView } from 'tamagui';
-import { Check } from '@tamagui/lucide-icons';
 import { DirPicker } from './DirPicker';
 import { FileChip } from './FileChip';
 import { useStore } from '../store/useStore';
@@ -13,13 +11,91 @@ const MODELS = [
   { value: 'claude-haiku-4-5-20251001', label: 'Haiku 4.5' },
 ];
 
-function FieldLabel({ children }: { children: string }) {
+/* ---- shared styles ---- */
+
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  boxSizing: 'border-box',
+  height: 38,
+  padding: '0 12px',
+  borderRadius: 10,
+  border: '1px solid #e5e7eb',
+  background: '#f9fafb',
+  color: '#1a1d24',
+  fontSize: 13,
+  fontFamily: 'inherit',
+  outline: 'none',
+  transition: 'border-color 0.15s',
+};
+
+const textareaStyle: React.CSSProperties = {
+  ...inputStyle,
+  height: 'auto',
+  minHeight: 72,
+  padding: '10px 12px',
+  lineHeight: 1.5,
+  resize: 'vertical',
+};
+
+const labelStyle: React.CSSProperties = {
+  fontSize: 11,
+  fontWeight: 600,
+  color: '#8b95a3',
+  letterSpacing: 0.4,
+  textTransform: 'uppercase',
+  marginBottom: 6,
+};
+
+const sectionStyle: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+};
+
+function focusBorder(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) {
+  e.currentTarget.style.borderColor = '#0ab9e6';
+}
+function blurBorder(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) {
+  e.currentTarget.style.borderColor = '#e5e7eb';
+}
+
+/* ---- pill button for model / permission selectors ---- */
+
+function PillOption({ selected, color, label, onClick }: {
+  selected: boolean;
+  color: string;
+  label: string;
+  onClick: () => void;
+}) {
+  const bg = selected ? color : '#f3f4f6';
+  const fg = selected ? '#fff' : '#6b7280';
   return (
-    <Text fontSize={11} fontWeight="500" color="$gray9" mb="$1">
-      {children}
-    </Text>
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        height: 30,
+        padding: '0 14px',
+        borderRadius: 15,
+        border: 'none',
+        background: bg,
+        color: fg,
+        fontSize: 12,
+        fontWeight: selected ? 700 : 500,
+        cursor: 'pointer',
+        transition: 'background 0.15s, transform 0.1s',
+        boxShadow: selected ? `0 2px 8px ${color}40` : 'none',
+      }}
+      onMouseEnter={e => { if (!selected) e.currentTarget.style.background = '#e9eaed'; }}
+      onMouseLeave={e => { if (!selected) e.currentTarget.style.background = '#f3f4f6'; }}
+      onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.96)'; }}
+      onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+    >
+      {label}
+    </button>
   );
 }
+
+/* ---- main component ---- */
 
 export function SessionConfig({ api, onCreated }: { api: Api; onCreated?: () => void }) {
   const allSpecs = useStore(s => s.teammateSpecs);
@@ -101,51 +177,59 @@ export function SessionConfig({ api, onCreated }: { api: Api; onCreated?: () => 
   const canSubmit = name.trim() && cwd.trim() && taskDescription.trim() && !submitting;
 
   return (
-    <YStack gap="$3">
-      {/* Name & Directory */}
-      <XStack gap="$3">
-        <YStack flex={1}>
-          <FieldLabel>Name</FieldLabel>
-          <Input
-            size="$3"
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      {/* Name & Directory — side by side */}
+      <div style={{ display: 'flex', gap: 12 }}>
+        <div style={{ ...sectionStyle, flex: 1 }}>
+          <label style={labelStyle}>Name</label>
+          <input
+            type="text"
             placeholder="Session name"
             value={name}
-            onChangeText={setName}
-            bg="$gray3"
-            borderColor="$gray5"
-            color="$gray12"
-            focusStyle={{ borderColor: '$blue9' }}
+            onChange={e => setName(e.target.value)}
+            style={inputStyle}
+            onFocus={focusBorder}
+            onBlur={blurBorder}
           />
-        </YStack>
-        <YStack flex={1}>
-          <FieldLabel>Working Directory</FieldLabel>
-          <XStack gap="$1">
-            <Input
-              size="$3"
-              flex={1}
+        </div>
+        <div style={{ ...sectionStyle, flex: 1 }}>
+          <label style={labelStyle}>Working Directory</label>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <input
+              type="text"
               placeholder="/path/to/project"
               value={cwd}
-              onChangeText={setCwd}
-              bg="$gray3"
-              borderColor="$gray5"
-              color="$gray12"
-              fontFamily="monospace"
-              fontSize={12}
-              focusStyle={{ borderColor: '$blue9' }}
+              onChange={e => setCwd(e.target.value)}
+              style={{ ...inputStyle, fontFamily: 'ui-monospace, SFMono-Regular, monospace', fontSize: 12 }}
+              onFocus={focusBorder}
+              onBlur={blurBorder}
             />
-            <Button
-              size="$3"
-              bg="$gray4"
-              borderColor="$gray5"
-              color="$gray11"
-              hoverStyle={{ bg: '$gray5' }}
-              onPress={() => setShowDirPicker(true)}
+            <button
+              type="button"
+              onClick={() => setShowDirPicker(true)}
+              style={{
+                height: 38,
+                width: 38,
+                minWidth: 38,
+                borderRadius: 10,
+                border: '1px solid #e5e7eb',
+                background: '#f9fafb',
+                color: '#8b95a3',
+                fontSize: 16,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'background 0.15s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = '#f0f1f3'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = '#f9fafb'; }}
             >
               ...
-            </Button>
-          </XStack>
-        </YStack>
-      </XStack>
+            </button>
+          </div>
+        </div>
+      </div>
 
       {showDirPicker && (
         <DirPicker
@@ -156,44 +240,38 @@ export function SessionConfig({ api, onCreated }: { api: Api; onCreated?: () => 
       )}
 
       {/* Task Description */}
-      <YStack>
-        <FieldLabel>Task Description</FieldLabel>
-        <div onPaste={handlePaste}>
-          <TextArea
-            placeholder="What should the team work on?"
-            value={taskDescription}
-            onChangeText={setTaskDescription}
-            numberOfLines={3}
-            bg="$gray3"
-            borderColor="$gray5"
-            color="$gray12"
-            fontSize={13}
-            focusStyle={{ borderColor: '$blue9' }}
-          />
-        </div>
-      </YStack>
+      <div style={sectionStyle}>
+        <label style={labelStyle}>Task Description</label>
+        <textarea
+          placeholder="What should the team work on?"
+          value={taskDescription}
+          onChange={e => setTaskDescription(e.target.value)}
+          onPaste={handlePaste}
+          rows={3}
+          style={textareaStyle}
+          onFocus={focusBorder}
+          onBlur={blurBorder}
+        />
+      </div>
 
       {/* Custom Instructions */}
-      <YStack>
-        <FieldLabel>Custom Instructions (optional)</FieldLabel>
-        <div onPaste={handlePaste}>
-          <TextArea
-            placeholder="Lead Agent への追加指示 (コーディング規約、使用言語、注意事項など)"
-            value={customInstructions}
-            onChangeText={setCustomInstructions}
-            numberOfLines={2}
-            bg="$gray3"
-            borderColor="$gray5"
-            color="$gray12"
-            fontSize={12}
-            focusStyle={{ borderColor: '$blue9' }}
-          />
-        </div>
-      </YStack>
+      <div style={sectionStyle}>
+        <label style={labelStyle}>Custom Instructions <span style={{ fontWeight: 400, textTransform: 'none', color: '#b0b8c4' }}>optional</span></label>
+        <textarea
+          placeholder="Lead Agent への追加指示 (コーディング規約、使用言語、注意事項など)"
+          value={customInstructions}
+          onChange={e => setCustomInstructions(e.target.value)}
+          onPaste={handlePaste}
+          rows={2}
+          style={{ ...textareaStyle, minHeight: 56 }}
+          onFocus={focusBorder}
+          onBlur={blurBorder}
+        />
+      </div>
 
-      {/* File Attachments */}
-      <YStack>
-        <FieldLabel>Attachments (optional)</FieldLabel>
+      {/* Attachments */}
+      <div style={sectionStyle}>
+        <label style={labelStyle}>Attachments <span style={{ fontWeight: 400, textTransform: 'none', color: '#b0b8c4' }}>optional</span></label>
         <input
           ref={fileInputRef}
           type="file"
@@ -218,182 +296,184 @@ export function SessionConfig({ api, onCreated }: { api: Api; onCreated?: () => 
             ))}
           </div>
         )}
-        <Button
-          size="$2"
-          bg="$gray3"
-          color="$gray11"
-          borderWidth={1}
-          borderColor="$gray5"
-          hoverStyle={{ bg: '$gray4' }}
-          alignSelf="flex-start"
-          onPress={() => fileInputRef.current?.click()}
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          style={{
+            alignSelf: 'flex-start',
+            height: 30,
+            padding: '0 14px',
+            borderRadius: 15,
+            border: '1px solid #e5e7eb',
+            background: '#fff',
+            color: '#8b95a3',
+            fontSize: 12,
+            fontWeight: 500,
+            cursor: 'pointer',
+            transition: 'background 0.15s, border-color 0.15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = '#f9fafb'; e.currentTarget.style.borderColor = '#d1d5db'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.borderColor = '#e5e7eb'; }}
         >
           + Attach Files
-        </Button>
-      </YStack>
+        </button>
+      </div>
 
-      {/* Model & Options */}
-      <XStack gap="$4">
-        <YStack>
-          <FieldLabel>Model</FieldLabel>
-          <XStack gap={4}>
-            {MODELS.map(m => {
-              const selected = model === m.value;
-              return (
-                <Text
-                  key={m.value}
-                  tag="button"
-                  fontSize={12}
-                  fontWeight={selected ? '600' : '400'}
-                  px="$2"
-                  py="$1.5"
-                  rounded="$2"
-                  cursor="pointer"
-                  bg={selected ? '$blue9' : '$gray3'}
-                  color={selected ? 'white' : '$gray11'}
-                  borderWidth={1}
-                  borderColor={selected ? '$blue9' : '$gray5'}
-                  hoverStyle={{ bg: selected ? '$blue8' : '$gray4' }}
-                  onPress={() => setModel(m.value)}
-                >
-                  {m.label}
-                </Text>
-              );
-            })}
-          </XStack>
-        </YStack>
+      {/* Divider */}
+      <div style={{ height: 1, background: '#f0f1f3' }} />
 
-        <YStack>
-          <FieldLabel>Permission</FieldLabel>
-          <XStack gap={4}>
-            {([
-              { value: 'acceptEdits' as const, label: 'Accept Edits' },
-              { value: 'bypassPermissions' as const, label: 'Bypass All' },
-            ]).map(p => {
-              const selected = permissionMode === p.value;
-              return (
-                <Text
-                  key={p.value}
-                  tag="button"
-                  fontSize={12}
-                  fontWeight={selected ? '600' : '400'}
-                  px="$2"
-                  py="$1.5"
-                  rounded="$2"
-                  cursor="pointer"
-                  bg={selected ? (p.value === 'bypassPermissions' ? '$orange9' : '$blue9') : '$gray3'}
-                  color={selected ? 'white' : '$gray11'}
-                  borderWidth={1}
-                  borderColor={selected ? (p.value === 'bypassPermissions' ? '$orange9' : '$blue9') : '$gray5'}
-                  hoverStyle={{ bg: selected ? (p.value === 'bypassPermissions' ? '$orange8' : '$blue8') : '$gray4' }}
-                  onPress={() => setPermissionMode(p.value)}
-                >
-                  {p.label}
-                </Text>
-              );
-            })}
-          </XStack>
+      {/* Model & Permission & Budget — compact row */}
+      <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+        <div style={sectionStyle}>
+          <label style={labelStyle}>Model</label>
+          <div style={{ display: 'flex', gap: 4 }}>
+            {MODELS.map(m => (
+              <PillOption
+                key={m.value}
+                selected={model === m.value}
+                color="#0ab9e6"
+                label={m.label}
+                onClick={() => setModel(m.value)}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div style={sectionStyle}>
+          <label style={labelStyle}>Permission</label>
+          <div style={{ display: 'flex', gap: 4 }}>
+            <PillOption
+              selected={permissionMode === 'acceptEdits'}
+              color="#0ab9e6"
+              label="Accept Edits"
+              onClick={() => setPermissionMode('acceptEdits')}
+            />
+            <PillOption
+              selected={permissionMode === 'bypassPermissions'}
+              color="#f97316"
+              label="Bypass All"
+              onClick={() => setPermissionMode('bypassPermissions')}
+            />
+          </div>
           {permissionMode === 'bypassPermissions' && (
-            <Text fontSize={10} color="$orange9" mt="$1">
-              All tool executions will be auto-approved without confirmation
-            </Text>
+            <span style={{ fontSize: 10, color: '#f97316', marginTop: 4 }}>
+              All tool executions will be auto-approved
+            </span>
           )}
-        </YStack>
+        </div>
 
-      </XStack>
-
-      {/* Budget */}
-      <YStack>
-        <FieldLabel>Budget (USD)</FieldLabel>
-        <Input
-          size="$3"
-          inputMode="decimal"
-          placeholder="No limit"
-          value={maxBudget}
-          onChangeText={setMaxBudget}
-          bg="$gray3"
-          borderColor="$gray5"
-          color="$gray12"
-          focusStyle={{ borderColor: '$blue9' }}
-          width={120}
-        />
-      </YStack>
+        <div style={sectionStyle}>
+          <label style={labelStyle}>Budget (USD)</label>
+          <input
+            type="text"
+            inputMode="decimal"
+            placeholder="No limit"
+            value={maxBudget}
+            onChange={e => setMaxBudget(e.target.value)}
+            style={{ ...inputStyle, width: 100 }}
+            onFocus={focusBorder}
+            onBlur={blurBorder}
+          />
+        </div>
+      </div>
 
       {/* Teammate Specs */}
-      <YStack>
-        <XStack ai="center" jc="space-between" mb="$1">
-          <Text fontSize={11} fontWeight="500" color="$gray9">Teammate Specs</Text>
-          <Text
-            fontSize={11}
-            color="$blue9"
-            cursor="pointer"
-            hoverStyle={{ color: '$blue10' }}
-            onPress={() => navigate({ view: 'teammate_spec_list' })}
-          >
-            Manage Specs
-          </Text>
-        </XStack>
-
-        {allSpecs.length === 0 ? (
-          <Text fontSize={12} color="$gray7" fontStyle="italic">
-            No specs created yet
-          </Text>
-        ) : (
-          <XStack gap="$2" flexWrap="wrap">
+      {allSpecs.length > 0 && (
+        <div style={sectionStyle}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <label style={{ ...labelStyle, marginBottom: 0 }}>Teammates</label>
+            <button
+              type="button"
+              onClick={() => navigate({ view: 'teammate_spec_list' })}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#0ab9e6',
+                fontSize: 11,
+                fontWeight: 600,
+                cursor: 'pointer',
+                padding: 0,
+              }}
+              onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline'; }}
+              onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none'; }}
+            >
+              Manage
+            </button>
+          </div>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {allSpecs.map(spec => {
               const selected = selectedSpecIds.has(spec.id);
               return (
-                <XStack
+                <button
                   key={spec.id}
-                  items="baseline"
-                  gap="$1.5"
-                  px="$2"
-                  py="$1"
-                  rounded="$2"
-                  cursor="pointer"
-                  bg={selected ? '$blue4' : '$gray3'}
-                  borderWidth={1}
-                  borderColor={selected ? '$blue7' : '$gray5'}
-                  hoverStyle={{ borderColor: selected ? '$blue8' : '$gray6' }}
-                  onPress={() => toggleSpec(spec.id)}
+                  type="button"
+                  onClick={() => toggleSpec(spec.id)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    height: 34,
+                    padding: '0 14px',
+                    borderRadius: 17,
+                    border: selected ? '1.5px solid #0ab9e6' : '1px solid #e5e7eb',
+                    background: selected ? '#e8f8fd' : '#fff',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s',
+                  }}
+                  onMouseEnter={e => { if (!selected) e.currentTarget.style.borderColor = '#d1d5db'; }}
+                  onMouseLeave={e => { if (!selected) e.currentTarget.style.borderColor = '#e5e7eb'; }}
                 >
-                  <Checkbox
-                    size="$1"
-                    checked={selected}
-                    onCheckedChange={() => toggleSpec(spec.id)}
-                    bg={selected ? '$blue9' : '$gray4'}
-                    borderColor={selected ? '$blue9' : '$gray6'}
-                    alignSelf="center"
-                  >
-                    <Checkbox.Indicator>
-                      <Check size={10} />
-                    </Checkbox.Indicator>
-                  </Checkbox>
-                  <Text fontSize={12} color={selected ? '$gray12' : '$gray11'} fontWeight="500">
-                    {spec.name}
-                  </Text>
-                  <Text fontSize={11} color="$gray8">{spec.role}</Text>
-                </XStack>
+                  {/* Checkbox dot */}
+                  <span style={{
+                    width: 14,
+                    height: 14,
+                    borderRadius: 7,
+                    border: selected ? 'none' : '1.5px solid #d1d5db',
+                    background: selected ? '#0ab9e6' : '#fff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    transition: 'all 0.15s',
+                  }}>
+                    {selected && <span style={{ color: '#fff', fontSize: 10, fontWeight: 800, lineHeight: 1 }}>✓</span>}
+                  </span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: '#3c4257' }}>{spec.name}</span>
+                  <span style={{ fontSize: 11, color: '#9ca3af' }}>{spec.role}</span>
+                </button>
               );
             })}
-          </XStack>
-        )}
-      </YStack>
+          </div>
+        </div>
+      )}
 
       {/* Submit */}
-      <Button
-        size="$3"
-        fontWeight="600"
-        bg={canSubmit ? '$blue9' : '$gray5'}
-        color={canSubmit ? 'white' : '$gray8'}
-        hoverStyle={canSubmit ? { bg: '$blue8' } : {}}
-        pressStyle={canSubmit ? { bg: '$blue10' } : {}}
+      <button
+        type="button"
+        onClick={handleCreate}
         disabled={!canSubmit}
-        onPress={handleCreate}
-        alignSelf="flex-start"
+        style={{
+          alignSelf: 'flex-end',
+          height: 42,
+          padding: '0 28px',
+          borderRadius: 21,
+          border: 'none',
+          background: canSubmit ? '#0ab9e6' : '#e8eaed',
+          color: canSubmit ? '#fff' : '#b0b8c4',
+          fontSize: 14,
+          fontWeight: 800,
+          letterSpacing: 0.4,
+          cursor: canSubmit ? 'pointer' : 'default',
+          transition: 'background 0.2s, transform 0.12s, box-shadow 0.2s',
+          boxShadow: canSubmit ? '0 3px 12px rgba(10,185,230,0.3)' : 'none',
+        }}
+        onMouseEnter={e => { if (canSubmit) { e.currentTarget.style.background = '#09a8d2'; e.currentTarget.style.boxShadow = '0 5px 18px rgba(10,185,230,0.4)'; } }}
+        onMouseLeave={e => { if (canSubmit) { e.currentTarget.style.background = '#0ab9e6'; e.currentTarget.style.boxShadow = '0 3px 12px rgba(10,185,230,0.3)'; } e.currentTarget.style.transform = 'scale(1)'; }}
+        onMouseDown={e => { if (canSubmit) { e.currentTarget.style.transform = 'scale(0.97)'; e.currentTarget.style.boxShadow = '0 1px 6px rgba(10,185,230,0.2)'; } }}
+        onMouseUp={e => { if (canSubmit) { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 5px 18px rgba(10,185,230,0.4)'; } }}
       >
         {submitting ? 'Starting...' : 'Start Agent Team'}
-      </Button>
-    </YStack>
+      </button>
+    </div>
   );
 }
