@@ -29,12 +29,12 @@ function ToastStack() {
     }}>
       {toasts.map(t => (
         <div key={t.id} style={{
-          padding: '8px 14px', borderRadius: 8,
+          padding: '10px 16px', borderRadius: 12,
           background: t.type === 'success' ? '#ecfdf5' : '#eff6ff',
           border: `1px solid ${t.type === 'success' ? '#86efac' : '#93c5fd'}`,
           color: t.type === 'success' ? '#065f46' : '#1e40af',
-          fontSize: 12, fontWeight: 500,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+          fontSize: 12, fontWeight: 600,
+          boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
           animation: 'toast-in 0.2s ease-out',
         }}>
           {t.type === 'success' ? '\u2713 ' : ''}{t.message}
@@ -90,7 +90,7 @@ export const SessionDetailView = memo(function SessionDetailView({ sessionId, ta
       <div
         style={{
           background: '#ffffff',
-          borderBottom: '1px solid #e5e7eb',
+          borderBottom: '1px solid #f0f1f3',
           flexShrink: 0,
         }}
       >
@@ -99,11 +99,11 @@ export const SessionDetailView = memo(function SessionDetailView({ sessionId, ta
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 10,
-            padding: '12px 20px 4px',
+            gap: 12,
+            padding: '16px 24px 6px',
           }}
         >
-          <InlineEdit value={session.name} onSave={handleRename} fontSize={16} fontWeight="700" />
+          <InlineEdit value={session.name} onSave={handleRename} fontSize={16} fontWeight="800" />
           <StatusBadge status={session.status} />
           <PermissionBadge sessionId={sessionId} />
         </div>
@@ -113,26 +113,41 @@ export const SessionDetailView = memo(function SessionDetailView({ sessionId, ta
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 12,
-            padding: '0 20px 10px',
+            gap: 16,
+            padding: '2px 24px 12px',
           }}
         >
-          <span style={{ fontSize: 11, color: '#9ca3af', fontFamily: 'monospace' }}>
+          <span style={{
+            fontSize: 11,
+            color: '#8b95a3',
+            fontFamily: 'monospace',
+            fontWeight: 600,
+            padding: '2px 8px',
+            borderRadius: 8,
+            background: '#f7f8fa',
+            letterSpacing: 0.3,
+          }}>
             {session.model.split('-').slice(1, 3).join(' ')}
           </span>
           <span
             style={{
               fontSize: 11,
-              color: '#9ca3af',
+              color: '#b0b8c4',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
               maxWidth: 260,
+              letterSpacing: 0.1,
             }}
           >
             {session.cwd}
           </span>
-          <span style={{ fontSize: 11, color: '#9ca3af', fontFamily: 'monospace' }}>
+          <span style={{
+            fontSize: 11,
+            color: '#8b95a3',
+            fontFamily: 'monospace',
+            fontWeight: 600,
+          }}>
             ${session.costUsd.toFixed(4)}
           </span>
           {isActive && (
@@ -140,23 +155,28 @@ export const SessionDetailView = memo(function SessionDetailView({ sessionId, ta
               onClick={() => api.stopSession(sessionId).catch(console.error)}
               style={{
                 marginLeft: 'auto',
-                padding: '3px 10px',
-                borderRadius: 4,
-                border: '1px solid #fca5a5',
-                background: '#fef2f2',
-                color: '#dc2626',
+                padding: '5px 14px',
+                borderRadius: 14,
+                border: 'none',
+                background: '#fee2e2',
+                color: '#ef4444',
                 fontSize: 11,
-                fontWeight: 600,
+                fontWeight: 700,
                 cursor: 'pointer',
-                lineHeight: 1.3,
-                transition: 'background 0.15s',
+                lineHeight: 1,
+                letterSpacing: 0.3,
+                transition: 'background 0.18s, transform 0.12s',
               }}
               onMouseEnter={e => {
-                e.currentTarget.style.background = '#fee2e2';
+                e.currentTarget.style.background = '#fecaca';
+                e.currentTarget.style.transform = 'scale(1.04)';
               }}
               onMouseLeave={e => {
-                e.currentTarget.style.background = '#fef2f2';
+                e.currentTarget.style.background = '#fee2e2';
+                e.currentTarget.style.transform = 'scale(1)';
               }}
+              onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.95)'; }}
+              onMouseUp={e => { e.currentTarget.style.transform = 'scale(1.04)'; }}
             >
               Stop
             </button>
@@ -164,7 +184,7 @@ export const SessionDetailView = memo(function SessionDetailView({ sessionId, ta
         </div>
 
         {/* Tab bar */}
-        <div style={{ display: 'flex', gap: 0, padding: '0 20px' }}>
+        <div style={{ display: 'flex', gap: 2, padding: '0 20px' }}>
           {TABS.map(t => {
             const active = tab === t.key;
             return (
@@ -172,22 +192,23 @@ export const SessionDetailView = memo(function SessionDetailView({ sessionId, ta
                 key={t.key}
                 onClick={() => navigate({ view: 'session_detail', sessionId, tab: t.key })}
                 style={{
-                  padding: '6px 14px 8px',
+                  padding: '8px 16px 10px',
                   border: 'none',
-                  borderBottom: active ? '2px solid #3b82f6' : '2px solid transparent',
+                  borderBottom: active ? '2px solid #0ab9e6' : '2px solid transparent',
                   background: 'transparent',
-                  color: active ? '#111827' : '#6b7280',
-                  fontWeight: active ? 600 : 400,
+                  color: active ? '#1a1d24' : '#8b95a3',
+                  fontWeight: active ? 700 : 500,
                   fontSize: 12,
+                  letterSpacing: 0.3,
                   cursor: 'pointer',
                   lineHeight: 1,
-                  transition: 'color 0.15s, border-color 0.15s',
+                  transition: 'color 0.18s, border-color 0.18s',
                 }}
                 onMouseEnter={e => {
-                  if (!active) e.currentTarget.style.color = '#111827';
+                  if (!active) e.currentTarget.style.color = '#555e6b';
                 }}
                 onMouseLeave={e => {
-                  if (!active) e.currentTarget.style.color = '#6b7280';
+                  if (!active) e.currentTarget.style.color = '#8b95a3';
                 }}
               >
                 {tabLabels[t.key]}
@@ -203,13 +224,13 @@ export const SessionDetailView = memo(function SessionDetailView({ sessionId, ta
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 8,
-            padding: '8px 20px',
-            background: '#fef2f2',
+            gap: 10,
+            padding: '10px 24px',
+            background: '#fff5f5',
             borderBottom: '1px solid #fecaca',
           }}
         >
-          <span style={{ flex: 1, fontSize: 12, color: '#dc2626' }}>{lastError}</span>
+          <span style={{ flex: 1, fontSize: 12, fontWeight: 500, color: '#ef4444' }}>{lastError}</span>
           <button
             onClick={clearError}
             style={{
@@ -217,14 +238,14 @@ export const SessionDetailView = memo(function SessionDetailView({ sessionId, ta
               background: 'transparent',
               color: '#ef4444',
               fontSize: 12,
+              fontWeight: 600,
               cursor: 'pointer',
+              padding: '4px 10px',
+              borderRadius: 10,
+              transition: 'background 0.15s',
             }}
-            onMouseEnter={e => {
-              e.currentTarget.style.color = '#dc2626';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.color = '#ef4444';
-            }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#fee2e2'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
           >
             Dismiss
           </button>

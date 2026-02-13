@@ -1,20 +1,29 @@
 const DOT: Record<string, { color: string; pulse?: boolean }> = {
   starting:    { color: '#eab308' },
   running:     { color: '#22c55e', pulse: true },
-  completed:   { color: '#6b7280' },
+  completed:   { color: '#8b95a3' },
   error:       { color: '#ef4444' },
-  working:     { color: '#3b82f6', pulse: true },
-  idle:        { color: '#6b7280' },
-  stopped:     { color: '#9ca3af' },
-  pending:     { color: '#9ca3af' },
-  in_progress: { color: '#3b82f6', pulse: true },
+  working:     { color: '#0ab9e6', pulse: true },
+  idle:        { color: '#8b95a3' },
+  stopped:     { color: '#b0b8c4' },
+  pending:     { color: '#b0b8c4' },
+  in_progress: { color: '#0ab9e6', pulse: true },
 };
 
 export function StatusBadge({ status, showLabel = true }: { status: string; showLabel?: boolean }) {
   const d = DOT[status] ?? DOT.pending;
 
   return (
-    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, flexShrink: 0, lineHeight: 1 }}>
+    <div style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 6,
+      flexShrink: 0,
+      lineHeight: 1,
+      padding: '3px 10px',
+      borderRadius: 12,
+      background: `${d.color}14`,
+    }}>
       <div
         className={d.pulse ? 'animate-pulse' : undefined}
         style={{
@@ -25,10 +34,17 @@ export function StatusBadge({ status, showLabel = true }: { status: string; show
           borderRadius: '50%',
           backgroundColor: d.color,
           flexShrink: 0,
+          boxShadow: d.pulse ? `0 0 6px ${d.color}` : 'none',
         }}
       />
       {showLabel && (
-        <span style={{ fontSize: 11, color: '#6b7280', letterSpacing: 0.2, lineHeight: 1 }}>
+        <span style={{
+          fontSize: 11,
+          fontWeight: 600,
+          color: d.color,
+          letterSpacing: 0.2,
+          lineHeight: 1,
+        }}>
           {status}
         </span>
       )}

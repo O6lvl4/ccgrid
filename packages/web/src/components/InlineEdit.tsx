@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react';
-import { Input, Text, XStack } from 'tamagui';
 
 interface InlineEditProps {
   value: string;
@@ -11,12 +10,12 @@ interface InlineEditProps {
 export function InlineEdit({ value, onSave, fontSize = 13, fontWeight = '600' }: InlineEditProps) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value);
-  const inputRef = useRef<any>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (editing) {
-      inputRef.current?.focus();
-      inputRef.current?.select();
+    if (editing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
     }
   }, [editing]);
 
@@ -41,43 +40,47 @@ export function InlineEdit({ value, onSave, fontSize = 13, fontWeight = '600' }:
 
   if (editing) {
     return (
-      <Input
+      <input
         ref={inputRef}
         value={draft}
-        onChangeText={setDraft}
+        onChange={e => setDraft(e.target.value)}
         onBlur={commit}
-        onKeyPress={(e: { nativeEvent: { key: string } }) => {
-          if (e.nativeEvent.key === 'Enter') commit();
-          if (e.nativeEvent.key === 'Escape') cancel();
+        onKeyDown={e => {
+          if (e.key === 'Enter') commit();
+          if (e.key === 'Escape') cancel();
         }}
-        unstyled
-        bg="transparent"
-        borderWidth={0}
-        borderBottomWidth={1}
-        borderBottomColor="$blue9"
-        color="$gray12"
-        fontSize={fontSize}
-        fontWeight={fontWeight as any}
-        px={0}
-        py="$0.5"
-        outlineWidth={0}
+        style={{
+          fontSize,
+          fontWeight: fontWeight as any,
+          color: '#1a1d24',
+          background: 'transparent',
+          border: 'none',
+          borderBottom: '2px solid #0ab9e6',
+          outline: 'none',
+          padding: '2px 0',
+          lineHeight: 1.3,
+          fontFamily: 'inherit',
+        }}
       />
     );
   }
 
   return (
-    <Text
-      fontSize={fontSize}
-      fontWeight={fontWeight as any}
-      color="$gray12"
-      numberOfLines={1}
-      cursor="pointer"
-      borderBottomWidth={1}
-      borderBottomColor="transparent"
-      hoverStyle={{ borderBottomColor: '$gray6' }}
-      onPress={() => setEditing(true)}
+    <span
+      onClick={() => setEditing(true)}
+      style={{
+        fontSize,
+        fontWeight: fontWeight as any,
+        color: '#1a1d24',
+        cursor: 'pointer',
+        borderBottom: '1px solid transparent',
+        transition: 'border-color 0.15s',
+        lineHeight: 1.3,
+      }}
+      onMouseEnter={e => { e.currentTarget.style.borderBottomColor = '#d1d5db'; }}
+      onMouseLeave={e => { e.currentTarget.style.borderBottomColor = 'transparent'; }}
     >
       {value}
-    </Text>
+    </span>
   );
 }
