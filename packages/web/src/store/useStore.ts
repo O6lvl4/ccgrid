@@ -110,12 +110,18 @@ export interface TeammateMessage {
   timestamp: string;
 }
 
+export interface FollowUpImage {
+  name: string;
+  dataUrl: string;
+}
+
 interface AppState {
   sessions: Map<string, Session>;
   teammates: Map<string, Teammate>;
   tasks: Map<string, TeamTask[]>;
   leadOutputs: Map<string, string>;
   teammateMessages: Map<string, TeammateMessage[]>; // sessionId -> messages
+  followUpImages: Map<string, FollowUpImage[][]>; // sessionId -> rounds of images
   teammateSpecs: TeammateSpec[];
   skillSpecs: SkillSpec[];
   pendingPermissions: Map<string, PendingPermission>;
@@ -138,6 +144,7 @@ interface AppState {
   clearError: () => void;
   setWsSend: (send: ((msg: unknown) => void) | null) => void;
   respondToPermission: (requestId: string, behavior: 'allow' | 'deny', message?: string, updatedInput?: Record<string, unknown>) => void;
+  pushFollowUpImages: (sessionId: string, images: FollowUpImage[]) => void;
   addToast: (message: string, type?: 'success' | 'info') => void;
   removeToast: (id: string) => void;
 }
@@ -148,6 +155,7 @@ export const useStore = create<AppState>((set, get) => ({
   tasks: new Map(),
   leadOutputs: new Map(),
   teammateMessages: new Map(),
+  followUpImages: new Map(),
   teammateSpecs: [],
   skillSpecs: [],
   pendingPermissions: new Map(),
@@ -458,6 +466,13 @@ export const useStore = create<AppState>((set, get) => ({
     const filtered = state.toasts.filter(t => t.id !== id);
     if (filtered.length === state.toasts.length) return state;
     return { toasts: filtered };
+  }),
+
+  pushFollowUpImages: (sessionId, images) => set(state => {
+    const followUpImages = new Map(state.followUpImages);
+    const rounds = [...(followUpImages.get(sessionId) ?? []), images];
+    followUpImages.set(sessionId, rounds);
+    return { followUpImages };
   }),
 }));
 

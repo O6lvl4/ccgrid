@@ -1,11 +1,12 @@
 import { useState, useCallback, useRef } from 'react';
 import { useApi } from '../hooks/useApi';
 import { readFilesAsAttachments, FILE_ACCEPT } from '../utils/fileUtils';
-import { pushAttachments, type AttachmentPreview } from '../utils/followUpAttachments';
+import { useStore } from '../store/useStore';
 import { FileChip } from './FileChip';
 
 export function FollowUpInput({ sessionId }: { sessionId: string }) {
   const api = useApi();
+  const pushFollowUpImages = useStore(s => s.pushFollowUpImages);
   const [prompt, setPrompt] = useState('');
   const [sending, setSending] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
@@ -20,14 +21,10 @@ export function FollowUpInput({ sessionId }: { sessionId: string }) {
         ? await readFilesAsAttachments(attachedFiles)
         : undefined;
       // Save image previews for display in the output timeline
-      if (files && files.length > 0) {
-        const previews: AttachmentPreview[] = files
-          .filter(f => f.mimeType.startsWith('image/'))
-          .map(f => ({ name: f.name, mimeType: f.mimeType, dataUrl: `data:${f.mimeType};base64,${f.base64Data}` }));
-        if (previews.length > 0) {
-          pushAttachments(sessionId, previews);
-        }
-      }
+      const imagePreviews = (files ?? [])
+        .filter(f => f.mimeType.startsWith('image/'))
+        .map(f => ({ name: f.name, dataUrl: `data:${f.mimeType};base64,${f.base64Data}` }));
+      pushFollowUpImages(sessionId, imagePreviews);
       await api.continueSession(sessionId, text || '添付ファイルを確認してください', files);
       setPrompt('');
       setAttachedFiles([]);
