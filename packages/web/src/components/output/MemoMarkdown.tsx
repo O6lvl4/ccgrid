@@ -11,12 +11,12 @@ export const proseClass = 'prose prose-sm max-w-none prose-pre:bg-gray-100 prose
 const remarkPlugins = [remarkGfm, remarkBreaks];
 const rehypePlugins = [rehypeTwemoji];
 
-export const MemoMarkdown = memo(function MemoMarkdown({ content }: { content: string }) {
-  return (
-    <div className={proseClass}>
-      <Markdown remarkPlugins={remarkPlugins} rehypePlugins={rehypePlugins} components={markdownComponents}>
-        {cleanSdkOutput(content)}
-      </Markdown>
-    </div>
+export const MemoMarkdown = memo(function MemoMarkdown({ content, bare }: { content: string; bare?: boolean }) {
+  const md = (
+    <Markdown remarkPlugins={remarkPlugins} rehypePlugins={rehypePlugins} components={markdownComponents}>
+      {cleanSdkOutput(content)}
+    </Markdown>
   );
+  if (bare) return md;
+  return <div className={proseClass}>{md}</div>;
 });

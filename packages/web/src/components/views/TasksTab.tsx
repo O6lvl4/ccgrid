@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useStore } from '../../store/useStore';
+import { useShallow } from 'zustand/shallow';
 import type { TeamTask, Teammate } from '@ccgrid/shared';
 import { TaskCard } from './TaskCard';
 
@@ -9,31 +10,31 @@ const COLUMNS: { key: TeamTask['status']; label: string; color: string; bg: stri
   { key: 'completed', label: 'Done', color: '#22c55e', bg: 'rgba(34,197,94,0.08)' },
 ];
 
+const EMPTY_TASKS: TeamTask[] = [];
+
 export function TasksTab({ sessionId }: { sessionId: string }) {
-  const tasksMap = useStore(s => s.tasks);
+  const rawTasks = useStore(s => s.tasks.get(sessionId) ?? EMPTY_TASKS);
   const session = useStore(s => s.sessions.get(sessionId));
-  const teammates = useStore(s => s.teammates);
   const navigate = useStore(s => s.navigate);
+
+  const teammateMap = useStore(useShallow((s) => {
+    const map = new Map<string, Teammate>();
+    for (const tm of s.teammates.values()) {
+      if (tm.sessionId === sessionId) map.set(tm.agentId, tm);
+    }
+    return map;
+  }));
 
   const sessionDone = session?.status === 'completed' || session?.status === 'error';
 
   const tasks = useMemo(() => {
-    const raw = tasksMap.get(sessionId) ?? [];
-    if (!sessionDone) return raw;
-    return raw.map(t =>
+    if (!sessionDone) return rawTasks;
+    return rawTasks.map(t =>
       t.status === 'pending' || t.status === 'in_progress'
         ? { ...t, status: 'completed' as const }
         : t,
     );
-  }, [tasksMap, sessionId, sessionDone]);
-
-  const teammateMap = useMemo(() => {
-    const map = new Map<string, Teammate>();
-    for (const tm of teammates.values()) {
-      if (tm.sessionId === sessionId) map.set(tm.agentId, tm);
-    }
-    return map;
-  }, [teammates, sessionId]);
+  }, [rawTasks, sessionDone]);
 
   const grouped = useMemo(() => {
     const map: Record<string, TeamTask[]> = { pending: [], in_progress: [], completed: [] };

@@ -12,6 +12,34 @@ export interface ParsedSegments {
   followUps: { userPrompt: string; response: string }[];
 }
 
+const CHUNK_SIZE = 3000;
+
+export function splitIntoChunks(content: string): string[] {
+  if (!content) return [];
+  if (content.length <= CHUNK_SIZE) return [content];
+
+  const chunks: string[] = [];
+  let pos = 0;
+
+  while (pos < content.length) {
+    if (pos + CHUNK_SIZE >= content.length) {
+      chunks.push(content.slice(pos));
+      break;
+    }
+    // Find paragraph boundary near CHUNK_SIZE
+    let breakAt = content.indexOf('\n\n', pos + CHUNK_SIZE - 400);
+    if (breakAt === -1 || breakAt > pos + CHUNK_SIZE + 400) {
+      breakAt = pos + CHUNK_SIZE;
+    } else {
+      breakAt += 2; // include the \n\n
+    }
+    chunks.push(content.slice(pos, breakAt));
+    pos = breakAt;
+  }
+
+  return chunks;
+}
+
 export function parseSegments(output: string): ParsedSegments {
   if (!output) return { initial: '', followUps: [] };
 

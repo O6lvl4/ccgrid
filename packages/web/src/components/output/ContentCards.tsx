@@ -98,7 +98,7 @@ export const ContentCard = memo(function ContentCard({ icon, title, subtitle, st
   title: string;
   subtitle?: string;
   status?: string;
-  content: string;
+  content?: string;
   borderColorOverride?: string;
   children?: ReactNode;
 }) {
@@ -116,12 +116,11 @@ export const ContentCard = memo(function ContentCard({ icon, title, subtitle, st
       />
       {!collapsed && (
         <div style={{ padding: '0 12px 12px' }}>
-          {content ? (
+          {children ? children : content ? (
             <MemoMarkdown content={content} />
           ) : (
             <span style={{ color: '#9ca3af', fontStyle: 'italic', fontSize: 13 }}>No output yet</span>
           )}
-          {children}
         </div>
       )}
     </div>

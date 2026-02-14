@@ -1,15 +1,18 @@
-import { useMemo } from 'react';
 import { useStore } from '../../store/useStore';
+import { useShallow } from 'zustand/shallow';
 import { StatusBadge } from '../StatusBadge';
+import type { Teammate } from '@ccgrid/shared';
 
 export function TeammatesTab({ sessionId }: { sessionId: string }) {
-  const teammates = useStore(s => s.teammates);
   const navigate = useStore(s => s.navigate);
 
-  const tmList = useMemo(
-    () => Array.from(teammates.values()).filter(t => t.sessionId === sessionId),
-    [teammates, sessionId],
-  );
+  const tmList = useStore(useShallow((s) => {
+    const result: Teammate[] = [];
+    for (const tm of s.teammates.values()) {
+      if (tm.sessionId === sessionId) result.push(tm);
+    }
+    return result;
+  }));
 
   if (tmList.length === 0) {
     return (

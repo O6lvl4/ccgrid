@@ -14,6 +14,16 @@ export function handleServerMessage(msg: ServerMessage, get: StateGetter, set: S
 type MsgOf<T extends ServerMessage['type']> = Extract<ServerMessage, { type: T }>;
 type Handler<T extends ServerMessage['type']> = (msg: MsgOf<T>, get: StateGetter, set: StateSetter) => void;
 
+// --- rAF batching buffers ---
+const leadOutputBuffer = new Map<string, string>();
+let leadOutputRafId: number | null = null;
+
+const costUpdateBuffer = new Map<string, { costUsd: number; inputTokens: number; outputTokens: number }>();
+let costUpdateRafId: number | null = null;
+
+const teammateOutputBuffer = new Map<string, string>();
+let teammateOutputRafId: number | null = null;
+
 const MESSAGE_HANDLERS: { [K in ServerMessage['type']]?: Handler<K> } = {
   snapshot: handleSnapshot,
   session_created: handleSessionCreated,
@@ -123,12 +133,23 @@ function handleSessionDeleted(msg: MsgOf<'session_deleted'>, _get: StateGetter, 
 }
 
 function handleLeadOutput(msg: MsgOf<'lead_output'>, _get: StateGetter, set: StateSetter): void {
-  set(state => {
-    const leadOutputs = new Map(state.leadOutputs);
-    const existing = leadOutputs.get(msg.sessionId) ?? '';
-    leadOutputs.set(msg.sessionId, existing + msg.text);
-    return { leadOutputs };
-  });
+  const existing = leadOutputBuffer.get(msg.sessionId) ?? '';
+  leadOutputBuffer.set(msg.sessionId, existing + msg.text);
+  if (leadOutputRafId === null) {
+    leadOutputRafId = requestAnimationFrame(() => {
+      leadOutputRafId = null;
+      const buffered = new Map(leadOutputBuffer);
+      leadOutputBuffer.clear();
+      set(state => {
+        const leadOutputs = new Map(state.leadOutputs);
+        for (const [sid, delta] of buffered) {
+          const prev = leadOutputs.get(sid) ?? '';
+          leadOutputs.set(sid, prev + delta);
+        }
+        return { leadOutputs };
+      });
+    });
+  }
 }
 
 function handleTeammateDiscovered(msg: MsgOf<'teammate_discovered'>, _get: StateGetter, set: StateSetter): void {
@@ -151,14 +172,24 @@ function handleTeammateStatus(msg: MsgOf<'teammate_status'>, _get: StateGetter, 
 }
 
 function handleTeammateOutput(msg: MsgOf<'teammate_output'>, _get: StateGetter, set: StateSetter): void {
-  set(state => {
-    const teammates = new Map(state.teammates);
-    const tm = teammates.get(msg.agentId);
-    if (tm) {
-      teammates.set(msg.agentId, { ...tm, output: msg.text });
-    }
-    return { teammates };
-  });
+  teammateOutputBuffer.set(msg.agentId, msg.text);
+  if (teammateOutputRafId === null) {
+    teammateOutputRafId = requestAnimationFrame(() => {
+      teammateOutputRafId = null;
+      const buffered = new Map(teammateOutputBuffer);
+      teammateOutputBuffer.clear();
+      set(state => {
+        const teammates = new Map(state.teammates);
+        for (const [agentId, text] of buffered) {
+          const tm = teammates.get(agentId);
+          if (tm) {
+            teammates.set(agentId, { ...tm, output: text });
+          }
+        }
+        return { teammates };
+      });
+    });
+  }
 }
 
 function handleTaskSync(msg: MsgOf<'task_sync'>, _get: StateGetter, set: StateSetter): void {
@@ -177,19 +208,28 @@ function handleTaskCompleted(msg: MsgOf<'task_completed'>, get: StateGetter, _se
 }
 
 function handleCostUpdate(msg: MsgOf<'cost_update'>, _get: StateGetter, set: StateSetter): void {
-  set(state => {
-    const sessions = new Map(state.sessions);
-    const session = sessions.get(msg.sessionId);
-    if (session) {
-      sessions.set(msg.sessionId, {
-        ...session,
-        costUsd: msg.costUsd,
-        inputTokens: msg.inputTokens,
-        outputTokens: msg.outputTokens,
-      });
-    }
-    return { sessions };
+  costUpdateBuffer.set(msg.sessionId, {
+    costUsd: msg.costUsd,
+    inputTokens: msg.inputTokens,
+    outputTokens: msg.outputTokens,
   });
+  if (costUpdateRafId === null) {
+    costUpdateRafId = requestAnimationFrame(() => {
+      costUpdateRafId = null;
+      const buffered = new Map(costUpdateBuffer);
+      costUpdateBuffer.clear();
+      set(state => {
+        const sessions = new Map(state.sessions);
+        for (const [sid, data] of buffered) {
+          const session = sessions.get(sid);
+          if (session) {
+            sessions.set(sid, { ...session, ...data });
+          }
+        }
+        return { sessions };
+      });
+    });
+  }
 }
 
 function handlePermissionRequest(msg: MsgOf<'permission_request'>, _get: StateGetter, set: StateSetter): void {

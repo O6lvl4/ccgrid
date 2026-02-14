@@ -1,4 +1,4 @@
-import { useMemo, memo } from 'react';
+import { useMemo, useState, useEffect, memo } from 'react';
 import { useStore, type SessionTab } from '../../store/useStore';
 import { InlineEdit } from '../InlineEdit';
 import { StatusBadge } from '../StatusBadge';
@@ -9,6 +9,55 @@ import { TasksTab } from './TasksTab';
 import { PermissionDialog, PermissionBadge, PermissionHistory } from '../PermissionDialog';
 import type { Api } from '../../hooks/useApi';
 import type { TeamTask } from '@ccgrid/shared';
+
+const SKELETON_CARDS: number[][] = [
+  [92, 78, 85, 60],
+  [80, 65, 90, 50],
+  [70, 88, 55, 82],
+];
+
+function SkeletonCard({ lines, delay }: { lines: number[]; delay: number }) {
+  return (
+    <div style={{
+      border: '1px solid #e5e7eb',
+      borderRadius: 8,
+      backgroundColor: '#ffffff',
+      overflow: 'hidden',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px' }}>
+        <div style={{ width: 22, height: 22, borderRadius: '50%', background: '#f0f1f3' }} />
+        <div style={{ width: 40, height: 12, borderRadius: 4, background: '#f0f1f3' }} />
+      </div>
+      <div style={{ padding: '0 12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {lines.map((w, i) => (
+          <div key={i} className="skeleton-pulse" style={{ height: 12, borderRadius: 4, background: '#f0f1f3', width: `${w}%`, animationDelay: `${(delay + i) * 0.1}s` }} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function OutputSkeleton() {
+  let delay = 0;
+  return (
+    <div style={{ flex: 1, padding: 16, backgroundColor: '#f9fafb', display: 'flex', flexDirection: 'column', gap: 12 }}>
+      {SKELETON_CARDS.map((lines, i) => {
+        const d = delay;
+        delay += lines.length;
+        return <SkeletonCard key={i} lines={lines} delay={d} />;
+      })}
+      <style>{`
+        .skeleton-pulse {
+          animation: skeleton-fade 1.2s ease-in-out infinite;
+        }
+        @keyframes skeleton-fade {
+          0%, 100% { opacity: 0.4; }
+          50% { opacity: 1; }
+        }
+      `}</style>
+    </div>
+  );
+}
 
 const TABS: { key: SessionTab; label: string }[] = [
   { key: 'output', label: 'Output' },
@@ -67,6 +116,13 @@ export const SessionDetailView = memo(function SessionDetailView({ sessionId, ta
   });
   const taskList = useStore(s => s.tasks.get(sessionId) ?? EMPTY_TASKS);
   const doneCount = useMemo(() => taskList.filter(t => t.status === 'completed').length, [taskList]);
+
+  // Defer heavy tab content to after first paint so header/title appears instantly
+  const [contentReady, setContentReady] = useState(false);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setContentReady(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
 
   if (!session) return null;
 
@@ -256,13 +312,19 @@ export const SessionDetailView = memo(function SessionDetailView({ sessionId, ta
       <PermissionDialog sessionId={sessionId} />
       <PermissionHistory sessionId={sessionId} />
 
-      {/* Tab content — OutputTab stays mounted to preserve DOM across tab switches */}
-      <div style={{ display: tab === 'output' ? 'flex' : 'none', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-        <OutputTab sessionId={sessionId} />
-      </div>
-      {tab === 'overview' && <OverviewTab session={session} />}
-      {tab === 'teammates' && <TeammatesTab sessionId={sessionId} />}
-      {tab === 'tasks' && <TasksTab sessionId={sessionId} />}
+      {/* Tab content — deferred to after first paint for instant header switch */}
+      {contentReady ? (
+        <>
+          <div style={{ display: tab === 'output' ? 'flex' : 'none', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+            <OutputTab sessionId={sessionId} visible={tab === 'output'} />
+          </div>
+          {tab === 'overview' && <OverviewTab session={session} />}
+          {tab === 'teammates' && <TeammatesTab sessionId={sessionId} />}
+          {tab === 'tasks' && <TasksTab sessionId={sessionId} />}
+        </>
+      ) : (
+        <OutputSkeleton />
+      )}
 
       {/* Toast notifications */}
       <ToastStack />
