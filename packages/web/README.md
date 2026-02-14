@@ -1,6 +1,6 @@
 # @ccgrid/web
 
-React + Tamagui + Zustand によるフロントエンド。セッション管理、Teammate 監視、タスク追跡、権限承認の GUI を提供する。
+React + Zustand + Tailwind CSS によるフロントエンド。セッション管理、Teammate 監視、タスク追跡、権限承認の GUI を提供する。
 
 ## 起動
 
@@ -32,7 +32,6 @@ src/
 ## 主な依存
 
 - **React 19** + **Vite**
-- **Tamagui** — UI コンポーネント
 - **Zustand** — 状態管理
 - **Tailwind CSS** — スタイリング
 - **react-markdown** + **remark-gfm** — Markdown レンダリング
