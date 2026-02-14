@@ -1,10 +1,22 @@
 {
   "name": "ccgrid",
+  "version": "0.1.0",
+  "description": "Claude Agent SDKを使ったチーム開発管理ツール",
   "private": true,
   "workspaces": ["packages/shared", "packages/server", "packages/web"],
   "scripts": {
     "dev": "concurrently -k \"npm run dev -w @ccgrid/server\" \"npm run dev -w @ccgrid/web\""
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/O6lvl4/ccgrid.git"
+  },
+  "bugs": {
+    "url": "https://github.com/O6lvl4/ccgrid/issues"
+  },
+  "homepage": "https://github.com/O6lvl4/ccgrid",
+  "author": "O6lvl4 <hiromi.motodera@aid-on.org>",
+  "license": "MIT",
   "devDependencies": {
     "concurrently": "^9.1.0",
     "typescript": "^5.8.0"

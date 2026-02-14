@@ -1,10 +1,19 @@
 {
   "name": "@ccgrid/server",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/O6lvl4/ccgrid.git"
+  },
+  "bugs": {
+    "url": "https://github.com/O6lvl4/ccgrid/issues"
+  },
+  "homepage": "https://github.com/O6lvl4/ccgrid",
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "^0.2.37",
     "@ccgrid/shared": "*",
