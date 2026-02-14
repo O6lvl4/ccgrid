@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import type { SDKUserMessage } from '@anthropic-ai/claude-agent-sdk';
-import type { ContentBlockParam } from '@anthropic-ai/sdk/resources/messages/messages';
+import type { ContentBlockParam } from '@anthropic-ai/sdk/resources';
 import type { Session, FileAttachment } from '@ccgrid/shared';
 import { buildSystemPrompt } from './prompt-builder.js';
 import { buildAgents, filesToContentBlocks } from './agent-builder.js';

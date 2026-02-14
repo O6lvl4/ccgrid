@@ -1,4 +1,4 @@
-import type { ContentBlockParam } from '@anthropic-ai/sdk/resources/messages/messages';
+import type { ContentBlockParam } from '@anthropic-ai/sdk/resources';
 import type { TeammateSpec, SkillSpec, FileAttachment } from '@ccgrid/shared';
 
 export function buildAgents(

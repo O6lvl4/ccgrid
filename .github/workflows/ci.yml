@@ -27,7 +27,10 @@ jobs:
         run: npm ci
 
       - name: Check TypeScript compilation
-        run: npx tsc --noEmit
+        run: |
+          npx tsc --noEmit -p packages/shared/tsconfig.json
+          npx tsc --noEmit -p packages/server/tsconfig.json
+          npx tsc --noEmit -p packages/web/tsconfig.json
 
       - name: Run tests (if available)
         run: |

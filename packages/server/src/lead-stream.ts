@@ -47,7 +47,7 @@ async function handleLeadMessage(sessionId: string, message: SDKMessage, deps: L
 }
 
 function handleSystemInit(sessionId: string, session: Session, message: SDKMessage, deps: LeadStreamDeps): void {
-  if (!('subtype' in message) || message.subtype !== 'init') return;
+  if (message.type !== 'system' || !('subtype' in message) || message.subtype !== 'init') return;
   session.sessionId = message.session_id;
   session.status = 'running';
   deps.persistSession(sessionId);
@@ -56,7 +56,8 @@ function handleSystemInit(sessionId: string, session: Session, message: SDKMessa
 }
 
 function handleStreamDelta(sessionId: string, message: SDKMessage, deps: LeadStreamDeps): void {
-  const event = message.event as Record<string, unknown>;
+  if (message.type !== 'stream_event') return;
+  const event = message.event as unknown as Record<string, unknown>;
   if (event.type !== 'content_block_delta') return;
 
   const delta = event.delta as Record<string, unknown> | undefined;

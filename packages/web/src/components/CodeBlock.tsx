@@ -32,11 +32,13 @@ SyntaxHighlighter.registerLanguage('bash', bash);
 const CODE_FONT = 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace';
 
 /**
- * Detects `cat -n` style line-numbered output:
- *   "     1\tline content"  (tab separator)
- *   "     1→line content"   (→ U+2192 separator, used by Claude Code)
+ * Detects line-numbered output:
+ *   "     1\tline content"  (tab separator — cat -n)
+ *   "     1→line content"   (→ U+2192 separator — Claude Code)
+ *   "1371:line content"     (colon separator — grep match lines)
+ *   "1372-line content"     (dash separator — grep context lines)
  */
-const LINE_NUM_RE = /^(\s*\d+)[\t\u2192](.*)$/;
+const LINE_NUM_RE = /^(\s*\d+)[\t\u2192:\-](.*)$/;
 
 function hasLineNumbers(code: string): boolean {
   const lines = code.split('\n').filter(l => l.length > 0);
