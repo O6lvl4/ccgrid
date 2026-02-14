@@ -5,15 +5,65 @@ import { FollowUpInput } from '../FollowUpInput';
 import { parseSegments } from '../../utils/outputParser';
 import { LeadAvatar, UserAvatar, FollowUpAvatar } from '../output/Avatars';
 import { StatusBadge, PulseWorking, ContentCard, TeammateCard, TimelineConnector } from '../output/ContentCards';
-import type { FollowUpImage } from '../../store/useStore';
 import type { Teammate } from '@ccgrid/shared';
 
-const STABLE_EMPTY_MAP = new Map<number, FollowUpImage[]>();
+function LeadStreamingIndicator({ show }: { show: boolean }) {
+  if (!show) return null;
+  return (
+    <>
+      <TimelineConnector />
+      <div style={{ border: '1px solid #93c5fd', borderRadius: 8, overflow: 'hidden', padding: 12, backgroundColor: '#ffffff' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingBottom: 4 }}>
+          <LeadAvatar />
+          <span style={{ color: '#111827', fontWeight: 600, fontSize: 13 }}>Lead</span>
+          <StatusBadge status="running" />
+        </div>
+        <PulseWorking />
+      </div>
+    </>
+  );
+}
+
+interface FollowUp { userPrompt?: string; response?: string }
+
+function FollowUpEntry({ fu, index, isLast, isStreaming }: {
+  fu: FollowUp; index: number; isLast: boolean; isStreaming: boolean;
+}) {
+  const followUpStatus = isLast && isStreaming ? 'running' : 'completed';
+  return (
+    <div>
+      {fu.userPrompt && (
+        <>
+          <TimelineConnector />
+          <ContentCard icon={<UserAvatar />} title="You" content={fu.userPrompt} borderColorOverride="$indigo5" />
+        </>
+      )}
+      {fu.response && (
+        <>
+          <TimelineConnector />
+          <ContentCard icon={<FollowUpAvatar />} title={`Follow-up #${index + 1}`} status={followUpStatus} content={fu.response} borderColorOverride="$blue5" />
+        </>
+      )}
+      {!fu.response && isLast && isStreaming && (
+        <>
+          <TimelineConnector />
+          <div style={{ border: '1px solid #93c5fd', borderRadius: 8, overflow: 'hidden', padding: 12, backgroundColor: '#ffffff' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingBottom: 4 }}>
+              <FollowUpAvatar />
+              <span style={{ color: '#111827', fontWeight: 600, fontSize: 13 }}>Follow-up #{index + 1}</span>
+              <StatusBadge status="running" />
+            </div>
+            <PulseWorking />
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
 export const OutputTab = memo(function OutputTab({ sessionId }: { sessionId: string }) {
   const session = useStore(s => s.sessions.get(sessionId));
   const output = useStore(s => s.leadOutputs.get(sessionId) ?? '');
-  const imageMap = useStore(s => s.followUpImages.get(sessionId) ?? STABLE_EMPTY_MAP);
   const allTeammates = useStore(useShallow((s) => {
     const result: Teammate[] = [];
     for (const tm of s.teammates.values()) {
@@ -38,6 +88,13 @@ export const OutputTab = memo(function OutputTab({ sessionId }: { sessionId: str
   const isCompleted = session.status === 'completed';
   const hasTeammates = allTeammates.length > 0;
 
+  let leadStatus: string;
+  if (hasTeammates || segments.followUps.length > 0) {
+    leadStatus = segments.followUps.length === 0 && isStreaming ? 'running' : 'completed';
+  } else {
+    leadStatus = session.status;
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', backgroundColor: '#f9fafb' }}>
       <div
@@ -55,9 +112,7 @@ export const OutputTab = memo(function OutputTab({ sessionId }: { sessionId: str
             <ContentCard
               icon={<LeadAvatar />}
               title="Lead"
-              status={hasTeammates || segments.followUps.length > 0
-                ? (segments.followUps.length === 0 && isStreaming ? 'running' : 'completed')
-                : session.status}
+              status={leadStatus}
               content={segments.initial}
             />
 
@@ -70,85 +125,12 @@ export const OutputTab = memo(function OutputTab({ sessionId }: { sessionId: str
             ))}
 
             {/* 3. フォローアップ（ユーザーメッセージ + AI応答） */}
-            {segments.followUps.map((fu, i) => {
-              const isLast = i === segments.followUps.length - 1;
-              const followUpStatus = isLast && isStreaming ? 'running' : 'completed';
-              const images = imageMap.get(i);
-              return (
-                <div key={`followup-${i}`}>
-                  {fu.userPrompt && (
-                    <>
-                      <TimelineConnector />
-                      <ContentCard
-                        icon={<UserAvatar />}
-                        title="You"
-                        content={fu.userPrompt}
-                        borderColorOverride="$indigo5"
-                      >
-                        {images && images.length > 0 && (
-                          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
-                            {images.map((img, j) => (
-                              <img
-                                key={j}
-                                src={img.dataUrl}
-                                alt={img.name}
-                                style={{
-                                  maxWidth: 200,
-                                  maxHeight: 150,
-                                  borderRadius: 10,
-                                  objectFit: 'cover',
-                                  boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-                                }}
-                              />
-                            ))}
-                          </div>
-                        )}
-                      </ContentCard>
-                    </>
-                  )}
-                  {fu.response && (
-                    <>
-                      <TimelineConnector />
-                      <ContentCard
-                        icon={<FollowUpAvatar />}
-                        title={`Follow-up #${i + 1}`}
-                        status={followUpStatus}
-                        content={fu.response}
-                        borderColorOverride="$blue5"
-                      />
-                    </>
-                  )}
-                  {!fu.response && isLast && isStreaming && (
-                    <>
-                      <TimelineConnector />
-                      <div style={{ border: '1px solid #93c5fd', borderRadius: 8, overflow: 'hidden', padding: 12, backgroundColor: '#ffffff' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingBottom: 4 }}>
-                          <FollowUpAvatar />
-                          <span style={{ color: '#111827', fontWeight: 600, fontSize: 13 }}>Follow-up #{i + 1}</span>
-                          <StatusBadge status="running" />
-                        </div>
-                        <PulseWorking />
-                      </div>
-                    </>
-                  )}
-                </div>
-              );
-            })}
+            {segments.followUps.map((fu, i) => (
+              <FollowUpEntry key={`followup-${i}`} fu={fu} index={i} isLast={i === segments.followUps.length - 1} isStreaming={isStreaming} />
+            ))}
 
             {/* 4. ストリーミング中 */}
-            {isStreaming && segments.followUps.length === 0 && !hasTeammates && segments.initial && (
-              <>
-                <TimelineConnector />
-                <div style={{ border: '1px solid #93c5fd', borderRadius: 8, overflow: 'hidden', padding: 12, backgroundColor: '#ffffff' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingBottom: 4 }}>
-                    <LeadAvatar />
-                    <span style={{ color: '#111827', fontWeight: 600, fontSize: 13 }}>Lead</span>
-                    <StatusBadge status="running" />
-                  </div>
-                  <PulseWorking />
-                </div>
-              </>
-            )}
+            <LeadStreamingIndicator show={isStreaming && segments.followUps.length === 0 && !hasTeammates && !!segments.initial} />
 
             {/* 5. フォローアップ入力 */}
             {isCompleted && (

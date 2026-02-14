@@ -14,13 +14,14 @@ export interface PollerDeps {
 const activeTimers = new Map<string, ReturnType<typeof setInterval>>();
 const lastOutputs = new Map<string, string>();
 
-export function startPolling(
-  sessionId: string,
-  agentId: string,
-  sdkSessionId: string,
-  cwd: string,
-  deps: PollerDeps,
-): void {
+export function startPolling(opts: {
+  sessionId: string;
+  agentId: string;
+  sdkSessionId: string;
+  cwd: string;
+  deps: PollerDeps;
+}): void {
+  const { sessionId, agentId, sdkSessionId, cwd, deps } = opts;
   if (activeTimers.has(agentId)) return;
 
   const transcriptPath = join(

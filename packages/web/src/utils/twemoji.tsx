@@ -169,6 +169,32 @@ export function applyTwemojiToElement(container: HTMLElement): void {
   }
 }
 
+function emojiPartToNode(part: { text: string; isEmoji: boolean }): HastNode {
+  if (part.isEmoji) {
+    return {
+      type: 'element',
+      tagName: 'img',
+      properties: {
+        src: twemojiUrl(part.text),
+        alt: part.text,
+        className: 'emoji',
+        draggable: false,
+      },
+      children: [],
+    };
+  }
+  return { type: 'text', value: part.text };
+}
+
+function expandTextChild(child: HastNode): { nodes: HastNode[]; changed: boolean } {
+  if (child.type !== 'text' || typeof child.value !== 'string') {
+    return { nodes: [child], changed: false };
+  }
+  const parts = splitEmoji(child.value);
+  if (parts.length <= 1) return { nodes: [child], changed: false };
+  return { nodes: parts.map(emojiPartToNode), changed: true };
+}
+
 function visitTextNodes(node: HastNode) {
   if (!node.children) return;
 
@@ -176,30 +202,10 @@ function visitTextNodes(node: HastNode) {
   let changed = false;
 
   for (const child of node.children) {
-    if (child.type === 'text' && typeof child.value === 'string') {
-      const parts = splitEmoji(child.value);
-      if (parts.length > 1) {
-        changed = true;
-        for (const part of parts) {
-          if (part.isEmoji) {
-            newChildren.push({
-              type: 'element',
-              tagName: 'img',
-              properties: {
-                src: twemojiUrl(part.text),
-                alt: part.text,
-                className: 'emoji',
-                draggable: false,
-              },
-              children: [],
-            });
-          } else {
-            newChildren.push({ type: 'text', value: part.text });
-          }
-        }
-      } else {
-        newChildren.push(child);
-      }
+    const result = expandTextChild(child);
+    if (result.changed) {
+      changed = true;
+      newChildren.push(...result.nodes);
     } else {
       visitTextNodes(child);
       newChildren.push(child);

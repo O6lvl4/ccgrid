@@ -8,12 +8,13 @@ type StateSetter = (partial: Partial<AppState> | ((state: AppState) => Partial<A
 
 export function handleServerMessage(msg: ServerMessage, get: StateGetter, set: StateSetter): void {
   const handler = MESSAGE_HANDLERS[msg.type];
-  if (handler) handler(msg, get, set);
+  if (handler) handler(msg as never, get, set);
 }
 
-type Handler = (msg: any, get: StateGetter, set: StateSetter) => void;
+type MsgOf<T extends ServerMessage['type']> = Extract<ServerMessage, { type: T }>;
+type Handler<T extends ServerMessage['type']> = (msg: MsgOf<T>, get: StateGetter, set: StateSetter) => void;
 
-const MESSAGE_HANDLERS: Record<string, Handler> = {
+const MESSAGE_HANDLERS: { [K in ServerMessage['type']]?: Handler<K> } = {
   snapshot: handleSnapshot,
   session_created: handleSessionCreated,
   session_status: handleSessionStatus,
@@ -32,8 +33,8 @@ const MESSAGE_HANDLERS: Record<string, Handler> = {
   error: handleError,
 };
 
-function handleSnapshot(msg: any, _get: StateGetter, set: StateSetter): void {
-  const sessions = new Map<string, Session>(msg.sessions.map((s: Session) => [s.id, s]));
+function handleSnapshot(msg: MsgOf<'snapshot'>, _get: StateGetter, set: StateSetter): void {
+  const sessions = new Map<string, Session>(msg.sessions.map((s) => [s.id, s]));
   const firstId = msg.sessions[0]?.id ?? null;
   const leadOutputs = new Map<string, string>(Object.entries(msg.leadOutputs ?? {}));
   set(state => {
@@ -47,11 +48,12 @@ function handleSnapshot(msg: any, _get: StateGetter, set: StateSetter): void {
     const tasks = new Map<string, TeamTask[]>(Object.entries(msg.tasks ?? {}));
     return {
       sessions,
-      teammates: new Map<string, Teammate>(msg.teammates.map((t: Teammate) => [t.agentId, t])),
+      teammates: new Map<string, Teammate>(msg.teammates.map((t) => [t.agentId, t])),
       tasks,
       leadOutputs,
       teammateSpecs: msg.teammateSpecs ?? [],
       skillSpecs: msg.skillSpecs ?? [],
+      plugins: msg.plugins ?? [],
       permissionRules: msg.permissionRules ?? [],
       selectedSessionId,
       route,
@@ -60,7 +62,7 @@ function handleSnapshot(msg: any, _get: StateGetter, set: StateSetter): void {
   });
 }
 
-function handleSessionCreated(msg: any, _get: StateGetter, set: StateSetter): void {
+function handleSessionCreated(msg: MsgOf<'session_created'>, _get: StateGetter, set: StateSetter): void {
   const newRoute: ViewRoute = { view: 'session_detail', sessionId: msg.session.id, tab: 'output' };
   window.history.pushState(null, '', routeToPath(newRoute));
   set(state => {
@@ -75,7 +77,7 @@ function handleSessionCreated(msg: any, _get: StateGetter, set: StateSetter): vo
   });
 }
 
-function handleSessionStatus(msg: any, _get: StateGetter, set: StateSetter): void {
+function handleSessionStatus(msg: MsgOf<'session_status'>, _get: StateGetter, set: StateSetter): void {
   set(state => {
     const sessions = new Map(state.sessions);
     const session = sessions.get(msg.sessionId);
@@ -86,13 +88,13 @@ function handleSessionStatus(msg: any, _get: StateGetter, set: StateSetter): voi
   });
 }
 
-function handleSessionDeleted(msg: any, _get: StateGetter, set: StateSetter): void {
+function handleSessionDeleted(msg: MsgOf<'session_deleted'>, _get: StateGetter, set: StateSetter): void {
   set(state => {
     const sessions = new Map(state.sessions);
     sessions.delete(msg.sessionId);
     const teammates = new Map(state.teammates);
-    for (const [id, tm] of teammates) {
-      if (tm.sessionId === msg.sessionId) teammates.delete(id);
+    for (const [, tm] of teammates) {
+      if (tm.sessionId === msg.sessionId) teammates.delete(tm.agentId);
     }
     const tasks = new Map(state.tasks);
     tasks.delete(msg.sessionId);
@@ -120,7 +122,7 @@ function handleSessionDeleted(msg: any, _get: StateGetter, set: StateSetter): vo
   });
 }
 
-function handleLeadOutput(msg: any, _get: StateGetter, set: StateSetter): void {
+function handleLeadOutput(msg: MsgOf<'lead_output'>, _get: StateGetter, set: StateSetter): void {
   set(state => {
     const leadOutputs = new Map(state.leadOutputs);
     const existing = leadOutputs.get(msg.sessionId) ?? '';
@@ -129,7 +131,7 @@ function handleLeadOutput(msg: any, _get: StateGetter, set: StateSetter): void {
   });
 }
 
-function handleTeammateDiscovered(msg: any, _get: StateGetter, set: StateSetter): void {
+function handleTeammateDiscovered(msg: MsgOf<'teammate_discovered'>, _get: StateGetter, set: StateSetter): void {
   set(state => {
     const teammates = new Map(state.teammates);
     teammates.set(msg.teammate.agentId, msg.teammate);
@@ -137,7 +139,7 @@ function handleTeammateDiscovered(msg: any, _get: StateGetter, set: StateSetter)
   });
 }
 
-function handleTeammateStatus(msg: any, _get: StateGetter, set: StateSetter): void {
+function handleTeammateStatus(msg: MsgOf<'teammate_status'>, _get: StateGetter, set: StateSetter): void {
   set(state => {
     const teammates = new Map(state.teammates);
     const tm = teammates.get(msg.agentId);
@@ -148,7 +150,7 @@ function handleTeammateStatus(msg: any, _get: StateGetter, set: StateSetter): vo
   });
 }
 
-function handleTeammateOutput(msg: any, _get: StateGetter, set: StateSetter): void {
+function handleTeammateOutput(msg: MsgOf<'teammate_output'>, _get: StateGetter, set: StateSetter): void {
   set(state => {
     const teammates = new Map(state.teammates);
     const tm = teammates.get(msg.agentId);
@@ -159,7 +161,7 @@ function handleTeammateOutput(msg: any, _get: StateGetter, set: StateSetter): vo
   });
 }
 
-function handleTaskSync(msg: any, _get: StateGetter, set: StateSetter): void {
+function handleTaskSync(msg: MsgOf<'task_sync'>, _get: StateGetter, set: StateSetter): void {
   set(state => {
     const tasks = new Map(state.tasks);
     tasks.set(msg.sessionId, msg.tasks);
@@ -167,14 +169,14 @@ function handleTaskSync(msg: any, _get: StateGetter, set: StateSetter): void {
   });
 }
 
-function handleTaskCompleted(msg: any, get: StateGetter, _set: StateSetter): void {
+function handleTaskCompleted(msg: MsgOf<'task_completed'>, get: StateGetter, _set: StateSetter): void {
   const label = msg.teammateName
     ? `${msg.teammateName}: ${msg.taskSubject}`
     : msg.taskSubject;
   get().addToast(`Task completed — ${label}`, 'success');
 }
 
-function handleCostUpdate(msg: any, _get: StateGetter, set: StateSetter): void {
+function handleCostUpdate(msg: MsgOf<'cost_update'>, _get: StateGetter, set: StateSetter): void {
   set(state => {
     const sessions = new Map(state.sessions);
     const session = sessions.get(msg.sessionId);
@@ -190,7 +192,7 @@ function handleCostUpdate(msg: any, _get: StateGetter, set: StateSetter): void {
   });
 }
 
-function handlePermissionRequest(msg: any, _get: StateGetter, set: StateSetter): void {
+function handlePermissionRequest(msg: MsgOf<'permission_request'>, _get: StateGetter, set: StateSetter): void {
   set(state => {
     const pendingPermissions = new Map(state.pendingPermissions);
     pendingPermissions.set(msg.requestId, {
@@ -205,7 +207,7 @@ function handlePermissionRequest(msg: any, _get: StateGetter, set: StateSetter):
   });
 }
 
-function handleTeammateMessageRelayed(msg: any, _get: StateGetter, set: StateSetter): void {
+function handleTeammateMessageRelayed(msg: MsgOf<'teammate_message_relayed'>, _get: StateGetter, set: StateSetter): void {
   set(state => {
     const teammateMessages = new Map(state.teammateMessages);
     const existing = teammateMessages.get(msg.sessionId) ?? [];
@@ -218,7 +220,7 @@ function handleTeammateMessageRelayed(msg: any, _get: StateGetter, set: StateSet
   });
 }
 
-function handlePermissionResolved(msg: any, _get: StateGetter, set: StateSetter): void {
+function handlePermissionResolved(msg: MsgOf<'permission_resolved'>, _get: StateGetter, set: StateSetter): void {
   set(state => {
     const permissionHistory = new Map(state.permissionHistory);
     const existing = permissionHistory.get(msg.entry.sessionId) ?? [];
@@ -227,11 +229,11 @@ function handlePermissionResolved(msg: any, _get: StateGetter, set: StateSetter)
   });
 }
 
-function handlePermissionRulesUpdated(msg: any, _get: StateGetter, set: StateSetter): void {
+function handlePermissionRulesUpdated(msg: MsgOf<'permission_rules_updated'>, _get: StateGetter, set: StateSetter): void {
   set({ permissionRules: msg.rules });
 }
 
-function handleError(msg: any, _get: StateGetter, set: StateSetter): void {
+function handleError(msg: MsgOf<'error'>, _get: StateGetter, set: StateSetter): void {
   console.error('Server error:', msg.message);
   set({ lastError: msg.message });
 }

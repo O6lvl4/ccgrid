@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync, readdirSync, mkdirSync, unlinkSync, existsSync } from 'fs';
 import { join } from 'path';
-import type { Session, Teammate, TeamTask, TeammateSpec, SkillSpec, PermissionRule } from '@ccgrid/shared';
+import type { Session, Teammate, TeamTask, TeammateSpec, SkillSpec, PermissionRule, PluginSpec } from '@ccgrid/shared';
 
 const HOME = process.env.HOME ?? '';
 const BASE_DIR = join(HOME, '.claude', 'claude-team');
@@ -8,6 +8,8 @@ const SESSIONS_DIR = join(BASE_DIR, 'sessions');
 const SPECS_FILE = join(BASE_DIR, 'teammate-specs.json');
 const SKILL_SPECS_FILE = join(BASE_DIR, 'skill-specs.json');
 const PERMISSION_RULES_FILE = join(BASE_DIR, 'permission-rules.json');
+const PLUGINS_FILE = join(BASE_DIR, 'plugins.json');
+const PLUGINS_DIR = join(BASE_DIR, 'plugins');
 const TASKS_DIR = join(HOME, '.claude', 'tasks');
 const TEAMS_DIR = join(HOME, '.claude', 'teams');
 
@@ -63,13 +65,14 @@ export function loadAllSessions(): {
   return { sessions, teammates, tasks, leadOutputs };
 }
 
-export function saveSession(
-  sessionId: string,
-  session: Session,
-  teammates: Teammate[],
-  tasks: TeamTask[],
-  leadOutput: string,
-): void {
+export function saveSession(opts: {
+  sessionId: string;
+  session: Session;
+  teammates: Teammate[];
+  tasks: TeamTask[];
+  leadOutput: string;
+}): void {
+  const { sessionId, session, teammates, tasks, leadOutput } = opts;
   const data: SessionFile = { session, teammates, tasks, leadOutput };
   try {
     mkdirSync(SESSIONS_DIR, { recursive: true });
@@ -89,29 +92,34 @@ export function deleteSessionFile(sessionId: string): void {
 
 // ---- Load tasks from ~/.claude/tasks/ ----
 
+function scanTeamConfigsSync(sdkSessionId: string): string | null {
+  if (!existsSync(TEAMS_DIR)) return null;
+  try {
+    const teamDirs = readdirSync(TEAMS_DIR);
+    for (const teamName of teamDirs) {
+      const configPath = join(TEAMS_DIR, teamName, 'config.json');
+      if (!existsSync(configPath)) continue;
+      try {
+        const raw = readFileSync(configPath, 'utf-8');
+        const config = JSON.parse(raw);
+        if (config.leadSessionId === sdkSessionId) {
+          const teamTaskDir = join(TASKS_DIR, teamName);
+          if (existsSync(teamTaskDir)) return teamTaskDir;
+        }
+      } catch {
+        // skip invalid config
+      }
+    }
+  } catch {
+    // teams dir read failed
+  }
+  return null;
+}
+
 function findTaskDirSync(sdkSessionId: string): string | null {
   // 1. Scan team configs for matching leadSessionId
-  if (existsSync(TEAMS_DIR)) {
-    try {
-      const teamDirs = readdirSync(TEAMS_DIR);
-      for (const teamName of teamDirs) {
-        const configPath = join(TEAMS_DIR, teamName, 'config.json');
-        if (!existsSync(configPath)) continue;
-        try {
-          const raw = readFileSync(configPath, 'utf-8');
-          const config = JSON.parse(raw);
-          if (config.leadSessionId === sdkSessionId) {
-            const teamTaskDir = join(TASKS_DIR, teamName);
-            if (existsSync(teamTaskDir)) return teamTaskDir;
-          }
-        } catch {
-          // skip invalid config
-        }
-      }
-    } catch {
-      // teams dir read failed
-    }
-  }
+  const teamDir = scanTeamConfigsSync(sdkSessionId);
+  if (teamDir) return teamDir;
 
   // 2. Fallback: SDK session ID based directory
   const sdkTaskDir = join(TASKS_DIR, sdkSessionId);
@@ -210,5 +218,30 @@ export function savePermissionRules(rules: PermissionRule[]): void {
     writeFileSync(PERMISSION_RULES_FILE, JSON.stringify(rules, null, 2));
   } catch (err) {
     console.error('Failed to save permission rules:', err);
+  }
+}
+
+// ---- Plugins persistence ----
+
+export function getPluginsDir(): string {
+  return PLUGINS_DIR;
+}
+
+export function loadPlugins(): PluginSpec[] {
+  try {
+    if (!existsSync(PLUGINS_FILE)) return [];
+    const raw = readFileSync(PLUGINS_FILE, 'utf-8');
+    return JSON.parse(raw) as PluginSpec[];
+  } catch {
+    return [];
+  }
+}
+
+export function savePlugins(plugins: PluginSpec[]): void {
+  try {
+    mkdirSync(BASE_DIR, { recursive: true });
+    writeFileSync(PLUGINS_FILE, JSON.stringify(plugins, null, 2));
+  } catch (err) {
+    console.error('Failed to save plugins:', err);
   }
 }

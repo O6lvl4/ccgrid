@@ -1,5 +1,5 @@
-import { useCallback } from 'react';
-import type { Session, TeammateSpec, SkillSpec, PermissionRule, FileAttachment } from '@ccgrid/shared';
+import { useCallback, useMemo } from 'react';
+import type { Session, TeammateSpec, SkillSpec, PluginSpec, PermissionRule, FileAttachment } from '@ccgrid/shared';
 
 export interface Api {
   createSession: (params: {
@@ -24,6 +24,9 @@ export interface Api {
   updateSkillSpec: (id: string, updates: { name?: string; description?: string; skillType?: string }) => Promise<SkillSpec>;
   deleteSkillSpec: (id: string) => Promise<void>;
   sendToTeammate: (sessionId: string, teammateName: string, message: string) => Promise<Session>;
+  installPlugin: (params: { source: string; alias?: string }) => Promise<{ plugin: PluginSpec; skills: SkillSpec[] }>;
+  updatePlugin: (name: string) => Promise<{ plugin: PluginSpec; skills: SkillSpec[] }>;
+  uninstallPlugin: (name: string) => Promise<void>;
   createPermissionRule: (params: { toolName: string; pathPattern?: string; behavior: 'allow' | 'deny' }) => Promise<PermissionRule>;
   deletePermissionRule: (id: string) => Promise<void>;
 }
@@ -90,11 +93,20 @@ export function useApi(): Api {
   const sendToTeammate = useCallback((sessionId: string, teammateName: string, message: string) =>
     request<Session>('POST', `/sessions/${sessionId}/teammates/${encodeURIComponent(teammateName)}/message`, { message }), []);
 
+  const installPlugin = useCallback((params: { source: string; alias?: string }) =>
+    request<{ plugin: PluginSpec; skills: SkillSpec[] }>('POST', '/plugins/install', params), []);
+
+  const updatePlugin = useCallback((name: string) =>
+    request<{ plugin: PluginSpec; skills: SkillSpec[] }>('POST', `/plugins/${encodeURIComponent(name)}/update`), []);
+
+  const uninstallPlugin = useCallback((name: string) =>
+    request<void>('DELETE', `/plugins/${encodeURIComponent(name)}`), []);
+
   const createPermissionRule = useCallback((params: { toolName: string; pathPattern?: string; behavior: 'allow' | 'deny' }) =>
     request<PermissionRule>('POST', '/permission-rules', params), []);
 
   const deletePermissionRule = useCallback((id: string) =>
     request<void>('DELETE', `/permission-rules/${id}`), []);
 
-  return { createSession, updateSession, deleteSession, stopSession, continueSession, createSpec, updateSpec, deleteSpec, createSkillSpec, updateSkillSpec, deleteSkillSpec, sendToTeammate, createPermissionRule, deletePermissionRule };
+  return useMemo(() => ({ createSession, updateSession, deleteSession, stopSession, continueSession, createSpec, updateSpec, deleteSpec, createSkillSpec, updateSkillSpec, deleteSkillSpec, sendToTeammate, installPlugin, updatePlugin, uninstallPlugin, createPermissionRule, deletePermissionRule }), [createSession, updateSession, deleteSession, stopSession, continueSession, createSpec, updateSpec, deleteSpec, createSkillSpec, updateSkillSpec, deleteSkillSpec, sendToTeammate, installPlugin, updatePlugin, uninstallPlugin, createPermissionRule, deletePermissionRule]);
 }

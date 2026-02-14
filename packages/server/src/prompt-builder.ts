@@ -10,7 +10,7 @@ export function buildPrompt(teammateSpecs: TeammateSpec[] | undefined, taskDescr
       if (s.skillIds && s.skillIds.length > 0) {
         const skills = s.skillIds
           .map(id => skillMap.get(id))
-          .filter((sk): sk is SkillSpec => sk != null)
+          .filter((sk): sk is SkillSpec => sk !== undefined)
           .map(sk => `${sk.name} [${sk.skillType}]: ${sk.description}`);
         if (skills.length > 0) {
           parts.push(`Skills:\n${skills.map(sk => `      - ${sk}`).join('\n')}`);
@@ -89,6 +89,11 @@ ACTIVE COORDINATION:
 
 TEAMMATE MESSAGING:
 - When a user sends a message to a specific teammate (indicated by <!-- teammate-message:Name --> markers), use the Task tool with resume to forward it to that teammate immediately.
+
+FILE SHARING WITH TEAMMATES:
+- When the user attaches files, they are saved to disk and the file paths are included in the prompt.
+- To share attached files with teammates, include the file paths in the Task tool's prompt parameter and instruct the teammate to use the Read tool to view them.
+- Example: "The user attached a file. Read it with the Read tool at: /tmp/claude-team-files/xxx/filename.png"
 
 Do NOT use TaskCreate/TaskUpdate/TaskGet — only TaskList and Task.`;
 

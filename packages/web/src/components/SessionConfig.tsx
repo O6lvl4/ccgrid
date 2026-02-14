@@ -3,10 +3,78 @@ import { DirPicker } from './DirPicker';
 import { FileChip } from './FileChip';
 import { useStore } from '../store/useStore';
 import { readFilesAsAttachments, FILE_ACCEPT } from '../utils/fileUtils';
+import { extractPastedFiles } from '../utils/pasteUtils';
 import { inputStyle, textareaStyle, labelStyle, sectionStyle, focusBorder, blurBorder } from './session/FormStyles';
 import { PillOption } from './session/PillOption';
 import { TeammateSelector } from './session/TeammateSelector';
 import type { Api } from '../hooks/useApi';
+import type { TeammateSpec } from '@ccgrid/shared';
+
+function buildCreateParams(opts: {
+  name: string; cwd: string; model: string; taskDescription: string;
+  permissionMode: 'acceptEdits' | 'bypassPermissions'; customInstructions: string;
+  maxBudget: string; allSpecs: TeammateSpec[]; selectedSpecIds: Set<string>;
+  attachedFiles: File[];
+}) {
+  const budget = opts.maxBudget ? Number(opts.maxBudget) : undefined;
+  const selectedSpecs = opts.allSpecs
+    .filter(s => opts.selectedSpecIds.has(s.id))
+    .map(s => ({ id: s.id, name: s.name, role: s.role, instructions: s.instructions, skillIds: s.skillIds, createdAt: s.createdAt }));
+  return {
+    name: opts.name.trim(),
+    cwd: opts.cwd.trim(),
+    model: opts.model,
+    ...(selectedSpecs.length > 0 ? { teammateSpecs: selectedSpecs } : {}),
+    ...(budget && budget > 0 ? { maxBudgetUsd: budget } : {}),
+    taskDescription: opts.taskDescription.trim(),
+    permissionMode: opts.permissionMode,
+    ...(opts.customInstructions.trim() ? { customInstructions: opts.customInstructions.trim() } : {}),
+  };
+}
+
+function SubmitButton({ canSubmit, submitting, onClick }: { canSubmit: boolean; submitting: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button" onClick={onClick} disabled={!canSubmit}
+      style={{ alignSelf: 'flex-end', height: 42, padding: '0 28px', borderRadius: 21, border: 'none', background: canSubmit ? '#0ab9e6' : '#e8eaed', color: canSubmit ? '#fff' : '#b0b8c4', fontSize: 14, fontWeight: 800, letterSpacing: 0.4, cursor: canSubmit ? 'pointer' : 'default', transition: 'background 0.2s, transform 0.12s, box-shadow 0.2s', boxShadow: canSubmit ? '0 3px 12px rgba(10,185,230,0.3)' : 'none' }}
+      onMouseEnter={e => { if (canSubmit) { e.currentTarget.style.background = '#09a8d2'; e.currentTarget.style.boxShadow = '0 5px 18px rgba(10,185,230,0.4)'; } }}
+      onMouseLeave={e => { if (canSubmit) { e.currentTarget.style.background = '#0ab9e6'; e.currentTarget.style.boxShadow = '0 3px 12px rgba(10,185,230,0.3)'; } e.currentTarget.style.transform = 'scale(1)'; }}
+      onMouseDown={e => { if (canSubmit) { e.currentTarget.style.transform = 'scale(0.97)'; e.currentTarget.style.boxShadow = '0 1px 6px rgba(10,185,230,0.2)'; } }}
+      onMouseUp={e => { if (canSubmit) { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 5px 18px rgba(10,185,230,0.4)'; } }}
+    >
+      {submitting ? 'Starting...' : 'Start Agent Team'}
+    </button>
+  );
+}
+
+function ModelPermissionBudget({ model, setModel, permissionMode, setPermissionMode, maxBudget, setMaxBudget }: {
+  model: string; setModel: (v: string) => void;
+  permissionMode: 'acceptEdits' | 'bypassPermissions'; setPermissionMode: (v: 'acceptEdits' | 'bypassPermissions') => void;
+  maxBudget: string; setMaxBudget: (v: string) => void;
+}) {
+  return (
+    <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+      <div style={sectionStyle}>
+        <label style={labelStyle}>Model</label>
+        <div style={{ display: 'flex', gap: 4 }}>
+          {MODELS.map(m => <PillOption key={m.value} selected={model === m.value} color="#0ab9e6" label={m.label} onClick={() => setModel(m.value)} />)}
+        </div>
+      </div>
+      <div style={sectionStyle}>
+        <label style={labelStyle}>Permission</label>
+        <div style={{ display: 'flex', gap: 4 }}>
+          <PillOption selected={permissionMode === 'acceptEdits'} color="#0ab9e6" label="Accept Edits" onClick={() => setPermissionMode('acceptEdits')} />
+          <PillOption selected={permissionMode === 'bypassPermissions'} color="#f97316" label="Bypass All" onClick={() => setPermissionMode('bypassPermissions')} />
+        </div>
+        {permissionMode === 'bypassPermissions' && <span style={{ fontSize: 10, color: '#f97316', marginTop: 4 }}>All tool executions will be auto-approved</span>}
+      </div>
+      <div style={sectionStyle}>
+        <label style={labelStyle}>Budget (USD)</label>
+        <input type="text" inputMode="decimal" placeholder="No limit" value={maxBudget} onChange={e => setMaxBudget(e.target.value)} style={{ ...inputStyle, width: 100 }} onFocus={focusBorder} onBlur={blurBorder} />
+      </div>
+    </div>
+  );
+}
 
 const MODELS = [
   { value: 'claude-sonnet-4-5-20250929', label: 'Sonnet 4.5' },
@@ -42,26 +110,11 @@ export function SessionConfig({ api, onCreated }: { api: Api; onCreated?: () => 
 
   const handleCreate = async () => {
     if (!name.trim() || !cwd.trim() || !taskDescription.trim()) return;
-    const budget = maxBudget ? Number(maxBudget) : undefined;
-    const selectedSpecs = allSpecs
-      .filter(s => selectedSpecIds.has(s.id))
-      .map(s => ({ id: s.id, name: s.name, role: s.role, instructions: s.instructions, skillIds: s.skillIds, createdAt: s.createdAt }));
     setSubmitting(true);
     try {
-      const files = attachedFiles.length > 0
-        ? await readFilesAsAttachments(attachedFiles)
-        : undefined;
-      await api.createSession({
-        name: name.trim(),
-        cwd: cwd.trim(),
-        model,
-        ...(selectedSpecs.length > 0 ? { teammateSpecs: selectedSpecs } : {}),
-        ...(budget && budget > 0 ? { maxBudgetUsd: budget } : {}),
-        taskDescription: taskDescription.trim(),
-        permissionMode,
-        ...(customInstructions.trim() ? { customInstructions: customInstructions.trim() } : {}),
-        ...(files ? { files } : {}),
-      });
+      const params = buildCreateParams({ name, cwd, model, taskDescription, permissionMode, customInstructions, maxBudget, allSpecs, selectedSpecIds, attachedFiles });
+      const files = attachedFiles.length > 0 ? await readFilesAsAttachments(attachedFiles) : undefined;
+      await api.createSession({ ...params, ...(files ? { files } : {}) });
       setName('');
       setTaskDescription('');
       setAttachedFiles([]);
@@ -75,18 +128,8 @@ export function SessionConfig({ api, onCreated }: { api: Api; onCreated?: () => 
   };
 
   const handlePaste = useCallback((e: React.ClipboardEvent) => {
-    const items = e.clipboardData?.items;
-    if (!items) return;
-    const files: File[] = [];
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
-      if (item.kind === 'file') {
-        const file = item.getAsFile();
-        if (file) files.push(file);
-      }
-    }
+    const files = extractPastedFiles(e);
     if (files.length > 0) {
-      e.preventDefault();
       setAttachedFiles(prev => [...prev, ...files]);
     }
   }, []);
@@ -124,26 +167,10 @@ export function SessionConfig({ api, onCreated }: { api: Api; onCreated?: () => 
             <button
               type="button"
               onClick={() => setShowDirPicker(true)}
-              style={{
-                height: 38,
-                width: 38,
-                minWidth: 38,
-                borderRadius: 10,
-                border: '1px solid #e5e7eb',
-                background: '#f9fafb',
-                color: '#8b95a3',
-                fontSize: 16,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'background 0.15s',
-              }}
+              style={{ height: 38, width: 38, minWidth: 38, borderRadius: 10, border: '1px solid #e5e7eb', background: '#f9fafb', color: '#8b95a3', fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.15s' }}
               onMouseEnter={e => { e.currentTarget.style.background = '#f0f1f3'; }}
               onMouseLeave={e => { e.currentTarget.style.background = '#f9fafb'; }}
-            >
-              ...
-            </button>
+            >...</button>
           </div>
         </div>
       </div>
@@ -216,83 +243,21 @@ export function SessionConfig({ api, onCreated }: { api: Api; onCreated?: () => 
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          style={{
-            alignSelf: 'flex-start',
-            height: 30,
-            padding: '0 14px',
-            borderRadius: 15,
-            border: '1px solid #e5e7eb',
-            background: '#fff',
-            color: '#8b95a3',
-            fontSize: 12,
-            fontWeight: 500,
-            cursor: 'pointer',
-            transition: 'background 0.15s, border-color 0.15s',
-          }}
+          style={{ alignSelf: 'flex-start', height: 30, padding: '0 14px', borderRadius: 15, border: '1px solid #e5e7eb', background: '#fff', color: '#8b95a3', fontSize: 12, fontWeight: 500, cursor: 'pointer', transition: 'background 0.15s, border-color 0.15s' }}
           onMouseEnter={e => { e.currentTarget.style.background = '#f9fafb'; e.currentTarget.style.borderColor = '#d1d5db'; }}
           onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.borderColor = '#e5e7eb'; }}
-        >
-          + Attach Files
-        </button>
+        >+ Attach Files</button>
       </div>
 
       {/* Divider */}
       <div style={{ height: 1, background: '#f0f1f3' }} />
 
       {/* Model & Permission & Budget */}
-      <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-        <div style={sectionStyle}>
-          <label style={labelStyle}>Model</label>
-          <div style={{ display: 'flex', gap: 4 }}>
-            {MODELS.map(m => (
-              <PillOption
-                key={m.value}
-                selected={model === m.value}
-                color="#0ab9e6"
-                label={m.label}
-                onClick={() => setModel(m.value)}
-              />
-            ))}
-          </div>
-        </div>
-
-        <div style={sectionStyle}>
-          <label style={labelStyle}>Permission</label>
-          <div style={{ display: 'flex', gap: 4 }}>
-            <PillOption
-              selected={permissionMode === 'acceptEdits'}
-              color="#0ab9e6"
-              label="Accept Edits"
-              onClick={() => setPermissionMode('acceptEdits')}
-            />
-            <PillOption
-              selected={permissionMode === 'bypassPermissions'}
-              color="#f97316"
-              label="Bypass All"
-              onClick={() => setPermissionMode('bypassPermissions')}
-            />
-          </div>
-          {permissionMode === 'bypassPermissions' && (
-            <span style={{ fontSize: 10, color: '#f97316', marginTop: 4 }}>
-              All tool executions will be auto-approved
-            </span>
-          )}
-        </div>
-
-        <div style={sectionStyle}>
-          <label style={labelStyle}>Budget (USD)</label>
-          <input
-            type="text"
-            inputMode="decimal"
-            placeholder="No limit"
-            value={maxBudget}
-            onChange={e => setMaxBudget(e.target.value)}
-            style={{ ...inputStyle, width: 100 }}
-            onFocus={focusBorder}
-            onBlur={blurBorder}
-          />
-        </div>
-      </div>
+      <ModelPermissionBudget
+        model={model} setModel={setModel}
+        permissionMode={permissionMode} setPermissionMode={setPermissionMode}
+        maxBudget={maxBudget} setMaxBudget={setMaxBudget}
+      />
 
       {/* Teammate Specs */}
       <TeammateSelector
@@ -303,32 +268,7 @@ export function SessionConfig({ api, onCreated }: { api: Api; onCreated?: () => 
       />
 
       {/* Submit */}
-      <button
-        type="button"
-        onClick={handleCreate}
-        disabled={!canSubmit}
-        style={{
-          alignSelf: 'flex-end',
-          height: 42,
-          padding: '0 28px',
-          borderRadius: 21,
-          border: 'none',
-          background: canSubmit ? '#0ab9e6' : '#e8eaed',
-          color: canSubmit ? '#fff' : '#b0b8c4',
-          fontSize: 14,
-          fontWeight: 800,
-          letterSpacing: 0.4,
-          cursor: canSubmit ? 'pointer' : 'default',
-          transition: 'background 0.2s, transform 0.12s, box-shadow 0.2s',
-          boxShadow: canSubmit ? '0 3px 12px rgba(10,185,230,0.3)' : 'none',
-        }}
-        onMouseEnter={e => { if (canSubmit) { e.currentTarget.style.background = '#09a8d2'; e.currentTarget.style.boxShadow = '0 5px 18px rgba(10,185,230,0.4)'; } }}
-        onMouseLeave={e => { if (canSubmit) { e.currentTarget.style.background = '#0ab9e6'; e.currentTarget.style.boxShadow = '0 3px 12px rgba(10,185,230,0.3)'; } e.currentTarget.style.transform = 'scale(1)'; }}
-        onMouseDown={e => { if (canSubmit) { e.currentTarget.style.transform = 'scale(0.97)'; e.currentTarget.style.boxShadow = '0 1px 6px rgba(10,185,230,0.2)'; } }}
-        onMouseUp={e => { if (canSubmit) { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 5px 18px rgba(10,185,230,0.4)'; } }}
-      >
-        {submitting ? 'Starting...' : 'Start Agent Team'}
-      </button>
+      <SubmitButton canSubmit={!!canSubmit} submitting={submitting} onClick={handleCreate} />
     </div>
   );
 }

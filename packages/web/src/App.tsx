@@ -20,16 +20,18 @@ function AppInner() {
 
   // Cache visited session views — switching back is instant (DOM stays alive)
   const visitedRef = useRef(new Set<string>());
+  const tabsRef = useRef(new Map<string, string>());
   if (route.view === 'session_detail') {
     visitedRef.current.add(route.sessionId);
+    tabsRef.current.set(route.sessionId, route.tab);
     if (visitedRef.current.size > MAX_CACHED_SESSIONS) {
-      visitedRef.current.delete(visitedRef.current.values().next().value!);
+      const oldest = visitedRef.current.values().next().value!;
+      visitedRef.current.delete(oldest);
+      tabsRef.current.delete(oldest);
     }
   }
 
   const activeSessionId = route.view === 'session_detail' ? route.sessionId : null;
-  const activeTab = route.view === 'session_detail' ? route.tab : 'output';
-
   const renderView = () => {
     switch (route.view) {
       case 'session_list':
@@ -59,7 +61,7 @@ function AppInner() {
         >
           <SessionDetailView
             sessionId={sid}
-            tab={activeSessionId === sid ? activeTab : 'output'}
+            tab={(tabsRef.current.get(sid) ?? 'output') as import('./store/useStore').SessionTab}
             api={api}
           />
         </div>

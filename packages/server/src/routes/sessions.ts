@@ -1,3 +1,6 @@
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { Hono } from 'hono';
 import type { SessionManager } from '../session-manager.js';
 import type { SkillSpec } from '@ccgrid/shared';
@@ -11,7 +14,7 @@ export function sessionRoutes(sm: SessionManager, getSkillSpecs: () => SkillSpec
       return c.json({ error: 'name, cwd, model, taskDescription are required' }, 400);
     }
     try {
-      const session = await sm.createSession(name, cwd, model, teammateSpecs, maxBudgetUsd, taskDescription, permissionMode, getSkillSpecs(), customInstructions, files);
+      const session = await sm.createSession({ name, cwd, model, teammateSpecs, maxBudgetUsd, taskDescription, permissionMode, skillSpecs: getSkillSpecs(), customInstructions, files });
       return c.json(session, 201);
     } catch (err) {
       return c.json({ error: String(err) }, 500);
@@ -90,6 +93,24 @@ export function sessionRoutes(sm: SessionManager, getSkillSpecs: () => SkillSpec
     const session = sm.getSession(id);
     if (!session) return c.json({ error: 'Session not found' }, 404);
     return c.json({ output: sm.getLeadOutput(id) });
+  });
+
+  app.get('/:id/files/:filename', (c) => {
+    const id = c.req.param('id');
+    const filename = c.req.param('filename');
+    if (!sm.getSession(id)) return c.json({ error: 'Session not found' }, 404);
+    const filePath = path.join(os.tmpdir(), 'claude-team-files', id, filename);
+    if (!fs.existsSync(filePath)) return c.json({ error: 'File not found' }, 404);
+    const ext = path.extname(filename).toLowerCase();
+    const mimeTypes: Record<string, string> = {
+      '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
+      '.gif': 'image/gif', '.webp': 'image/webp', '.svg': 'image/svg+xml',
+      '.pdf': 'application/pdf', '.txt': 'text/plain', '.csv': 'text/csv',
+      '.json': 'application/json',
+    };
+    const contentType = mimeTypes[ext] ?? 'application/octet-stream';
+    const data = fs.readFileSync(filePath);
+    return new Response(data, { headers: { 'Content-Type': contentType, 'Cache-Control': 'public, max-age=86400' } });
   });
 
   return app;

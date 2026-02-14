@@ -1,6 +1,6 @@
 import { startTransition } from 'react';
 import { create } from 'zustand';
-import type { Session, Teammate, TeamTask, TeammateSpec, SkillSpec, ServerMessage, PermissionLogEntry, PermissionRule } from '@ccgrid/shared';
+import type { Session, Teammate, TeamTask, TeammateSpec, SkillSpec, PluginSpec, ServerMessage, PermissionLogEntry, PermissionRule } from '@ccgrid/shared';
 import { deriveSectionFromRoute, routeToPath, pathToRoute } from './routing';
 import { handleServerMessage } from './messageHandlers';
 
@@ -38,6 +38,7 @@ export interface AppState {
   followUpImages: Map<string, Map<number, FollowUpImage[]>>;
   teammateSpecs: TeammateSpec[];
   skillSpecs: SkillSpec[];
+  plugins: PluginSpec[];
   pendingPermissions: Map<string, PendingPermission>;
   permissionHistory: Map<string, PermissionLogEntry[]>;
   permissionRules: PermissionRule[];
@@ -55,6 +56,7 @@ export interface AppState {
   patchSession: (id: string, updates: Partial<Session>) => void;
   setTeammateSpecs: (specs: TeammateSpec[]) => void;
   setSkillSpecs: (specs: SkillSpec[]) => void;
+  setPlugins: (plugins: PluginSpec[]) => void;
   clearError: () => void;
   setWsSend: (send: ((msg: unknown) => void) | null) => void;
   respondToPermission: (requestId: string, behavior: 'allow' | 'deny', message?: string, updatedInput?: Record<string, unknown>) => void;
@@ -72,6 +74,7 @@ export const useStore = create<AppState>((set, get) => ({
   followUpImages: new Map(),
   teammateSpecs: [],
   skillSpecs: [],
+  plugins: [],
   pendingPermissions: new Map(),
   permissionHistory: new Map(),
   permissionRules: [],
@@ -143,6 +146,8 @@ export const useStore = create<AppState>((set, get) => ({
   setTeammateSpecs: (specs) => set({ teammateSpecs: specs }),
 
   setSkillSpecs: (specs) => set({ skillSpecs: specs }),
+
+  setPlugins: (plugins) => set({ plugins }),
 
   clearError: () => set({ lastError: null }),
 

@@ -21,7 +21,7 @@ export function FileChip({ file, onRemove }: { file: File; onRemove: () => void 
       background: '#f5f7fa',
       overflow: 'hidden',
     }}>
-      {isImage && url ? (
+      {isImage && url && (
         <img
           src={url}
           alt={file.name}
@@ -33,7 +33,8 @@ export function FileChip({ file, onRemove }: { file: File; onRemove: () => void 
             display: 'block',
           }}
         />
-      ) : (
+      )}
+      {!(isImage && url) && (
         <span style={{ padding: '4px 0 4px 10px', fontSize: 11, color: '#5a6376', fontWeight: 500 }}>
           {file.type === 'application/pdf' ? '\uD83D\uDCC4' : '\uD83D\uDCDD'} {file.name}
         </span>

@@ -22,7 +22,7 @@ The Lead coordinates the team and relays information between members.
   for (const spec of teammateSpecs) {
     const skillNames = (spec.skillIds ?? [])
       .map(id => skillMap.get(id))
-      .filter((s): s is SkillSpec => s != null)
+      .filter((s): s is SkillSpec => s !== undefined)
       .map(s => s.name);
     const basePrompt = spec.instructions ?? `You are a ${spec.role}. Complete the assigned task thoroughly.`;
     agents[spec.name] = {

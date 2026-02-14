@@ -36,29 +36,34 @@ export function startTaskWatcher(sessionId: string, sdkSessionId: string, deps: 
  * for a matching leadSessionId.
  * Falls back to ~/.claude/tasks/{sdkSessionId}/ for non-team sessions.
  */
+async function scanTeamConfigs(sdkSessionId: string): Promise<string | null> {
+  if (!existsSync(TEAMS_DIR)) return null;
+  try {
+    const teamDirs = await readdir(TEAMS_DIR);
+    for (const teamName of teamDirs) {
+      const configPath = join(TEAMS_DIR, teamName, 'config.json');
+      if (!existsSync(configPath)) continue;
+      try {
+        const raw = await readFile(configPath, 'utf-8');
+        const config = JSON.parse(raw);
+        if (config.leadSessionId === sdkSessionId) {
+          const teamTaskDir = join(TASKS_DIR, teamName);
+          if (existsSync(teamTaskDir)) return teamTaskDir;
+        }
+      } catch {
+        // skip invalid config
+      }
+    }
+  } catch {
+    // teams dir read failed
+  }
+  return null;
+}
+
 async function findTaskDir(sdkSessionId: string): Promise<string | null> {
   // 1. Try team-name based directory by scanning team configs
-  if (existsSync(TEAMS_DIR)) {
-    try {
-      const teamDirs = await readdir(TEAMS_DIR);
-      for (const teamName of teamDirs) {
-        const configPath = join(TEAMS_DIR, teamName, 'config.json');
-        if (!existsSync(configPath)) continue;
-        try {
-          const raw = await readFile(configPath, 'utf-8');
-          const config = JSON.parse(raw);
-          if (config.leadSessionId === sdkSessionId) {
-            const teamTaskDir = join(TASKS_DIR, teamName);
-            if (existsSync(teamTaskDir)) return teamTaskDir;
-          }
-        } catch {
-          // skip invalid config
-        }
-      }
-    } catch {
-      // teams dir read failed
-    }
-  }
+  const teamDir = await scanTeamConfigs(sdkSessionId);
+  if (teamDir) return teamDir;
 
   // 2. Fallback: SDK session ID based directory
   const sdkTaskDir = join(TASKS_DIR, sdkSessionId);

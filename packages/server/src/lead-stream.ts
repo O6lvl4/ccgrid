@@ -78,13 +78,15 @@ function handleAssistantFallback(sessionId: string, message: SDKMessage, deps: L
   }
 }
 
+function isTextBlock(block: unknown): block is { type: 'text'; text: string } {
+  return !!block && typeof block === 'object' && 'type' in block && (block as Record<string, unknown>).type === 'text' && 'text' in block && typeof (block as Record<string, unknown>).text === 'string';
+}
+
 function extractAssistantText(message: SDKMessage): string {
   if ('content' in message && Array.isArray(message.content)) {
     let text = '';
     for (const block of message.content) {
-      if (block && typeof block === 'object' && 'type' in block && block.type === 'text' && 'text' in block && typeof block.text === 'string') {
-        text += block.text;
-      }
+      if (isTextBlock(block)) text += block.text;
     }
     return text;
   }

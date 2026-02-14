@@ -2,6 +2,8 @@ import { useState, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
 import { useApi } from '../../hooks/useApi';
 import { DialogOverlay } from './DialogOverlay';
+import { ExternalSkillSection } from './ExternalSkillSection';
+
 
 const SKILL_TYPE_OPTIONS = ['official', 'external', 'internal'] as const;
 type SkillType = typeof SKILL_TYPE_OPTIONS[number];
@@ -139,122 +141,37 @@ export function NewSkillSpecDialog({ open, onClose }: { open: boolean; onClose: 
           </div>
         </div>
 
-        {skillType === 'official' ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div style={{ fontSize: 11, color: '#8b95a3' }}>Select an official skill</div>
-            {['Workflow', 'Quality', 'Setup', 'Document', 'LSP', 'Other'].map(category => {
-              const skills = OFFICIAL_SKILLS.filter(s => s.category === category);
-              if (skills.length === 0) return null;
-              return (
-                <div key={category} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <div style={{ fontSize: 10, fontWeight: 600, color: '#b0b8c4', textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                    {category}
-                  </div>
-                  {skills.map(skill => {
-                    const alreadyAdded = existingOfficialNames.has(skill.name);
-                    const isSelected = selectedOfficial === skill.name;
-                    return (
-                      <div
-                        key={skill.name}
-                        onClick={() => { if (!alreadyAdded) setSelectedOfficial(isSelected ? null : skill.name); }}
-                        style={{
-                          padding: '10px 14px',
-                          borderRadius: 12,
-                          border: `1px solid ${isSelected ? '#0ab9e6' : (alreadyAdded ? '#f0f1f3' : '#e5e7eb')}`,
-                          background: isSelected ? 'rgba(10, 185, 230, 0.06)' : (alreadyAdded ? '#f9fafb' : '#fff'),
-                          cursor: alreadyAdded ? 'default' : 'pointer',
-                          opacity: alreadyAdded ? 0.5 : 1,
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 14,
-                          transition: 'border-color 0.15s, background 0.15s',
-                        }}
-                        onMouseEnter={e => { if (!alreadyAdded && !isSelected) e.currentTarget.style.borderColor = '#0ab9e6'; }}
-                        onMouseLeave={e => { if (!alreadyAdded && !isSelected) e.currentTarget.style.borderColor = '#e5e7eb'; }}
-                      >
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <span style={{ fontSize: 13, fontWeight: 600, color: alreadyAdded ? '#8b95a3' : '#1a1d24' }}>
-                              {skill.name}
-                            </span>
-                            {alreadyAdded && (
-                              <span style={{ fontSize: 10, color: '#b0b8c4', fontStyle: 'italic' }}>Added</span>
-                            )}
-                          </div>
-                          <span style={{ fontSize: 11, color: '#8b95a3', lineHeight: 1.4 }}>
-                            {skill.description}
-                          </span>
-                        </div>
-                        {isSelected && (
-                          <span style={{ fontSize: 14, color: '#0ab9e6', fontWeight: 700 }}>✓</span>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <>
-            <div>
-              <div style={{ fontSize: 11, fontWeight: 800, color: '#8b95a3', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>Name</div>
-              <input
-                placeholder="e.g. Code Review"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                style={{
-                  width: '100%',
-                  boxSizing: 'border-box',
-                  padding: '8px 12px',
-                  borderRadius: 10,
-                  border: '1px solid #e5e7eb',
-                  background: '#f9fafb',
-                  color: '#1a1d24',
-                  fontSize: 13,
-                  outline: 'none',
-                  transition: 'border-color 0.15s',
-                }}
-                onFocus={e => { e.currentTarget.style.borderColor = '#0ab9e6'; }}
-                onBlur={e => { e.currentTarget.style.borderColor = '#e5e7eb'; }}
-              />
-            </div>
-            <div>
-              <div style={{ fontSize: 11, fontWeight: 800, color: '#8b95a3', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>Description</div>
-              <textarea
-                placeholder="Describe what this skill does..."
-                value={description}
-                onChange={e => setDescription(e.target.value)}
-                rows={2}
-                style={{
-                  width: '100%',
-                  boxSizing: 'border-box',
-                  padding: '8px 12px',
-                  borderRadius: 10,
-                  border: '1px solid #e5e7eb',
-                  background: '#f9fafb',
-                  color: '#1a1d24',
-                  fontSize: 13,
-                  fontFamily: 'inherit',
-                  resize: 'vertical',
-                  outline: 'none',
-                  lineHeight: 1.5,
-                  transition: 'border-color 0.15s',
-                }}
-                onFocus={e => { e.currentTarget.style.borderColor = '#0ab9e6'; }}
-                onBlur={e => { e.currentTarget.style.borderColor = '#e5e7eb'; }}
-              />
-            </div>
-          </>
+        {skillType === 'official' && (
+          <OfficialSkillPicker
+            existingOfficialNames={existingOfficialNames}
+            selectedOfficial={selectedOfficial}
+            setSelectedOfficial={setSelectedOfficial}
+          />
+        )}
+        {skillType === 'external' && (
+          <ExternalSkillSection
+            onInstalled={() => { onClose(); }}
+          />
+        )}
+        {skillType === 'internal' && (
+          <CustomSkillForm
+            name={name} setName={setName}
+            description={description} setDescription={setDescription}
+          />
         )}
 
-        {(() => {
+        {skillType !== 'external' && (() => {
           const isDisabled = skillType === 'official'
             ? !selectedOfficial || submitting
             : !name.trim() || submitting;
-          const buttonLabel = submitting
-            ? 'Creating...'
-            : (skillType === 'official' ? 'Add Official Skill' : 'Create Skill Spec');
+          let buttonLabel: string;
+          if (submitting) {
+            buttonLabel = 'Creating...';
+          } else if (skillType === 'official') {
+            buttonLabel = 'Add Official Skill';
+          } else {
+            buttonLabel = 'Create Skill Spec';
+          }
           return (
             <button
               onClick={handleCreate}
@@ -279,5 +196,74 @@ export function NewSkillSpecDialog({ open, onClose }: { open: boolean; onClose: 
         })()}
       </div>
     </DialogOverlay>
+  );
+}
+
+function OfficialSkillPicker({ existingOfficialNames, selectedOfficial, setSelectedOfficial }: {
+  existingOfficialNames: Set<string>; selectedOfficial: string | null; setSelectedOfficial: (v: string | null) => void;
+}) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ fontSize: 11, color: '#8b95a3' }}>Select an official skill</div>
+      {['Workflow', 'Quality', 'Setup', 'Document', 'LSP', 'Other'].map(category => {
+        const skills = OFFICIAL_SKILLS.filter(s => s.category === category);
+        if (skills.length === 0) return null;
+        return (
+          <div key={category} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div style={{ fontSize: 10, fontWeight: 600, color: '#b0b8c4', textTransform: 'uppercase', letterSpacing: 0.5 }}>{category}</div>
+            {skills.map(skill => {
+              const alreadyAdded = existingOfficialNames.has(skill.name);
+              const isSelected = selectedOfficial === skill.name;
+              let borderColor: string;
+              if (isSelected) borderColor = '#0ab9e6';
+              else if (alreadyAdded) borderColor = '#f0f1f3';
+              else borderColor = '#e5e7eb';
+              let bg: string;
+              if (isSelected) bg = 'rgba(10, 185, 230, 0.06)';
+              else if (alreadyAdded) bg = '#f9fafb';
+              else bg = '#fff';
+              return (
+                <div key={skill.name}
+                  onClick={() => { if (!alreadyAdded) setSelectedOfficial(isSelected ? null : skill.name); }}
+                  style={{ padding: '10px 14px', borderRadius: 12, border: `1px solid ${borderColor}`, background: bg, cursor: alreadyAdded ? 'default' : 'pointer', opacity: alreadyAdded ? 0.5 : 1, display: 'flex', alignItems: 'center', gap: 14, transition: 'border-color 0.15s, background 0.15s' }}
+                  onMouseEnter={e => { if (!alreadyAdded && !isSelected) e.currentTarget.style.borderColor = '#0ab9e6'; }}
+                  onMouseLeave={e => { if (!alreadyAdded && !isSelected) e.currentTarget.style.borderColor = '#e5e7eb'; }}
+                >
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontSize: 13, fontWeight: 600, color: alreadyAdded ? '#8b95a3' : '#1a1d24' }}>{skill.name}</span>
+                      {alreadyAdded && <span style={{ fontSize: 10, color: '#b0b8c4', fontStyle: 'italic' }}>Added</span>}
+                    </div>
+                    <span style={{ fontSize: 11, color: '#8b95a3', lineHeight: 1.4 }}>{skill.description}</span>
+                  </div>
+                  {isSelected && <span style={{ fontSize: 14, color: '#0ab9e6', fontWeight: 700 }}>✓</span>}
+                </div>
+              );
+            })}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function CustomSkillForm({ name, setName, description, setDescription }: {
+  name: string; setName: (v: string) => void; description: string; setDescription: (v: string) => void;
+}) {
+  const inputStyle: React.CSSProperties = { width: '100%', boxSizing: 'border-box', padding: '8px 12px', borderRadius: 10, border: '1px solid #e5e7eb', background: '#f9fafb', color: '#1a1d24', fontSize: 13, outline: 'none', transition: 'border-color 0.15s' };
+  return (
+    <>
+      <div>
+        <div style={{ fontSize: 11, fontWeight: 800, color: '#8b95a3', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>Name</div>
+        <input placeholder="e.g. Code Review" value={name} onChange={e => setName(e.target.value)} style={inputStyle}
+          onFocus={e => { e.currentTarget.style.borderColor = '#0ab9e6'; }} onBlur={e => { e.currentTarget.style.borderColor = '#e5e7eb'; }} />
+      </div>
+      <div>
+        <div style={{ fontSize: 11, fontWeight: 800, color: '#8b95a3', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>Description</div>
+        <textarea placeholder="Describe what this skill does..." value={description} onChange={e => setDescription(e.target.value)} rows={2}
+          style={{ ...inputStyle, fontFamily: 'inherit', resize: 'vertical', lineHeight: 1.5 }}
+          onFocus={e => { e.currentTarget.style.borderColor = '#0ab9e6'; }} onBlur={e => { e.currentTarget.style.borderColor = '#e5e7eb'; }} />
+      </div>
+    </>
   );
 }

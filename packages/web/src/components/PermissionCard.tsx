@@ -186,34 +186,10 @@ function InputSection({ editing, editValue, parseError, input, onEdit, onCancelE
         </button>
       </div>
 
-      {editing ? (
-        <div>
-          <textarea
-            value={editValue}
-            onChange={(e) => onChange(e.target.value)}
-            style={{
-              fontFamily: 'monospace',
-              fontSize: 11,
-              padding: 10,
-              borderRadius: 10,
-              border: parseError ? '1px solid #ef4444' : '1px solid #e5e7eb',
-              backgroundColor: parseError ? '#fef2f2' : '#f9fafb',
-              minHeight: 80,
-              maxHeight: 200,
-              resize: 'vertical',
-              width: '100%',
-              boxSizing: 'border-box',
-              outline: 'none',
-              lineHeight: 1.5,
-            }}
-            onFocus={e => { if (!parseError) e.currentTarget.style.borderColor = '#0ab9e6'; }}
-            onBlur={e => { if (!parseError) e.currentTarget.style.borderColor = '#e5e7eb'; }}
-          />
-          {parseError && (
-            <span style={{ fontSize: 10, color: '#ef4444', marginTop: 4, display: 'block' }}>Invalid JSON</span>
-          )}
-        </div>
-      ) : (
+      {editing && (
+        <EditingView editValue={editValue} parseError={parseError} onChange={onChange} />
+      )}
+      {!editing && (
         <div style={{
           maxHeight: 120,
           overflow: 'auto',
@@ -233,6 +209,32 @@ function InputSection({ editing, editValue, parseError, input, onEdit, onCancelE
             {JSON.stringify(input, null, 2)}
           </pre>
         </div>
+      )}
+    </div>
+  );
+}
+
+function EditingView({ editValue, parseError, onChange }: {
+  editValue: string; parseError: boolean; onChange: (value: string) => void;
+}) {
+  const border = parseError ? '1px solid #ef4444' : '1px solid #e5e7eb';
+  const bg = parseError ? '#fef2f2' : '#f9fafb';
+  return (
+    <div>
+      <textarea
+        value={editValue}
+        onChange={(e) => onChange(e.target.value)}
+        style={{
+          fontFamily: 'monospace', fontSize: 11, padding: 10, borderRadius: 10,
+          border, backgroundColor: bg,
+          minHeight: 80, maxHeight: 200, resize: 'vertical',
+          width: '100%', boxSizing: 'border-box', outline: 'none', lineHeight: 1.5,
+        }}
+        onFocus={e => { if (!parseError) e.currentTarget.style.borderColor = '#0ab9e6'; }}
+        onBlur={e => { if (!parseError) e.currentTarget.style.borderColor = '#e5e7eb'; }}
+      />
+      {parseError && (
+        <span style={{ fontSize: 10, color: '#ef4444', marginTop: 4, display: 'block' }}>Invalid JSON</span>
       )}
     </div>
   );

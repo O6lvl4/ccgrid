@@ -146,11 +146,13 @@ export const TeammateCard = memo(function TeammateCard({ teammate }: { teammate:
       />
       {!collapsed && (
         <div style={{ padding: '0 12px 12px' }}>
-          {teammate.output ? (
+          {teammate.output && (
             <MemoMarkdown content={teammate.output} />
-          ) : isWorking ? (
+          )}
+          {!teammate.output && isWorking && (
             <PulseWorking />
-          ) : (
+          )}
+          {!teammate.output && !isWorking && (
             <span style={{ color: '#9ca3af', fontStyle: 'italic', fontSize: 12 }}>No output</span>
           )}
         </div>

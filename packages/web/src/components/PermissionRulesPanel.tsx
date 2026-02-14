@@ -61,103 +61,16 @@ export function PermissionRulesPanel() {
         <RuleRow key={rule.id} rule={rule} onDelete={handleDelete} />
       ))}
 
-      {adding ? (
-        <div style={{
-          background: '#f9fafb',
-          border: '1px solid #f0f1f3',
-          borderRadius: 14,
-          padding: '14px 18px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 10,
-        }}>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <input
-              placeholder='Tool name (e.g. "Bash", "Write", "*")'
-              value={toolName}
-              onChange={e => setToolName(e.target.value)}
-              style={{ ...inputStyle, flex: 1 }}
-              onFocus={e => { e.currentTarget.style.borderColor = '#0ab9e6'; }}
-              onBlur={e => { e.currentTarget.style.borderColor = '#e5e7eb'; }}
-            />
-            <div style={{ display: 'flex', gap: 4 }}>
-              {(['allow', 'deny'] as const).map(b => {
-                const selected = behavior === b;
-                const color = b === 'allow' ? '#22c55e' : '#ef4444';
-                return (
-                  <button
-                    key={b}
-                    onClick={() => setBehavior(b)}
-                    style={{
-                      fontSize: 11,
-                      fontWeight: selected ? 700 : 500,
-                      padding: '5px 10px',
-                      borderRadius: 10,
-                      cursor: 'pointer',
-                      border: 'none',
-                      background: selected ? color : '#e8eaed',
-                      color: selected ? '#fff' : '#555e6b',
-                      textTransform: 'uppercase',
-                      letterSpacing: 0.3,
-                      transition: 'background 0.15s',
-                    }}
-                  >
-                    {b}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-          <input
-            placeholder="Path pattern (optional, e.g. /etc/**)"
-            value={pathPattern}
-            onChange={e => setPathPattern(e.target.value)}
-            style={inputStyle}
-            onFocus={e => { e.currentTarget.style.borderColor = '#0ab9e6'; }}
-            onBlur={e => { e.currentTarget.style.borderColor = '#e5e7eb'; }}
-          />
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-            <button
-              onClick={() => setAdding(false)}
-              style={{
-                padding: '6px 16px',
-                borderRadius: 12,
-                border: 'none',
-                background: '#e8eaed',
-                color: '#555e6b',
-                fontSize: 12,
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'background 0.15s',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.background = '#dcdfe3'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = '#e8eaed'; }}
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleAdd}
-              disabled={!toolName.trim()}
-              style={{
-                padding: '6px 16px',
-                borderRadius: 12,
-                border: 'none',
-                background: toolName.trim() ? '#0ab9e6' : '#e8eaed',
-                color: toolName.trim() ? '#fff' : '#b0b8c4',
-                fontSize: 12,
-                fontWeight: 700,
-                cursor: toolName.trim() ? 'pointer' : 'default',
-                transition: 'background 0.18s, box-shadow 0.18s',
-                boxShadow: toolName.trim() ? '0 2px 8px rgba(10, 185, 230, 0.25)' : 'none',
-              }}
-              onMouseEnter={e => { if (toolName.trim()) e.currentTarget.style.background = '#09a8d2'; }}
-              onMouseLeave={e => { if (toolName.trim()) e.currentTarget.style.background = '#0ab9e6'; }}
-            >
-              Add Rule
-            </button>
-          </div>
-        </div>
-      ) : (
+      {adding && (
+        <AddRuleForm
+          toolName={toolName} setToolName={setToolName}
+          pathPattern={pathPattern} setPathPattern={setPathPattern}
+          behavior={behavior} setBehavior={setBehavior}
+          inputStyle={inputStyle}
+          onCancel={() => setAdding(false)} onAdd={handleAdd}
+        />
+      )}
+      {!adding && (
         <button
           onClick={() => setAdding(true)}
           style={{
@@ -178,6 +91,71 @@ export function PermissionRulesPanel() {
           + Add Rule
         </button>
       )}
+    </div>
+  );
+}
+
+function BehaviorButton({ b, selected, onClick }: { b: string; selected: boolean; onClick: () => void }) {
+  const color = b === 'allow' ? '#22c55e' : '#ef4444';
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        fontSize: 11, fontWeight: selected ? 700 : 500, padding: '5px 10px',
+        borderRadius: 10, cursor: 'pointer', border: 'none',
+        background: selected ? color : '#e8eaed', color: selected ? '#fff' : '#555e6b',
+        textTransform: 'uppercase', letterSpacing: 0.3, transition: 'background 0.15s',
+      }}
+    >{b}</button>
+  );
+}
+
+function AddRuleForm({ toolName, setToolName, pathPattern, setPathPattern, behavior, setBehavior, inputStyle, onCancel, onAdd }: {
+  toolName: string; setToolName: (v: string) => void;
+  pathPattern: string; setPathPattern: (v: string) => void;
+  behavior: 'allow' | 'deny'; setBehavior: (v: 'allow' | 'deny') => void;
+  inputStyle: React.CSSProperties; onCancel: () => void; onAdd: () => void;
+}) {
+  const canAdd = !!toolName.trim();
+  return (
+    <div style={{ background: '#f9fafb', border: '1px solid #f0f1f3', borderRadius: 14, padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <input
+          placeholder='Tool name (e.g. "Bash", "Write", "*")'
+          value={toolName} onChange={e => setToolName(e.target.value)}
+          style={{ ...inputStyle, flex: 1 }}
+          onFocus={e => { e.currentTarget.style.borderColor = '#0ab9e6'; }}
+          onBlur={e => { e.currentTarget.style.borderColor = '#e5e7eb'; }}
+        />
+        <div style={{ display: 'flex', gap: 4 }}>
+          {(['allow', 'deny'] as const).map(b => (
+            <BehaviorButton key={b} b={b} selected={behavior === b} onClick={() => setBehavior(b)} />
+          ))}
+        </div>
+      </div>
+      <input
+        placeholder="Path pattern (optional, e.g. /etc/**)"
+        value={pathPattern} onChange={e => setPathPattern(e.target.value)}
+        style={inputStyle}
+        onFocus={e => { e.currentTarget.style.borderColor = '#0ab9e6'; }}
+        onBlur={e => { e.currentTarget.style.borderColor = '#e5e7eb'; }}
+      />
+      <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+        <button onClick={onCancel} style={{ padding: '6px 16px', borderRadius: 12, border: 'none', background: '#e8eaed', color: '#555e6b', fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'background 0.15s' }}
+          onMouseEnter={e => { e.currentTarget.style.background = '#dcdfe3'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = '#e8eaed'; }}
+        >Cancel</button>
+        <button onClick={onAdd} disabled={!canAdd} style={{
+          padding: '6px 16px', borderRadius: 12, border: 'none',
+          background: canAdd ? '#0ab9e6' : '#e8eaed', color: canAdd ? '#fff' : '#b0b8c4',
+          fontSize: 12, fontWeight: 700, cursor: canAdd ? 'pointer' : 'default',
+          transition: 'background 0.18s, box-shadow 0.18s',
+          boxShadow: canAdd ? '0 2px 8px rgba(10, 185, 230, 0.25)' : 'none',
+        }}
+          onMouseEnter={e => { if (canAdd) e.currentTarget.style.background = '#09a8d2'; }}
+          onMouseLeave={e => { if (canAdd) e.currentTarget.style.background = '#0ab9e6'; }}
+        >Add Rule</button>
+      </div>
     </div>
   );
 }

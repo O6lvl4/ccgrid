@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { useUsage, type RateLimitWindow, type UsageData } from '../../hooks/useUsage';
 
+const GAUGE_TICKS = [0, 25, 50, 75, 100] as const;
+const BAR_TICK_MARKS = [25, 50, 75] as const;
+
 export function usageColor(pct: number): string {
   if (pct >= 75) return '#ef4444';
   if (pct >= 50) return '#eab308';
@@ -72,7 +75,7 @@ function GaugeBar({ pct, label }: { pct: number; label: string }) {
           boxShadow: pct > 0 ? `0 0 8px ${color}40, inset 0 0 4px ${color}20` : 'none',
         }} />
 
-        {[25, 50, 75].map(tick => (
+        {BAR_TICK_MARKS.map(tick => (
           <div key={tick} style={{
             position: 'absolute',
             bottom: `${tick}%`,
@@ -132,6 +135,23 @@ function LimitRow({ label, window }: { label: string; window: RateLimitWindow })
   );
 }
 
+function CostBreakdown({ cost }: { cost: NonNullable<UsageData['cost']> }) {
+  return (
+    <div style={{ marginTop: 14, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+        <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>{cost.month} Cost</span>
+        <span style={{ fontSize: 11, fontFamily: 'monospace', color: '#0ab9e6', fontWeight: 700 }}>${cost.totalCostUsd.toFixed(2)}</span>
+      </div>
+      {cost.modelBreakdowns.map(m => (
+        <div key={m.modelName} style={{ display: 'flex', justifyContent: 'space-between', padding: '1px 0' }}>
+          <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)', fontFamily: 'monospace' }}>{shortModel(m.modelName)}</span>
+          <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)', fontFamily: 'monospace' }}>${m.cost.toFixed(2)}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function UsageTooltip({ usage }: { usage: UsageData }) {
   return (
     <div
@@ -149,39 +169,14 @@ function UsageTooltip({ usage }: { usage: UsageData }) {
       }}
       onClick={e => e.stopPropagation()}
     >
-      <div style={{ fontSize: 11, fontWeight: 700, color: '#fff', marginBottom: 12 }}>
-        Plan Usage
-      </div>
-
+      <div style={{ fontSize: 11, fontWeight: 700, color: '#fff', marginBottom: 12 }}>Plan Usage</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {usage.fiveHour && <LimitRow label="Session (5h)" window={usage.fiveHour} />}
         {usage.sevenDay && <LimitRow label="Weekly — All" window={usage.sevenDay} />}
         {usage.sevenDaySonnet && <LimitRow label="Weekly — Sonnet" window={usage.sevenDaySonnet} />}
         {usage.sevenDayOpus && <LimitRow label="Weekly — Opus" window={usage.sevenDayOpus} />}
       </div>
-
-      {usage.cost && (
-        <div style={{ marginTop: 14, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-            <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>{usage.cost.month} Cost</span>
-            <span style={{ fontSize: 11, fontFamily: 'monospace', color: '#0ab9e6', fontWeight: 700 }}>
-              ${usage.cost.totalCostUsd.toFixed(2)}
-            </span>
-          </div>
-          {usage.cost.modelBreakdowns.map(m => (
-            <div key={m.modelName} style={{
-              display: 'flex', justifyContent: 'space-between', padding: '1px 0',
-            }}>
-              <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)', fontFamily: 'monospace' }}>
-                {shortModel(m.modelName)}
-              </span>
-              <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)', fontFamily: 'monospace' }}>
-                ${m.cost.toFixed(2)}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
+      {usage.cost && <CostBreakdown cost={usage.cost} />}
     </div>
   );
 }
@@ -216,7 +211,7 @@ export function UsageGaugeArea() {
       >
         {/* Tick marks */}
         <div style={{ width: 16, position: 'relative', flexShrink: 0 }}>
-          {[0, 25, 50, 75, 100].map(tick => (
+          {GAUGE_TICKS.map(tick => (
             <span key={tick} style={{
               position: 'absolute',
               bottom: `${tick}%`,

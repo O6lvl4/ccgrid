@@ -1,7 +1,11 @@
+import os from 'node:os';
+import path from 'node:path';
 import { v4 as uuidv4 } from 'uuid';
 import type { CanUseTool } from '@anthropic-ai/claude-agent-sdk';
 import type { PermissionLogEntry, PermissionRule, ServerMessage } from '@ccgrid/shared';
 import { loadPermissionRules } from './state-store.js';
+
+const ATTACHMENTS_DIR = path.join(os.tmpdir(), 'claude-team-files') + path.sep;
 
 export interface PermissionMaps {
   pendingPermissions: Map<string, {
@@ -18,6 +22,16 @@ export function createCanUseTool(
 ): CanUseTool {
   return (toolName, input, options) => {
     console.log(`[canUseTool] session=${sessionId.slice(0, 8)} tool=${toolName} agent=${options.agentID ?? 'lead'} toolUseID=${options.toolUseID}`);
+
+    // Auto-allow Read tool on user-attached files
+    if (toolName === 'Read') {
+      const inputObj = input as Record<string, unknown>;
+      const filePath = (inputObj.file_path ?? '') as string;
+      if (filePath.startsWith(ATTACHMENTS_DIR)) {
+        console.log(`[canUseTool:auto-attachment] tool=${toolName} path=${filePath}`);
+        return Promise.resolve({ behavior: 'allow' as const, updatedInput: input as Record<string, unknown> });
+      }
+    }
 
     const rules = loadPermissionRules();
     const matchedRule = rules.find(r => {

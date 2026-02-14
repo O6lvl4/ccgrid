@@ -67,9 +67,7 @@ export function useWebSocket() {
         }
       };
 
-      ws.onerror = () => {
-        // onclose will fire after this
-      };
+      ws.onerror = () => { void 0; };
     }
 
     connect();

@@ -140,11 +140,12 @@ export function TeammateSpecDetailView({ specId, api }: { specId: string; api: A
                 Manage Skills
               </span>
             </div>
-            {skillSpecs.length === 0 ? (
+            {skillSpecs.length === 0 && (
               <span style={{ fontSize: 12, color: '#b0b8c4', fontStyle: 'italic' }}>
                 No skills defined yet
               </span>
-            ) : (
+            )}
+            {skillSpecs.length > 0 && (
               <div style={{
                 background: '#f9fafb',
                 border: '1px solid #f0f1f3',

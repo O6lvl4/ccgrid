@@ -7,6 +7,23 @@ export interface SkillSpec {
   description: string;
   skillType: SkillType;
   createdAt: string;
+  pluginName?: string;
+  skillMdContent?: string;
+  allowedTools?: string;
+  argumentHint?: string;
+}
+
+// ---- Plugin spec (installed from GitHub) ----
+export interface PluginSpec {
+  name: string;
+  description: string;
+  version: string;
+  author: string;
+  repository: string;
+  source: string; // owner/repo
+  alias?: string;
+  skillIds: string[];
+  installedAt: string;
 }
 
 // ---- Teammate spec (user-defined before session start) ----
@@ -108,7 +125,7 @@ export type ServerMessage =
   | { type: 'teammate_message_relayed'; sessionId: string; teammateName: string; message: string }
   | { type: 'permission_resolved'; entry: PermissionLogEntry }
   | { type: 'permission_rules_updated'; rules: PermissionRule[] }
-  | { type: 'snapshot'; sessions: Session[]; teammates: Teammate[]; tasks: Record<string, TeamTask[]>; leadOutputs: Record<string, string>; teammateSpecs: TeammateSpec[]; skillSpecs: SkillSpec[]; permissionRules: PermissionRule[] };
+  | { type: 'snapshot'; sessions: Session[]; teammates: Teammate[]; tasks: Record<string, TeamTask[]>; leadOutputs: Record<string, string>; teammateSpecs: TeammateSpec[]; skillSpecs: SkillSpec[]; plugins: PluginSpec[]; permissionRules: PermissionRule[] };
 
 // ---- WebSocket: Client → Server ----
 export type ClientMessage =

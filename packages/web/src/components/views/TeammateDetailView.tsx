@@ -6,6 +6,7 @@ import { useStore, type TeammateMessage } from '../../store/useStore';
 import { useApi } from '../../hooks/useApi';
 import { StatusBadge } from '../StatusBadge';
 import { markdownComponents } from '../CodeBlock';
+import type { Teammate } from '@ccgrid/shared';
 
 function InfoRow({ label, children, mono }: { label: string; children: React.ReactNode; mono?: boolean }) {
   return (
@@ -188,6 +189,60 @@ function TeammateMessageInput({ sessionId, teammateName }: { sessionId: string; 
 
 const proseClass = 'prose prose-sm max-w-none prose-pre:bg-gray-100 prose-pre:border prose-pre:border-gray-200 prose-code:text-blue-600 prose-headings:text-gray-900 prose-p:text-gray-700 prose-li:text-gray-700 prose-strong:text-gray-900 prose-a:text-blue-600';
 
+function TeammateHeader({ teammate, goBack }: { teammate: Teammate; goBack: () => void }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 24px', background: '#ffffff', borderBottom: '1px solid #f0f1f3', flexShrink: 0 }}>
+      <span
+        style={{ fontSize: 12, color: '#b0b8c4', cursor: 'pointer', lineHeight: 1, fontWeight: 600, transition: 'color 0.15s' }}
+        onClick={goBack}
+        onMouseEnter={e => { e.currentTarget.style.color = '#1a1d24'; }}
+        onMouseLeave={e => { e.currentTarget.style.color = '#b0b8c4'; }}
+      >
+        ← Back
+      </span>
+      <span style={{ fontWeight: 800, fontSize: 16, color: '#1a1d24', lineHeight: 1 }}>
+        {teammate.name ?? teammate.agentId.slice(0, 8)}
+      </span>
+      <StatusBadge status={teammate.status} />
+      <span style={{ fontSize: 11, color: '#8b95a3', fontWeight: 500, padding: '2px 8px', borderRadius: 8, background: '#f0f1f3' }}>
+        {teammate.agentType}
+      </span>
+    </div>
+  );
+}
+
+function TeammateContent({ teammate, teammateMessages }: { teammate: Teammate; teammateMessages: TeammateMessage[] }) {
+  return (
+    <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 24, width: '100%', boxSizing: 'border-box' }}>
+      <div style={{ background: '#f9fafb', border: '1px solid #f0f1f3', borderRadius: 14, padding: '14px 18px' }}>
+        <InfoRow label="Agent ID" mono>{teammate.agentId}</InfoRow>
+        <InfoRow label="Type">{teammate.agentType}</InfoRow>
+        <InfoRow label="Status"><StatusBadge status={teammate.status} /></InfoRow>
+        {teammate.name && <InfoRow label="Name">{teammate.name}</InfoRow>}
+        {teammate.transcriptPath && <InfoRow label="Transcript" mono>{teammate.transcriptPath}</InfoRow>}
+      </div>
+      <div>
+        <SectionLabel>Output</SectionLabel>
+        {teammate.output ? (
+          <div style={{ backgroundColor: '#ffffff', borderRadius: 14, padding: 18, border: '1px solid #f0f1f3' }} className={proseClass}>
+            <Markdown remarkPlugins={[remarkGfm, remarkBreaks]} components={markdownComponents}>{teammate.output}</Markdown>
+          </div>
+        ) : (
+          <span style={{ fontSize: 13, color: '#b0b8c4', fontStyle: 'italic' }}>No output yet</span>
+        )}
+      </div>
+      {teammateMessages.length > 0 && (
+        <div>
+          <SectionLabel>Messages</SectionLabel>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {teammateMessages.map((msg, i) => <MessageBubble key={i} msg={msg} />)}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function TeammateDetailView({ sessionId, agentId }: { sessionId: string; agentId: string }) {
   const teammate = useStore(s => s.teammates.get(agentId));
   const session = useStore(s => s.sessions.get(sessionId));
@@ -197,9 +252,7 @@ export function TeammateDetailView({ sessionId, agentId }: { sessionId: string; 
   const goBack = useStore(s => s.goBack);
 
   const canSendMessage = teammate?.name && session && (session.status === 'running' || session.status === 'completed');
-  const teammateMessages = teammate?.name
-    ? messages.filter(m => m.teammateName === teammate.name)
-    : [];
+  const teammateMessages = teammate?.name ? messages.filter(m => m.teammateName === teammate.name) : [];
 
   useEffect(() => {
     if (!teammate) navigate({ view: 'session_detail', sessionId, tab: 'teammates' });
@@ -209,101 +262,11 @@ export function TeammateDetailView({ sessionId, agentId }: { sessionId: string; 
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-      {/* Header */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-          padding: '14px 24px',
-          background: '#ffffff',
-          borderBottom: '1px solid #f0f1f3',
-          flexShrink: 0,
-        }}
-      >
-        <span
-          style={{
-            fontSize: 12,
-            color: '#b0b8c4',
-            cursor: 'pointer',
-            lineHeight: 1,
-            fontWeight: 600,
-            transition: 'color 0.15s',
-          }}
-          onClick={goBack}
-          onMouseEnter={e => { e.currentTarget.style.color = '#1a1d24'; }}
-          onMouseLeave={e => { e.currentTarget.style.color = '#b0b8c4'; }}
-        >
-          ← Back
-        </span>
-        <span style={{ fontWeight: 800, fontSize: 16, color: '#1a1d24', lineHeight: 1 }}>
-          {teammate.name ?? teammate.agentId.slice(0, 8)}
-        </span>
-        <StatusBadge status={teammate.status} />
-        <span style={{
-          fontSize: 11,
-          color: '#8b95a3',
-          fontWeight: 500,
-          padding: '2px 8px',
-          borderRadius: 8,
-          background: '#f0f1f3',
-        }}>
-          {teammate.agentType}
-        </span>
-      </div>
-
-      {/* Content */}
+      <TeammateHeader teammate={teammate} goBack={goBack} />
       <div style={{ flex: 1, overflow: 'auto' }}>
-        <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 24, width: '100%', boxSizing: 'border-box' }}>
-          {/* Metadata */}
-          <div style={{
-            background: '#f9fafb',
-            border: '1px solid #f0f1f3',
-            borderRadius: 14,
-            padding: '14px 18px',
-          }}>
-            <InfoRow label="Agent ID" mono>{teammate.agentId}</InfoRow>
-            <InfoRow label="Type">{teammate.agentType}</InfoRow>
-            <InfoRow label="Status"><StatusBadge status={teammate.status} /></InfoRow>
-            {teammate.name && <InfoRow label="Name">{teammate.name}</InfoRow>}
-            {teammate.transcriptPath && (
-              <InfoRow label="Transcript" mono>{teammate.transcriptPath}</InfoRow>
-            )}
-          </div>
-
-          {/* Output */}
-          <div>
-            <SectionLabel>Output</SectionLabel>
-            {teammate.output ? (
-              <div
-                style={{ backgroundColor: '#ffffff', borderRadius: 14, padding: 18, border: '1px solid #f0f1f3' }}
-                className={proseClass}
-              >
-                <Markdown remarkPlugins={[remarkGfm, remarkBreaks]} components={markdownComponents}>{teammate.output}</Markdown>
-              </div>
-            ) : (
-              <span style={{ fontSize: 13, color: '#b0b8c4', fontStyle: 'italic' }}>No output yet</span>
-            )}
-          </div>
-
-          {/* Sent messages history */}
-          {teammateMessages.length > 0 && (
-            <div>
-              <SectionLabel>Messages</SectionLabel>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {teammateMessages.map((msg, i) => (
-                  <MessageBubble key={i} msg={msg} />
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+        <TeammateContent teammate={teammate} teammateMessages={teammateMessages} />
       </div>
-
-      {/* Message input */}
-      {canSendMessage && (
-        <TeammateMessageInput sessionId={sessionId} teammateName={teammate.name!} />
-      )}
+      {canSendMessage && <TeammateMessageInput sessionId={sessionId} teammateName={teammate.name!} />}
     </div>
   );
 }

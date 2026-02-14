@@ -49,49 +49,51 @@ export function SkillPanel() {
         }}>
           Skills
         </span>
-        <button
-          onClick={() => setShowCreate(true)}
-          title="New skill spec"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: 26,
-            height: 26,
-            padding: 0,
-            borderRadius: 13,
-            border: 'none',
-            background: '#0ab9e6',
-            color: '#fff',
-            cursor: 'pointer',
-            transition: 'background 0.18s, transform 0.12s, box-shadow 0.18s',
-            boxShadow: '0 2px 8px rgba(10, 185, 230, 0.3)',
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.background = '#09a8d2';
-            e.currentTarget.style.transform = 'scale(1.1)';
-            e.currentTarget.style.boxShadow = '0 3px 12px rgba(10, 185, 230, 0.4)';
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.background = '#0ab9e6';
-            e.currentTarget.style.transform = 'scale(1)';
-            e.currentTarget.style.boxShadow = '0 2px 8px rgba(10, 185, 230, 0.3)';
-          }}
-          onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.92)'; }}
-          onMouseUp={e => { e.currentTarget.style.transform = 'scale(1.1)'; }}
-        >
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
-        </button>
+        <div style={{ display: 'flex', gap: 6 }}>
+          <button
+            onClick={() => setShowCreate(true)}
+            title="New skill spec"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 26,
+              height: 26,
+              padding: 0,
+              borderRadius: 13,
+              border: 'none',
+              background: '#0ab9e6',
+              color: '#fff',
+              cursor: 'pointer',
+              transition: 'background 0.18s, transform 0.12s, box-shadow 0.18s',
+              boxShadow: '0 2px 8px rgba(10, 185, 230, 0.3)',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = '#09a8d2';
+              e.currentTarget.style.transform = 'scale(1.1)';
+              e.currentTarget.style.boxShadow = '0 3px 12px rgba(10, 185, 230, 0.4)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = '#0ab9e6';
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(10, 185, 230, 0.3)';
+            }}
+            onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.92)'; }}
+            onMouseUp={e => { e.currentTarget.style.transform = 'scale(1.1)'; }}
+          >
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+          </button>
+        </div>
       </div>
 
       {/* Skill list */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '0 10px 10px' }}>
-        {skillSpecs.length === 0 ? (
+        {skillSpecs.length === 0 && (
           <div style={{ padding: '32px 8px', textAlign: 'center' }}>
             <span style={{ fontSize: 12, color: '#b0b8c4' }}>No skills yet</span>
           </div>
-        ) : (
-          skillSpecs.map(spec => {
+        )}
+        {skillSpecs.map(spec => {
             const isActive = spec.id === currentSpecId;
             const colors = SKILL_TYPE_COLORS[spec.skillType] ?? SKILL_TYPE_COLORS.internal;
             return (
@@ -157,8 +159,7 @@ export function SkillPanel() {
                 )}
               </div>
             );
-          })
-        )}
+          })}
       </div>
 
       <NewSkillSpecDialog open={showCreate} onClose={() => setShowCreate(false)} />

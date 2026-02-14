@@ -80,11 +80,12 @@ export function TeammatePanel() {
 
       {/* Spec list */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '0 10px 10px' }}>
-        {specs.length === 0 ? (
+        {specs.length === 0 && (
           <div style={{ padding: '32px 8px', textAlign: 'center' }}>
             <span style={{ fontSize: 12, color: '#b0b8c4' }}>No specs yet</span>
           </div>
-        ) : (
+        )}
+        {specs.length > 0 && (
           specs.map(spec => {
             const isActive = spec.id === currentSpecId;
             return (

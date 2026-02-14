@@ -6,9 +6,10 @@ import { join } from 'path';
 import os from 'os';
 import { SessionManager } from './session-manager.js';
 import { getUsage } from './usage-tracker.js';
-import { loadTeammateSpecs, loadSkillSpecs, loadPermissionRules } from './state-store.js';
+import { loadTeammateSpecs, loadSkillSpecs, loadPermissionRules, loadPlugins } from './state-store.js';
 import { sessionRoutes } from './routes/sessions.js';
 import { specsRoutes } from './routes/specs.js';
+import { pluginRoutes } from './routes/plugins.js';
 import type { ServerMessage } from '@ccgrid/shared';
 
 process.on('unhandledRejection', (err) => {
@@ -35,12 +36,14 @@ const specsState = {
   teammateSpecs: loadTeammateSpecs(),
   skillSpecs: loadSkillSpecs(),
   permissionRules: loadPermissionRules(),
+  plugins: loadPlugins(),
 };
 
 // ---- Routes ----
 
 app.route('/api/sessions', sessionRoutes(sm, () => specsState.skillSpecs));
 app.route('/api', specsRoutes(specsState, broadcast));
+app.route('/api', pluginRoutes(specsState, broadcast));
 
 // ---- REST: Utilities ----
 
@@ -106,6 +109,7 @@ wss.on('connection', (ws) => {
     leadOutputs: sm.getLeadOutputs(),
     teammateSpecs: specsState.teammateSpecs,
     skillSpecs: specsState.skillSpecs,
+    plugins: specsState.plugins,
     permissionRules: specsState.permissionRules,
   };
   ws.send(JSON.stringify(snapshot));
@@ -122,7 +126,7 @@ wss.on('connection', (ws) => {
   });
 
   ws.on('close', () => clients.delete(ws));
-  ws.on('pong', () => { /* alive */ });
+  ws.on('pong', () => { void 0; });
 });
 
 setInterval(() => {

@@ -157,18 +157,20 @@ export function DirPicker({
 
       {/* Directory list */}
       <div style={{ maxHeight: 280, overflow: 'auto' }}>
-        {loading ? (
+        {loading && (
           <div style={{ padding: '32px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <span style={{ fontSize: 12, color: '#8b95a3' }}>Loading...</span>
           </div>
-        ) : listing.dirs.length === 0 ? (
+        )}
+        {!loading && listing.dirs.length === 0 && (
           <div style={{ padding: '32px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
               <path d="M2 5C2 3.89543 2.89543 3 4 3H7.17157C7.70201 3 8.21071 3.21071 8.58579 3.58579L9.41421 4.41421C9.78929 4.78929 10.298 5 10.8284 5H16C17.1046 5 18 5.89543 18 7V15C18 16.1046 17.1046 17 16 17H4C2.89543 17 2 16.1046 2 15V5Z" stroke="#b0b8c4" strokeWidth="1.5" fill="none"/>
             </svg>
             <span style={{ fontSize: 12, color: '#b0b8c4' }}>No subdirectories</span>
           </div>
-        ) : (
+        )}
+        {!loading && listing.dirs.length > 0 && (
           <div style={{ padding: '4px 0' }}>
             {listing.dirs.map(dir => (
               <button

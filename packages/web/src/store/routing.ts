@@ -61,7 +61,11 @@ const ROUTE_MATCHERS: RouteMatcher[] = [
   (p) => p[0] === 'skill-specs' ? { view: 'skill_spec_list' } : null,
   (p) => p[0] === 'sessions' && p[1] && p[2] === 'teammates' && p[3] ? { view: 'teammate_detail', sessionId: p[1], agentId: p[3] } : null,
   (p) => p[0] === 'sessions' && p[1] && p[2] === 'tasks' && p[3] ? { view: 'task_detail', sessionId: p[1], taskId: p[3] } : null,
-  (p) => p[0] === 'sessions' && p[1] ? { view: 'session_detail', sessionId: p[1], tab: (SESSION_TABS.has(p[2] ?? '') ? p[2] as SessionTab : 'output') } : null,
+  (p) => {
+    if (!(p[0] === 'sessions' && p[1])) return null;
+    const tab: SessionTab = SESSION_TABS.has(p[2] ?? '') ? p[2] as SessionTab : 'output';
+    return { view: 'session_detail', sessionId: p[1], tab };
+  },
 ];
 
 export function pathToRoute(pathname: string): ViewRoute {

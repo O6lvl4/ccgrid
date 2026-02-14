@@ -2,7 +2,7 @@ import type { Session } from '@ccgrid/shared';
 
 export function CostTracker({ session }: { session: Session }) {
   const totalTokens = session.inputTokens + session.outputTokens;
-  const hasBudget = session.maxBudgetUsd != null && session.maxBudgetUsd > 0;
+  const hasBudget = session.maxBudgetUsd !== undefined && session.maxBudgetUsd > 0;
   const budgetPercent = hasBudget
     ? Math.min(100, (session.costUsd / session.maxBudgetUsd!) * 100)
     : 0;

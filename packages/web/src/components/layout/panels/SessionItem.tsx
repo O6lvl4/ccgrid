@@ -1,5 +1,60 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { timeAgo } from '../../../utils/timeAgo';
+
+function SessionItemBody({ name, status, createdAt, isActive, isRenaming, renameRef, draft, setDraft, commitRename, onRenameEnd }: {
+  name: string; status: string; createdAt: string; isActive: boolean; isRenaming: boolean;
+  renameRef: React.RefObject<HTMLInputElement | null>; draft: string; setDraft: (v: string) => void;
+  commitRename: () => void; onRenameEnd: (v: string | null) => void;
+}) {
+  return (
+    <div style={{ flex: 1, minWidth: 0 }}>
+      {isRenaming && (
+        <input
+          ref={renameRef}
+          value={draft}
+          onChange={e => setDraft(e.target.value)}
+          onBlur={commitRename}
+          onKeyDown={e => { if (e.key === 'Enter') commitRename(); if (e.key === 'Escape') onRenameEnd(null); }}
+          onClick={e => e.stopPropagation()}
+          style={{ width: '100%', fontSize: 13, fontWeight: 600, color: '#1a1d24', border: 'none', borderBottom: '2px solid #0ab9e6', outline: 'none', background: 'transparent', padding: 0, lineHeight: 1.3, boxSizing: 'border-box' as const }}
+        />
+      )}
+      {!isRenaming && (
+        <div style={{ fontSize: 13, fontWeight: isActive ? 700 : 500, color: isActive ? '#1a1d24' : '#3c4257', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.3 }}>
+          {name}
+        </div>
+      )}
+      <div style={{ fontSize: 11, color: '#b0b8c4', marginTop: 3, lineHeight: 1, letterSpacing: 0.1 }}>
+        {status} · {timeAgo(createdAt)}
+      </div>
+    </div>
+  );
+}
+
+function SessionItemMenu({ hovered, menuOpen, isRenaming, menuRef, onMenuToggle, onRenameStart, onDelete }: {
+  hovered: boolean; menuOpen: boolean; isRenaming: boolean;
+  menuRef: React.RefObject<HTMLDivElement | null>; onMenuToggle: () => void;
+  onRenameStart: () => void; onDelete: () => void;
+}) {
+  return (
+    <>
+      {(hovered || menuOpen) && !isRenaming && (
+        <button
+          onClick={e => { e.stopPropagation(); onMenuToggle(); }}
+          style={{ position: 'absolute', top: 8, right: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, borderRadius: 12, border: 'none', background: menuOpen ? '#e8eaed' : 'transparent', color: '#8b95a3', fontSize: 14, cursor: 'pointer', lineHeight: 1, padding: 0, transition: 'background 0.15s, color 0.15s' }}
+          onMouseEnter={e => { e.currentTarget.style.background = '#e8eaed'; e.currentTarget.style.color = '#555e6b'; }}
+          onMouseLeave={e => { if (!menuOpen) e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#8b95a3'; }}
+        >···</button>
+      )}
+      {menuOpen && (
+        <div ref={menuRef} style={{ position: 'absolute', top: 32, right: 8, zIndex: 100, background: '#ffffff', border: '1px solid #f0f1f3', borderRadius: 12, boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.03)', padding: '4px 0', minWidth: 130, overflow: 'hidden' }}>
+          <MenuItem label="Rename" onClick={e => { e.stopPropagation(); onRenameStart(); }} />
+          <MenuItem label="Delete" danger onClick={e => { e.stopPropagation(); onDelete(); }} />
+        </div>
+      )}
+    </>
+  );
+}
 
 export function SessionItem({
   id,
@@ -63,6 +118,15 @@ export function SessionItem({
     onRenameEnd(trimmed || null);
   };
 
+  let itemBackground: string;
+  if (isActive) {
+    itemBackground = '#f0f7ff';
+  } else if (hovered) {
+    itemBackground = '#f9fafb';
+  } else {
+    itemBackground = 'transparent';
+  }
+
   return (
     <div
       role="button"
@@ -74,7 +138,7 @@ export function SessionItem({
         padding: '10px 12px',
         borderRadius: 12,
         cursor: 'pointer',
-        background: isActive ? '#f0f7ff' : (hovered ? '#f9fafb' : 'transparent'),
+        background: itemBackground,
         marginBottom: 2,
         transition: 'background 0.18s',
         position: 'relative',
@@ -97,108 +161,16 @@ export function SessionItem({
           boxShadow: dotPulse ? `0 0 6px ${dotColor}` : 'none',
         }}
       />
-      <div style={{ flex: 1, minWidth: 0 }}>
-        {isRenaming ? (
-          <input
-            ref={renameRef}
-            value={draft}
-            onChange={e => setDraft(e.target.value)}
-            onBlur={commitRename}
-            onKeyDown={e => {
-              if (e.key === 'Enter') commitRename();
-              if (e.key === 'Escape') onRenameEnd(null);
-            }}
-            onClick={e => e.stopPropagation()}
-            style={{
-              width: '100%',
-              fontSize: 13,
-              fontWeight: 600,
-              color: '#1a1d24',
-              border: 'none',
-              borderBottom: '2px solid #0ab9e6',
-              outline: 'none',
-              background: 'transparent',
-              padding: 0,
-              lineHeight: 1.3,
-              boxSizing: 'border-box',
-            }}
-          />
-        ) : (
-          <div
-            style={{
-              fontSize: 13,
-              fontWeight: isActive ? 700 : 500,
-              color: isActive ? '#1a1d24' : '#3c4257',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              lineHeight: 1.3,
-            }}
-          >
-            {name}
-          </div>
-        )}
-        <div style={{
-          fontSize: 11,
-          color: '#b0b8c4',
-          marginTop: 3,
-          lineHeight: 1,
-          letterSpacing: 0.1,
-        }}>
-          {status} · {timeAgo(createdAt)}
-        </div>
-      </div>
-
-      {(hovered || menuOpen) && !isRenaming && (
-        <button
-          onClick={e => { e.stopPropagation(); onMenuToggle(); }}
-          style={{
-            position: 'absolute',
-            top: 8,
-            right: 8,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: 24,
-            height: 24,
-            borderRadius: 12,
-            border: 'none',
-            background: menuOpen ? '#e8eaed' : 'transparent',
-            color: '#8b95a3',
-            fontSize: 14,
-            cursor: 'pointer',
-            lineHeight: 1,
-            padding: 0,
-            transition: 'background 0.15s, color 0.15s',
-          }}
-          onMouseEnter={e => { e.currentTarget.style.background = '#e8eaed'; e.currentTarget.style.color = '#555e6b'; }}
-          onMouseLeave={e => { if (!menuOpen) e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#8b95a3'; }}
-        >
-          ···
-        </button>
-      )}
-
-      {menuOpen && (
-        <div
-          ref={menuRef}
-          style={{
-            position: 'absolute',
-            top: 32,
-            right: 8,
-            zIndex: 100,
-            background: '#ffffff',
-            border: '1px solid #f0f1f3',
-            borderRadius: 12,
-            boxShadow: '0 4px 16px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.03)',
-            padding: '4px 0',
-            minWidth: 130,
-            overflow: 'hidden',
-          }}
-        >
-          <MenuItem label="Rename" onClick={e => { e.stopPropagation(); onRenameStart(); }} />
-          <MenuItem label="Delete" danger onClick={e => { e.stopPropagation(); onDelete(); }} />
-        </div>
-      )}
+      <SessionItemBody
+        name={name} status={status} createdAt={createdAt} isActive={isActive}
+        isRenaming={isRenaming} renameRef={renameRef} draft={draft}
+        setDraft={setDraft} commitRename={commitRename} onRenameEnd={onRenameEnd}
+      />
+      <SessionItemMenu
+        hovered={hovered} menuOpen={menuOpen} isRenaming={isRenaming}
+        menuRef={menuRef} onMenuToggle={onMenuToggle}
+        onRenameStart={onRenameStart} onDelete={onDelete}
+      />
     </div>
   );
 }
