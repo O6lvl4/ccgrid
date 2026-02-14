@@ -1,59 +1,59 @@
 # ccgrid
 
-Claude Agent SDK を使ったチーム開発管理ツール。Lead エージェントが複数の Teammate エージェントを起動・監視し、タスクを並列で進行する。
+A team development management tool powered by Claude Agent SDK. A Lead agent launches and monitors multiple Teammate agents to execute tasks in parallel.
 
-## 概要
+## Overview
 
-ccgrid は、Claude Agent SDK を活用した協調型 AI チーム開発環境です。1つの Lead エージェントが複数の Teammate エージェントを管理し、並列でタスクを実行することで、大規模なプロジェクトを効率的に進めることができます。
+ccgrid is a collaborative AI team development environment leveraging the Claude Agent SDK. A single Lead agent manages multiple Teammate agents, executing tasks in parallel to efficiently handle large-scale projects.
 
-## 主要機能
+## Key Features
 
-### 1. セッション管理
-- **Lead + Teammate チーム構成**: Lead エージェントが Teammate を動的に起動・監視
-- **セッション再開**: 中断したセッションを続行可能（`POST /api/sessions/:id/continue`）
-- **コスト追跡**: トークン使用量とコストをリアルタイム表示
-- **使用率ゲージ**: プラン上限に対する使用率を燃料計スタイルで可視化
+### 1. Session Management
+- **Lead + Teammate Team Structure**: Lead agent dynamically launches and monitors Teammates
+- **Session Resume**: Resume interrupted sessions (`POST /api/sessions/:id/continue`)
+- **Cost Tracking**: Real-time display of token usage and costs
+- **Usage Gauge**: Visualize usage rate against plan limits in a fuel gauge style
 
-### 2. Teammate コーディネーション
-- **自動検出**: Agent SDK の Hooks により Teammate を自動発見
-- **タスク同期**: `~/.claude/tasks/{sessionId}/` のタスク JSON を監視・同期
-- **DM リレー**: Lead ↔ Teammate 間のメッセージ送受信（WebSocket + REST API）
-- **ステータス管理**: `starting` → `working` → `idle` → `stopped` のライフサイクル
+### 2. Teammate Coordination
+- **Auto-Discovery**: Automatically detect Teammates via Agent SDK Hooks
+- **Task Sync**: Monitor and sync task JSON files at `~/.claude/tasks/{sessionId}/`
+- **DM Relay**: Message exchange between Lead ↔ Teammates (WebSocket + REST API)
+- **Status Management**: Lifecycle management: `starting` → `working` → `idle` → `stopped`
 
-### 3. スキル・プラグインシステム
-- **3種類のスキル**:
-  - `official`: Claude 公式スキル
-  - `external`: GitHub リポジトリからインストール
-  - `internal`: ユーザー定義スキル
-- **プラグイン管理**: GitHub リポジトリ（例: `owner/repo`）から `ccgrid-plugin.json` を読み込み、スキルを一括インストール
-- **スキル発見**: Lead プロンプトに自動挿入され、Teammate から利用可能
+### 3. Skill & Plugin System
+- **3 Skill Types**:
+  - `official`: Official Claude skills
+  - `external`: Installed from GitHub repositories
+  - `internal`: User-defined skills
+- **Plugin Management**: Batch install skills by loading `ccgrid-plugin.json` from GitHub repos (e.g., `owner/repo`)
+- **Skill Discovery**: Automatically injected into Lead prompt and available to Teammates
 
-### 4. パーミッション管理
-- **ルールベース自動判定**: ツール名とパスパターンによる `allow` / `deny` ルール
-- **インタラクティブ許可**: ルールに該当しない場合、UI で許可/拒否を選択
-- **Permission Log**: 全ての許可判定を履歴として記録（`PermissionLogEntry`）
-- **入力書き換え**: 許可時にツール入力パラメータを修正可能
+### 4. Permission Management
+- **Rule-Based Auto-Decision**: `allow` / `deny` rules based on tool name and path patterns
+- **Interactive Approval**: UI-based allow/deny selection when no matching rule exists
+- **Permission Log**: Record all permission decisions as history (`PermissionLogEntry`)
+- **Input Rewriting**: Modify tool input parameters upon approval
 
-### 5. リアルタイム通信（WebSocket）
-- **Server → Client**: セッション状態、Teammate 出力、タスク更新、コスト変動を即座に配信
-- **Client → Server**: パーミッション応答、Teammate へのメッセージ送信
-- **スナップショット配信**: 接続時に全状態を一括送信（`type: 'snapshot'`）
+### 5. Real-Time Communication (WebSocket)
+- **Server → Client**: Instantly deliver session state, Teammate output, task updates, and cost changes
+- **Client → Server**: Permission responses and messages to Teammates
+- **Snapshot Delivery**: Send complete state snapshot upon connection (`type: 'snapshot'`)
 
-### 6. ファイル共有
-- **Base64 エンコード**: 添付ファイルを JSON として送信
-- **画像圧縮**: 大きな画像を自動リサイズ（最大 2048px）
-- **サムネイル表示**: UI でプレビュー可能
-- **Lead + Teammate に配布**: セッション作成時・続行時に自動添付
+### 6. File Sharing
+- **Base64 Encoding**: Send attached files as JSON
+- **Image Compression**: Auto-resize large images (max 2048px)
+- **Thumbnail Display**: Preview in UI
+- **Distribution to Lead + Teammates**: Auto-attach files when creating or continuing sessions
 
-### 7. パフォーマンス最適化
-- **段階的レンダリング**: 大量の Teammate 出力を `requestAnimationFrame` でバッチ化
-- **Tab キャッシング**: Overview / Output / Teammates / Tasks タブの描画結果をキャッシュ
-- **Skeleton UI**: データロード中にスケルトン表示
-- **ファイル分割**: 大きなコンポーネント（IconRail, TasksTab 等）を分割して初回ロード時間を短縮
+### 7. Performance Optimization
+- **Incremental Rendering**: Batch large Teammate outputs using `requestAnimationFrame`
+- **Tab Caching**: Cache rendering results for Overview / Output / Teammates / Tasks tabs
+- **Skeleton UI**: Display skeleton during data loading
+- **File Splitting**: Split large components (IconRail, TasksTab, etc.) to reduce initial load time
 
-## 技術スタック
+## Tech Stack
 
-| レイヤー | 技術 | バージョン |
+| Layer | Technology | Version |
 |---|---|---|
 | **Backend** | Hono | 4.7 |
 | | WebSocket (ws) | 8.18 |
@@ -62,151 +62,151 @@ ccgrid は、Claude Agent SDK を活用した協調型 AI チーム開発環境�
 | | Zustand | 5.0 |
 | | Vite | 6.3 |
 | | Tailwind CSS | 4.1 |
-| **モノレポ** | npm workspaces | - |
+| **Monorepo** | npm workspaces | - |
 
-## セットアップ
+## Setup
 
-### 前提条件
+### Prerequisites
 - Node.js 18+ / npm 9+
-- Anthropic API キー（環境変数 `ANTHROPIC_API_KEY`）
+- Anthropic API key (environment variable `ANTHROPIC_API_KEY`)
 
-### インストール
+### Installation
 
 ```bash
-# リポジトリをクローン
+# Clone the repository
 git clone https://github.com/yourusername/ccgrid.git
 cd ccgrid
 
-# 依存パッケージをインストール
+# Install dependencies
 npm install
 
-# 開発サーバーを起動（server + web を並列起動）
+# Start development servers (server + web in parallel)
 npm run dev
 ```
 
 - Server: http://localhost:7819
 - Web UI: http://localhost:7820
 
-ブラウザで http://localhost:7820 を開くと UI が表示されます。
+Open http://localhost:7820 in your browser to view the UI.
 
-## アーキテクチャ
+## Architecture
 
-### セッション生成フロー
+### Session Creation Flow
 
 ```
-1. ユーザーが NewSessionDialog でセッション設定を入力
+1. User enters session settings in NewSessionDialog
    ↓
 2. POST /api/sessions → SessionManager.createSession()
    ↓
-3. AgentBuilder が Lead エージェント用プロンプトを生成
-   - カスタム指示
-   - スキル一覧
+3. AgentBuilder generates prompt for Lead agent
+   - Custom instructions
+   - Skill list
    - Teammate Specs
-   - ファイル添付
+   - File attachments
    ↓
-4. Agent SDK で Lead エージェントを起動（agent.start()）
+4. Launch Lead agent via Agent SDK (agent.start())
    ↓
-5. Hooks により Teammate 発見・タスク同期・コスト更新を検出
+5. Detect Teammate discovery, task sync, and cost updates via Hooks
    ↓
-6. WebSocket で UI に状態を配信
+6. Deliver state to UI via WebSocket
 ```
 
 ### Teammate Discovery Hooks
 
-Agent SDK の `onAgentAction` フックを利用し、以下を検出:
+Using Agent SDK's `onAgentAction` hook to detect:
 
-- **TeamCreate**: チーム名・タスクリストディレクトリ作成を検出
-- **Task ツール呼び出し**: Teammate 起動を検出 → `teammate_discovered` イベント
-- **TaskUpdate**: タスク完了を検出 → `task_completed` イベント
-- **SendMessage**: DM を検出 → `teammate_message_relayed` イベント
+- **TeamCreate**: Detect team name and task list directory creation
+- **Task Tool Invocation**: Detect Teammate launch → `teammate_discovered` event
+- **TaskUpdate**: Detect task completion → `task_completed` event
+- **SendMessage**: Detect DM → `teammate_message_relayed` event
 
-### Permission Evaluator フロー
+### Permission Evaluator Flow
 
 ```
-1. Agent がツールを実行しようとする
+1. Agent attempts to execute a tool
    ↓
-2. onPermissionRequest フック発火
+2. onPermissionRequest hook fires
    ↓
-3. PermissionEvaluator がルールに基づき自動判定
-   - toolName + pathPattern でマッチング
-   - ルールが見つかれば即座に allow / deny
+3. PermissionEvaluator makes auto-decision based on rules
+   - Match by toolName + pathPattern
+   - Immediately allow / deny if rule found
    ↓
-4. ルールがない場合、WebSocket で UI に permission_request 送信
+4. If no rule found, send permission_request to UI via WebSocket
    ↓
-5. ユーザーが UI で Allow / Deny / Modify Input を選択
+5. User selects Allow / Deny / Modify Input in UI
    ↓
-6. Client が permission_response を送信
+6. Client sends permission_response
    ↓
-7. SessionManager が Promise を resolve
+7. SessionManager resolves Promise
    ↓
-8. Agent SDK にレスポンスを返却
+8. Return response to Agent SDK
 ```
 
-## API エンドポイント
+## API Endpoints
 
 ### REST API
 
-| メソッド | パス | 説明 |
+| Method | Path | Description |
 |---|---|---|
-| `POST` | `/api/sessions` | セッション作成 |
-| `GET` | `/api/sessions` | セッション一覧取得 |
-| `GET` | `/api/sessions/:id` | セッション詳細取得 |
-| `PATCH` | `/api/sessions/:id` | セッション更新 |
-| `DELETE` | `/api/sessions/:id` | セッション削除 |
-| `POST` | `/api/sessions/:id/stop` | セッション停止 |
-| `POST` | `/api/sessions/:id/continue` | セッション続行 |
-| `POST` | `/api/sessions/:id/teammates/:name/message` | Teammate にメッセージ送信 |
-| `GET` | `/api/sessions/:id/teammates` | Teammate 一覧取得 |
-| `GET` | `/api/sessions/:id/tasks` | タスク一覧取得 |
-| `GET` | `/api/sessions/:id/permissions` | Permission Log 取得 |
-| `GET` | `/api/teammate-specs` | Teammate Spec 一覧 |
-| `POST` | `/api/teammate-specs` | Teammate Spec 作成 |
-| `PATCH` | `/api/teammate-specs/:id` | Teammate Spec 更新 |
-| `DELETE` | `/api/teammate-specs/:id` | Teammate Spec 削除 |
-| `GET` | `/api/skill-specs` | Skill Spec 一覧 |
-| `POST` | `/api/skill-specs` | Skill Spec 作成 |
-| `DELETE` | `/api/skill-specs/:id` | Skill Spec 削除 |
-| `GET` | `/api/plugins` | Plugin 一覧 |
-| `POST` | `/api/plugins/install` | GitHub からプラグインインストール |
-| `DELETE` | `/api/plugins/:name` | プラグイン削除 |
-| `GET` | `/api/permission-rules` | Permission Rule 一覧 |
-| `POST` | `/api/permission-rules` | Permission Rule 作成 |
-| `DELETE` | `/api/permission-rules/:id` | Permission Rule 削除 |
-| `GET` | `/api/usage` | API 使用量取得（ccusage） |
-| `GET` | `/api/health` | ヘルスチェック |
-| `GET` | `/api/dirs` | ディレクトリ一覧取得 |
-| `GET` | `/api/dirs/validate` | ディレクトリ検証 |
+| `POST` | `/api/sessions` | Create session |
+| `GET` | `/api/sessions` | List sessions |
+| `GET` | `/api/sessions/:id` | Get session details |
+| `PATCH` | `/api/sessions/:id` | Update session |
+| `DELETE` | `/api/sessions/:id` | Delete session |
+| `POST` | `/api/sessions/:id/stop` | Stop session |
+| `POST` | `/api/sessions/:id/continue` | Continue session |
+| `POST` | `/api/sessions/:id/teammates/:name/message` | Send message to Teammate |
+| `GET` | `/api/sessions/:id/teammates` | List Teammates |
+| `GET` | `/api/sessions/:id/tasks` | List tasks |
+| `GET` | `/api/sessions/:id/permissions` | Get Permission Log |
+| `GET` | `/api/teammate-specs` | List Teammate Specs |
+| `POST` | `/api/teammate-specs` | Create Teammate Spec |
+| `PATCH` | `/api/teammate-specs/:id` | Update Teammate Spec |
+| `DELETE` | `/api/teammate-specs/:id` | Delete Teammate Spec |
+| `GET` | `/api/skill-specs` | List Skill Specs |
+| `POST` | `/api/skill-specs` | Create Skill Spec |
+| `DELETE` | `/api/skill-specs/:id` | Delete Skill Spec |
+| `GET` | `/api/plugins` | List Plugins |
+| `POST` | `/api/plugins/install` | Install plugin from GitHub |
+| `DELETE` | `/api/plugins/:name` | Delete plugin |
+| `GET` | `/api/permission-rules` | List Permission Rules |
+| `POST` | `/api/permission-rules` | Create Permission Rule |
+| `DELETE` | `/api/permission-rules/:id` | Delete Permission Rule |
+| `GET` | `/api/usage` | Get API usage (ccusage) |
+| `GET` | `/api/health` | Health check |
+| `GET` | `/api/dirs` | List directories |
+| `GET` | `/api/dirs/validate` | Validate directory |
 
-### WebSocket メッセージタイプ（Server → Client）
+### WebSocket Message Types (Server → Client)
 
-- `snapshot`: 全状態スナップショット（接続時）
-- `session_created`: セッション作成
-- `session_status`: セッションステータス変更
-- `session_deleted`: セッション削除
-- `lead_output`: Lead エージェント出力
-- `teammate_discovered`: Teammate 発見
-- `teammate_status`: Teammate ステータス変更
-- `teammate_output`: Teammate 出力
-- `task_sync`: タスク同期
-- `task_completed`: タスク完了
-- `cost_update`: コスト更新
-- `permission_request`: パーミッション要求
-- `permission_resolved`: パーミッション判定完了
-- `permission_rules_updated`: ルール更新
-- `teammate_message_relayed`: Teammate メッセージリレー
-- `error`: エラー
+- `snapshot`: Complete state snapshot (on connection)
+- `session_created`: Session created
+- `session_status`: Session status changed
+- `session_deleted`: Session deleted
+- `lead_output`: Lead agent output
+- `teammate_discovered`: Teammate discovered
+- `teammate_status`: Teammate status changed
+- `teammate_output`: Teammate output
+- `task_sync`: Task synchronized
+- `task_completed`: Task completed
+- `cost_update`: Cost updated
+- `permission_request`: Permission requested
+- `permission_resolved`: Permission decision completed
+- `permission_rules_updated`: Rules updated
+- `teammate_message_relayed`: Teammate message relayed
+- `error`: Error occurred
 
-### WebSocket メッセージタイプ（Client → Server）
+### WebSocket Message Types (Client → Server)
 
-- `permission_response`: パーミッション応答
-- `teammate_message`: Teammate にメッセージ送信
+- `permission_response`: Permission response
+- `teammate_message`: Send message to Teammate
 
-## ディレクトリ構造
+## Directory Structure
 
 ```
 ccgrid/
 ├── packages/
-│   ├── shared/          # 共有型定義
+│   ├── shared/          # Shared type definitions
 │   │   └── src/
 │   │       ├── types.ts
 │   │       └── index.ts
@@ -277,41 +277,41 @@ ccgrid/
 └── README.md
 ```
 
-## 開発
+## Development
 
-### 開発サーバー起動
+### Start Development Servers
 
 ```bash
 npm run dev
 ```
 
-これにより、以下が並列で起動します:
-- Server: `http://localhost:7819`（Hono + WebSocket）
-- Web: `http://localhost:7820`（Vite dev server）
+This launches the following in parallel:
+- Server: `http://localhost:7819` (Hono + WebSocket)
+- Web: `http://localhost:7820` (Vite dev server)
 
-### ポート設定
+### Port Configuration
 
-| サービス | ポート | 設定箇所 |
+| Service | Port | Configuration Location |
 |---|---|---|
 | Server | 7819 | `packages/server/src/index.ts` |
 | Web | 7820 | `packages/web/vite.config.ts` |
 
-### ビルド
+### Build
 
 ```bash
-# Web のみビルド
+# Build web only
 npm run build -w @ccgrid/web
 
-# ビルド後のプレビュー
+# Preview after build
 npm run preview -w @ccgrid/web
 ```
 
-## SSH ControlMaster の設定（推奨）
+## SSH ControlMaster Configuration (Recommended)
 
-セッション内で複数リポジトリの git 操作を並列実行する場合、SSH 接続が不安定になることがある（`Connection reset by peer`）。
-SSH の ControlMaster を有効にすると、1つの接続を使い回すため安定性が大幅に向上する。
+When running parallel git operations across multiple repositories within a session, SSH connections can become unstable (`Connection reset by peer`).
+Enabling SSH ControlMaster significantly improves stability by reusing a single connection.
 
-`~/.ssh/config` に以下を追加:
+Add the following to `~/.ssh/config`:
 
 ```ssh-config
 Host *
@@ -320,17 +320,17 @@ Host *
   ControlPersist 600
 ```
 
-ソケット用ディレクトリも作成:
+Create the socket directory:
 
 ```bash
 mkdir -p ~/.ssh/sockets
 ```
 
-- **ControlMaster auto** — 最初の接続をマスターとして再利用。以降は新規 SSH ハンドシェイクなしでソケット経由通信
-- **ControlPersist 600** — 最後のセッション終了後も 10 分間マスター接続を維持
+- **ControlMaster auto** — Reuse the first connection as master. Subsequent connections communicate via socket without new SSH handshakes
+- **ControlPersist 600** — Keep master connection alive for 10 minutes after the last session ends
 
-> 既に `Host *` ブロックがある場合は、そのブロック内に上記3行を追記する。
+> If a `Host *` block already exists, add the above three lines within that block.
 
-## ライセンス
+## License
 
 MIT

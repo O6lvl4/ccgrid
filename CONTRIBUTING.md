@@ -1,133 +1,133 @@
-# コントリビューションガイド
+# Contributing Guide
 
-ccgrid への貢献に興味を持っていただきありがとうございます。
+Thank you for your interest in contributing to ccgrid.
 
-## 開発環境のセットアップ
+## Development Environment Setup
 
-### 必要な環境
+### Requirements
 
-- Node.js 20.x 以上
-- npm（Node.js に付属）
+- Node.js 20.x or later
+- npm (comes with Node.js)
 - Git
 
-### セットアップ手順
+### Setup Instructions
 
-1. リポジトリをフォーク
+1. Fork the repository
 
-2. クローン
+2. Clone
 ```bash
 git clone https://github.com/YOUR_USERNAME/ccgrid.git
 cd ccgrid
 ```
 
-3. 依存関係のインストール
+3. Install dependencies
 ```bash
 npm install
 ```
 
-4. 開発サーバーの起動
+4. Start the development server
 ```bash
 npm run dev
 ```
 
-ブラウザで http://localhost:7820 を開いて動作確認できます。
+Open http://localhost:7820 in your browser to verify it's working.
 
-### プロジェクト構成
+### Project Structure
 
 ```
 packages/
-  shared/   # 共有型定義 (Session, Teammate, TeamTask, ServerMessage 等)
-  server/   # Hono + WebSocket サーバー (ポート 7819)
-  web/      # Vite + React + Tailwind CSS フロントエンド (ポート 7820)
+  shared/   # Shared type definitions (Session, Teammate, TeamTask, ServerMessage, etc.)
+  server/   # Hono + WebSocket server (port 7819)
+  web/      # Vite + React + Tailwind CSS frontend (port 7820)
 ```
 
-## プルリクエストの流れ
+## Pull Request Workflow
 
-1. **Issue の作成（推奨）**
-   - 大きな変更の場合は、先に Issue で議論することをお勧めします
+1. **Create an Issue (recommended)**
+   - For major changes, we recommend discussing in an Issue first
 
-2. **ブランチの作成**
+2. **Create a branch**
 ```bash
 git checkout -b feature/your-feature-name
 ```
 
-3. **コードの変更**
-   - 変更内容をコミット
-   - コミットメッセージは日本語で簡潔に（prefixなし）
-   - 例: `セッション詳細画面のパフォーマンス最適化`
+3. **Make changes**
+   - Commit your changes
+   - Write commit messages in Japanese, concisely without prefixes
+   - Example: `セッション詳細画面のパフォーマンス最適化`
 
-4. **プッシュ**
+4. **Push**
 ```bash
 git push origin feature/your-feature-name
 ```
 
-5. **プルリクエストの作成**
-   - GitHub でプルリクエストを作成
-   - テンプレートに従って変更内容を記載
+5. **Create a Pull Request**
+   - Create a pull request on GitHub
+   - Follow the template to describe your changes
 
-## コーディング規約
+## Coding Guidelines
 
 ### TypeScript
 
-- `strict: true` で型安全性を確保
-- 明示的な型注釈を推奨（特に関数の引数と戻り値）
-- `any` の使用は避ける
+- Ensure type safety with `strict: true`
+- Explicit type annotations are recommended (especially for function parameters and return values)
+- Avoid using `any`
 
-### React コンポーネント
+### React Components
 
-- 関数コンポーネントを使用
-- パフォーマンスが重要な場合は `memo` を活用
-- カスタムフックは `use` プレフィックスを使用
-- コンポーネントファイルは PascalCase（例: `SessionDetailView.tsx`）
+- Use function components
+- Utilize `memo` when performance is critical
+- Use `use` prefix for custom hooks
+- Component files should be in PascalCase (e.g., `SessionDetailView.tsx`)
 
-### スタイリング
+### Styling
 
-- Tailwind CSS を使用
-- インラインスタイルは必要最小限に
-- レスポンシブデザインを考慮
+- Use Tailwind CSS
+- Minimize inline styles
+- Consider responsive design
 
-### ファイル・フォルダ構成
+### File and Folder Structure
 
-- **packages/shared**: 型定義のみ、実装を含まない
-- **packages/server**: バックエンドロジック、WebSocket、REST API
-- **packages/web**: フロントエンドコンポーネント、hooks、store
+- **packages/shared**: Type definitions only, no implementation
+- **packages/server**: Backend logic, WebSocket, REST API
+- **packages/web**: Frontend components, hooks, store
 
 ```
 packages/web/src/
   components/
-    dialogs/      # ダイアログコンポーネント
-    layout/       # レイアウト関連
-    output/       # 出力表示関連
-    session/      # セッション関連UI
-    views/        # メインビュー
-  hooks/          # カスタムフック
-  store/          # Zustand ストア
-  utils/          # ユーティリティ関数
+    dialogs/      # Dialog components
+    layout/       # Layout-related components
+    output/       # Output display components
+    session/      # Session-related UI
+    views/        # Main views
+  hooks/          # Custom hooks
+  store/          # Zustand store
+  utils/          # Utility functions
 ```
 
-### 命名規則
+### Naming Conventions
 
-- 変数・関数: camelCase
-- コンポーネント・型・インターフェース: PascalCase
-- 定数: UPPER_SNAKE_CASE（グローバル定数の場合）
-- ファイル名:
-  - コンポーネント: PascalCase (例: `SessionPanel.tsx`)
-  - ユーティリティ: camelCase (例: `timeAgo.ts`)
+- Variables and functions: camelCase
+- Components, types, and interfaces: PascalCase
+- Constants: UPPER_SNAKE_CASE (for global constants)
+- File names:
+  - Components: PascalCase (e.g., `SessionPanel.tsx`)
+  - Utilities: camelCase (e.g., `timeAgo.ts`)
 
-## テスト
+## Testing
 
-現在テストフレームワークは導入されていませんが、以下の手動確認を推奨します。
+Currently, no test framework is implemented, but we recommend the following manual checks:
 
-- [ ] 開発サーバーが正常に起動する
-- [ ] 既存機能が正常に動作する
-- [ ] ブラウザのコンソールにエラーが出ていない
-- [ ] TypeScript のコンパイルエラーがない
+- [ ] Development server starts successfully
+- [ ] Existing functionality works correctly
+- [ ] No errors in the browser console
+- [ ] No TypeScript compilation errors
 
-## SSH ControlMaster の設定（推奨）
+## SSH ControlMaster Configuration (recommended)
 
-並列 git 操作を行う場合、SSH の ControlMaster を有効にすることを推奨します。
+For parallel git operations, we recommend enabling SSH ControlMaster.
 
-`~/.ssh/config` に追加:
+Add to `~/.ssh/config`:
 
 ```ssh-config
 Host *
@@ -140,11 +140,11 @@ Host *
 mkdir -p ~/.ssh/sockets
 ```
 
-## 質問・サポート
+## Questions & Support
 
-- Issue で質問を投稿してください
-- バグ報告は Issue テンプレートに従ってください
+- Post questions as Issues
+- Follow the Issue template for bug reports
 
-## ライセンス
+## License
 
-このプロジェクトは MIT ライセンスの元で公開されています。コントリビューションも同様のライセンスで公開されます。
+This project is released under the MIT License. Contributions will also be released under the same license.

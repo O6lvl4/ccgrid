@@ -1,8 +1,8 @@
-# Claude Agent SDK アーキテクチャ
+# Claude Agent SDK Architecture
 
-ccgrid が Claude Code サブスクリプションアカウントを利用する仕組みを解説する。
+This document explains how ccgrid utilizes Claude Code subscription accounts through the Agent SDK.
 
-## 全体像
+## Overview
 
 ```mermaid
 graph TD
@@ -14,15 +14,15 @@ graph TD
     subgraph cli["Claude Code CLI subprocess (cli.js)"]
       IPC["stdin ← NDJSON commands
       stdout → NDJSON messages"]
-      AUTH["認証情報を読み込み:
+      AUTH["Load authentication:
       - macOS Keychain
-      - ~/.claude/ 配下の設定
-      - 環境変数 (ANTHROPIC_API_KEY 等)"]
+      - ~/.claude/ config
+      - Environment variables (ANTHROPIC_API_KEY, etc.)"]
     end
   end
 
   API["Anthropic API
-  (課金・認証)"]
+  (Billing & Auth)"]
 
   SM --> Q
   Q -- "spawn" --> cli
@@ -35,49 +35,49 @@ graph TD
   style Q fill:#ffffff,stroke:#495057
 ```
 
-## SDK の正体: CLI ラッパー
+## The SDK Reality: CLI Wrapper
 
-`@anthropic-ai/claude-agent-sdk` は **Anthropic API を直接呼ぶライブラリではない**。
-内部で Claude Code CLI を子プロセスとして起動し、NDJSON (改行区切り JSON) で stdin/stdout 通信する。
+`@anthropic-ai/claude-agent-sdk` **does NOT directly call the Anthropic API**.
+Instead, it spawns the Claude Code CLI as a subprocess and communicates via NDJSON (newline-delimited JSON) over stdin/stdout.
 
-つまり `query()` を呼ぶと:
+When you call `query()`:
 
-1. SDK が内蔵の Claude Code CLI バイナリ (`cli.js`) を spawn
-2. CLI プロセスがローカルの認証情報を読み込み
-3. CLI が Anthropic API と通信してエージェントループを実行
-4. ツール実行 (Read, Write, Bash 等) もすべて CLI 側で処理
-5. 結果が NDJSON ストリームとして SDK に返却
+1. SDK spawns the embedded Claude Code CLI binary (`cli.js`)
+2. CLI process loads local authentication credentials
+3. CLI communicates with Anthropic API to execute the agent loop
+4. All tool executions (Read, Write, Bash, etc.) are handled by the CLI
+5. Results are returned to SDK as an NDJSON stream
 
 ```typescript
-// SDK の内部イメージ (簡略)
+// SDK internal concept (simplified)
 function query(params) {
   const child = spawn('node', ['cli.js', '--sdk-mode'], {
     env: params.options.env,
     cwd: params.options.cwd,
   });
-  // stdin でプロンプトを送信、stdout で結果をストリーム受信
+  // Send prompt via stdin, receive results as stdout stream
 }
 ```
 
-## 認証フロー
+## Authentication Flow
 
-### SDK に認証パラメータは存在しない
+### SDK Has No Authentication Parameters
 
-`query()` の Options 型に `apiKey` や `authToken` といったフィールドは**ない**。
-認証は完全に CLI サブプロセスに委譲される。
+The `query()` Options type has **NO** fields like `apiKey` or `authToken`.
+Authentication is fully delegated to the CLI subprocess.
 
-### CLI が認証情報を解決する優先順位
+### CLI Authentication Resolution Priority
 
-| 優先度 | ソース | 説明 |
-|--------|--------|------|
-| 1 | 環境変数 `ANTHROPIC_API_KEY` | API キー (従量課金) |
-| 2 | 環境変数 `CLAUDE_CODE_OAUTH_TOKEN` | OAuth トークン (サブスクリプション) |
-| 3 | macOS Keychain | `claude login` で保存された認証情報 |
-| 4 | `~/.claude/` 配下の設定ファイル | ユーザー設定 |
-| 5 | `.claude/settings.json` | プロジェクト設定 |
-| 6 | `apiKeyHelper` 設定 | シェルスクリプト経由で動的に取得 |
+| Priority | Source | Description |
+|----------|--------|-------------|
+| 1 | Environment variable `ANTHROPIC_API_KEY` | API key (pay-as-you-go) |
+| 2 | Environment variable `CLAUDE_CODE_OAUTH_TOKEN` | OAuth token (subscription) |
+| 3 | macOS Keychain | Credentials saved via `claude login` |
+| 4 | `~/.claude/` config files | User settings |
+| 5 | `.claude/settings.json` | Project settings |
+| 6 | `apiKeyHelper` config | Dynamic retrieval via shell script |
 
-### ccgrid の場合
+### ccgrid Implementation
 
 ```typescript
 // session-manager.ts L299-326
@@ -87,7 +87,7 @@ agentQuery = query({
     cwd: session.cwd,
     model: session.model,
     env: {
-      ...process.env,  // ← ここで環境変数を丸ごと継承
+      ...process.env,  // ← Inherit all environment variables
       CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: '1',
     },
     settingSources: ['user', 'project'],
@@ -96,119 +96,119 @@ agentQuery = query({
 });
 ```
 
-`...process.env` でサーバープロセスの環境変数を CLI に渡している。
-`claude login` でサブスクリプション認証済みなら、Keychain の認証情報が CLI に自動で読まれる。
+`...process.env` passes server process environment variables to the CLI.
+If authenticated via `claude login`, the CLI automatically reads credentials from Keychain.
 
-**結論**: ccgrid は明示的な認証コードを一切書いていない。
-ホストマシンで `claude login` 済みであれば、SDK 経由の CLI が Keychain から認証情報を取得し、サブスクリプションアカウントで動作する。
+**Conclusion**: ccgrid writes NO explicit authentication code.
+If the host machine has run `claude login`, the SDK-launched CLI retrieves credentials from Keychain and operates with the subscription account.
 
-## 認証方式の種類
+## Authentication Methods
 
-### 1. サブスクリプション認証 (OAuth)
+### 1. Subscription Authentication (OAuth)
 
 ```bash
-# CLI でログイン (ブラウザが開く)
+# Login via CLI (opens browser)
 claude login
 ```
 
-- Claude Pro / Max / Teams / Enterprise プランで利用可能
-- 認証情報は macOS Keychain に暗号化保存
-- **個人利用・社内ツール向け**。サードパーティ製品での利用は Anthropic の事前承認が必要
+- Available for Claude Pro / Max / Teams / Enterprise plans
+- Credentials encrypted and stored in macOS Keychain
+- **For personal use / internal tools**. Third-party products require Anthropic pre-approval
 
-### 2. API キー認証 (従量課金)
+### 2. API Key Authentication (Pay-as-you-go)
 
 ```bash
 export ANTHROPIC_API_KEY=sk-ant-...
 ```
 
-- [platform.claude.com](https://platform.claude.com/) で発行
-- 使用量に応じた従量課金
-- **サードパーティ製品で必須**
+- Issued at [platform.claude.com](https://platform.claude.com/)
+- Pay based on usage
+- **Required for third-party products**
 
-### 3. クラウドプロバイダ経由
+### 3. Cloud Provider Integration
 
-| プロバイダ | 環境変数 |
-|-----------|---------|
-| Amazon Bedrock | `CLAUDE_CODE_USE_BEDROCK=1` + AWS 認証 |
-| Google Vertex AI | `CLAUDE_CODE_USE_VERTEX=1` + GCP 認証 |
-| Microsoft Azure | `CLAUDE_CODE_USE_FOUNDRY=1` + Azure 認証 |
+| Provider | Environment Variable |
+|----------|---------------------|
+| Amazon Bedrock | `CLAUDE_CODE_USE_BEDROCK=1` + AWS auth |
+| Google Vertex AI | `CLAUDE_CODE_USE_VERTEX=1` + GCP auth |
+| Microsoft Azure | `CLAUDE_CODE_USE_FOUNDRY=1` + Azure auth |
 
-## ccgrid での SDK 利用詳細
+## SDK Usage in ccgrid
 
-### query() のオプション
+### query() Options
 
-`session-manager.ts` の `startAgent()` が SDK を呼び出す箇所:
+Where `startAgent()` in `session-manager.ts` calls the SDK:
 
 ```typescript
 query({
-  prompt,                          // タスク指示文
+  prompt,                          // Task instruction
   options: {
-    // ---- セッション管理 ----
-    resume: session.sessionId,     // 既存セッションの再開時
-    cwd: session.cwd,              // 作業ディレクトリ
-    model: session.model,          // モデル (claude-sonnet-4-5-20250929 等)
+    // ---- Session management ----
+    resume: session.sessionId,     // Resume existing session
+    cwd: session.cwd,              // Working directory
+    model: session.model,          // Model (e.g., claude-sonnet-4-5-20250929)
 
-    // ---- パーミッション ----
+    // ---- Permissions ----
     permissionMode: 'acceptEdits', // or 'bypassPermissions'
-    canUseTool,                    // GUI からの許可/拒否コールバック
+    canUseTool,                    // Approval/denial callback from GUI
 
-    // ---- エージェント設定 ----
-    maxTurns: 999999,              // 実質無制限
-    maxBudgetUsd,                  // コスト上限 (USD)
-    includePartialMessages: true,  // 部分メッセージのストリーミング
+    // ---- Agent config ----
+    maxTurns: 999999,              // Effectively unlimited
+    maxBudgetUsd,                  // Cost limit (USD)
+    includePartialMessages: true,  // Stream partial messages
     systemPrompt: buildSystemPrompt(),
-    settingSources: ['user', 'project'],  // CLAUDE.md を読む
+    settingSources: ['user', 'project'],  // Read CLAUDE.md
 
-    // ---- 環境 ----
+    // ---- Environment ----
     env: {
       ...process.env,
       CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: '1',
     },
-    abortController,               // セッション停止用
+    abortController,               // Session abort control
 
-    // ---- フック (Agent Teams) ----
+    // ---- Hooks (Agent Teams) ----
     hooks: {
-      SubagentStart:  [...],       // サブエージェント起動時
-      SubagentStop:   [...],       // サブエージェント停止時
-      TeammateIdle:   [...],       // チームメイトがアイドルに
-      TaskCompleted:  [...],       // タスク完了時
+      SubagentStart:  [...],       // Subagent starts
+      SubagentStop:   [...],       // Subagent stops
+      TeammateIdle:   [...],       // Teammate goes idle
+      TaskCompleted:  [...],       // Task completed
     },
   },
 });
 ```
 
-### ストリーム処理
+### Stream Processing
 
-`query()` は `Query` オブジェクトを返す。これは `AsyncIterable<SDKMessage>` を実装しており、
-`lead-stream.ts` の `processLeadStream()` で `for await` ループで消費される。
+`query()` returns a `Query` object implementing `AsyncIterable<SDKMessage>`,
+consumed by `processLeadStream()` in `lead-stream.ts` via `for await` loop.
 
 ```typescript
-// lead-stream.ts (概要)
+// lead-stream.ts (overview)
 export async function processLeadStream(sessionId, agentQuery, deps) {
   for await (const message of agentQuery) {
     switch (message.type) {
-      case 'assistant':     // アシスタントの応答テキスト
-      case 'tool_use':      // ツール呼び出し
-      case 'tool_result':   // ツール実行結果
-      case 'system':        // セッションID・コスト情報
+      case 'assistant':     // Assistant response text
+      case 'tool_use':      // Tool invocation
+      case 'tool_result':   // Tool execution result
+      case 'system':        // Session ID, cost info
       // ...
     }
   }
 }
 ```
 
-### パフォーマンス特性
+### Performance Characteristics
 
-| モード | プロセス挙動 | レイテンシ |
-|--------|-------------|-----------|
-| 新規セッション (`prompt: string`) | 毎回 CLI プロセスを spawn | 初回 ~12 秒 |
-| セッション再開 (`resume: sessionId`) | 新プロセス + 状態復元 | ~12 秒 |
-| ストリーミング入力 (`AsyncIterable`) | プロセス持続 | 初回 ~12 秒、以降は高速 |
+| Mode | Process Behavior | Latency |
+|------|-----------------|---------|
+| New session (`prompt: string`) | Spawn CLI process each time | Initial ~12 seconds |
+| Resume session (`resume: sessionId`) | New process + state restore | ~12 seconds |
+| Streaming input (`AsyncIterable`) | Persistent process | Initial ~12 seconds, fast thereafter |
 
-ccgrid は `prompt: string` モードを使用しており、セッション作成ごとに ~12 秒の起動コストが発生する。
-`continueSession()` では `resume` オプションで既存セッションを引き継ぐ。
+ccgrid uses `prompt: string` mode, incurring ~12 second startup cost per session creation.
+`continueSession()` uses the `resume` option to continue existing sessions.
 
-## 参考リンク
+## References
 
 - [Agent SDK Overview](https://platform.claude.com/docs/en/agent-sdk/overview)
 - [TypeScript SDK Reference](https://platform.claude.com/docs/en/agent-sdk/typescript)

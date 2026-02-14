@@ -1,20 +1,20 @@
-## 概要
+## Summary
 
-この PR の目的を簡潔に説明してください。
+Briefly describe the purpose of this PR.
 
-## 変更内容
+## Changes
 
-- 変更したファイルと内容を箇条書きで記載
-- 主な実装内容や修正内容
+- List the files and their changes in bullet points
+- Describe main implementation or fixes
 
-## テスト
+## Testing
 
-- 動作確認した内容
-- 確認した環境（ブラウザ、Node.js バージョンなど）
+- Describe what was tested
+- Specify the test environment (browser, Node.js version, etc.)
 
-## チェックリスト
+## Checklist
 
-- [ ] コードレビュー可能な単位に分割されている
-- [ ] 既存機能に影響がないことを確認した
-- [ ] 適切なコミットメッセージになっている
-- [ ] 必要に応じてドキュメントを更新した
+- [ ] The changes are split into reviewable units
+- [ ] Confirmed no impact on existing features
+- [ ] Commit messages follow the project conventions
+- [ ] Documentation updated as needed

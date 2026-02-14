@@ -1,37 +1,37 @@
 # @ccgrid/web
 
-React + Zustand + Tailwind CSS によるフロントエンド。セッション管理、Teammate 監視、タスク追跡、権限承認の GUI を提供する。
+Frontend built with React + Zustand + Tailwind CSS. Provides GUI for session management, teammate monitoring, task tracking, and permission approval.
 
-## 起動
+## Getting Started
 
 ```bash
-npm run dev  # vite (ポート 7820)
+npm run dev  # vite (port 7820)
 ```
 
-## 構成
+## Structure
 
 ```
 src/
-  App.tsx              # ルートコンポーネント（ViewShell）
-  main.tsx             # エントリーポイント
-  store/useStore.ts    # Zustand ストア（状態管理 + WebSocket メッセージ処理）
+  App.tsx              # Root component (ViewShell)
+  main.tsx             # Entry point
+  store/useStore.ts    # Zustand store (state management + WebSocket message handling)
   hooks/
-    useApi.ts          # REST API クライアント
-    useWebSocket.ts    # WebSocket 接続管理
+    useApi.ts          # REST API client
+    useWebSocket.ts    # WebSocket connection management
   components/
     layout/            # ViewShell, SessionSidebar, Breadcrumb
-    views/             # SessionListView, SessionDetailView, OutputTab 等
-    atoms/             # Button, Badge, Input 等の基本コンポーネント
-    molecules/         # Card, FormField, IconButton 等の複合コンポーネント
-    PermissionDialog   # 権限リクエストの承認/拒否/入力編集 UI
+    views/             # SessionListView, SessionDetailView, OutputTab, etc.
+    atoms/             # Basic components like Button, Badge, Input
+    molecules/         # Composite components like Card, FormField, IconButton
+    PermissionDialog   # Permission request approval/rejection/input editing UI
   utils/
-    timeAgo.ts         # 相対時間表示
-    twemoji.tsx        # Twemoji レンダリング
+    timeAgo.ts         # Relative time display
+    twemoji.tsx        # Twemoji rendering
 ```
 
-## 主な依存
+## Main Dependencies
 
 - **React 19** + **Vite**
-- **Zustand** — 状態管理
-- **Tailwind CSS** — スタイリング
-- **react-markdown** + **remark-gfm** — Markdown レンダリング
+- **Zustand** — State management
+- **Tailwind CSS** — Styling
+- **react-markdown** + **remark-gfm** — Markdown rendering
