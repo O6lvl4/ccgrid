@@ -108,6 +108,26 @@ export interface PermissionRule {
   createdAt: string;
 }
 
+// ---- Teammate messaging (SendMessage tool) ----
+export type TeammateMessageType =
+  | 'message'
+  | 'broadcast'
+  | 'shutdown_request'
+  | 'shutdown_response'
+  | 'plan_approval_request'
+  | 'plan_approval_response';
+
+export interface TeammateMessage {
+  type: TeammateMessageType;
+  sender: string;
+  recipient?: string; // Required for: message, shutdown_request, plan_approval_response
+  content: string;
+  summary?: string; // Required for: message, broadcast
+  requestId?: string; // Required for: shutdown_response, plan_approval_response
+  approve?: boolean; // Required for: shutdown_response, plan_approval_response
+  timestamp: string;
+}
+
 // ---- WebSocket: Server → Client ----
 export type ServerMessage =
   | { type: 'session_created'; session: Session }
@@ -123,6 +143,7 @@ export type ServerMessage =
   | { type: 'error'; message: string; sessionId?: string }
   | { type: 'permission_request'; sessionId: string; requestId: string; toolName: string; input: Record<string, unknown>; description?: string; agentId?: string }
   | { type: 'teammate_message_relayed'; sessionId: string; teammateName: string; message: string }
+  | { type: 'teammate_message_sent'; sessionId: string; message: TeammateMessage }
   | { type: 'permission_resolved'; entry: PermissionLogEntry }
   | { type: 'permission_rules_updated'; rules: PermissionRule[] }
   | { type: 'snapshot'; sessions: Session[]; teammates: Teammate[]; tasks: Record<string, TeamTask[]>; leadOutputs: Record<string, string>; teammateSpecs: TeammateSpec[]; skillSpecs: SkillSpec[]; plugins: PluginSpec[]; permissionRules: PermissionRule[] };

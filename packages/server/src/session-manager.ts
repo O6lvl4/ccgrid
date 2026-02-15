@@ -1,6 +1,6 @@
 import { query, type Query } from '@anthropic-ai/claude-agent-sdk';
 import { v4 as uuidv4 } from 'uuid';
-import type { Session, Teammate, TeamTask, TeammateSpec, SkillSpec, ServerMessage, PermissionLogEntry, FileAttachment } from '@ccgrid/shared';
+import type { Session, Teammate, TeamTask, TeammateSpec, SkillSpec, ServerMessage, PermissionLogEntry, FileAttachment, TeammateMessage } from '@ccgrid/shared';
 import { loadAllSessions, saveSession, deleteSessionFile } from './state-store.js';
 import { buildPrompt, buildFollowUpPrompt } from './prompt-builder.js';
 import { processLeadStream } from './lead-stream.js';
@@ -105,11 +105,6 @@ export class SessionManager {
   }
 
   getSessions(): Session[] {
-    for (const session of this.sessions.values()) {
-      if ((session.status === 'running' || session.status === 'starting') && !this.activeSessions.has(session.id)) {
-        session.status = 'completed'; this.persistSession(session.id);
-      }
-    }
     return Array.from(this.sessions.values());
   }
 
@@ -178,6 +173,7 @@ export class SessionManager {
     this.broadcast({ type: 'session_status', sessionId, status: 'running' });
 
     const actionPrompt = buildFollowUpPrompt(prompt, session.teammateSpecs);
+    console.log(`[continueSession] resuming with sdkSessionId=${session.sessionId} promptLen=${actionPrompt.length} hasTeammateSpecs=${!!session.teammateSpecs}`);
     this.startAgent({ session, maxBudgetUsd: session.maxBudgetUsd, resumePrompt: actionPrompt, files });
     return session;
   }
@@ -209,6 +205,112 @@ export class SessionManager {
     }
 
     return session;
+  }
+
+  // ---- SendMessage tool support (teammate-to-teammate messaging) ----
+
+  async sendTeammateMessage(sessionId: string, message: TeammateMessage): Promise<void> {
+    const session = this.sessions.get(sessionId);
+    if (!session?.sessionId) return;
+
+    // Broadcast the message event to UI
+    this.broadcast({ type: 'teammate_message_sent', sessionId, message });
+
+    // For direct messages and shutdown requests, find the recipient and resume them
+    if ((message.type === 'message' || message.type === 'shutdown_request') && message.recipient) {
+      const recipient = this.findTeammateByName(sessionId, message.recipient);
+      if (!recipient) {
+        console.warn(`[sendTeammateMessage] Recipient "${message.recipient}" not found in session ${sessionId}`);
+        return;
+      }
+
+      // Check if Lead is currently running
+      const isLeadRunning = this.activeSessions.has(sessionId) && session.status === 'running';
+
+      if (isLeadRunning) {
+        // Lead is running - message will be delivered via hook detection
+        console.log(`[sendTeammateMessage] Lead is running, message will be detected by hooks`);
+      } else {
+        // Lead is completed - need to resume Lead to forward the message
+        console.log(`[sendTeammateMessage] Lead is completed, resuming to forward message`);
+        const forwardPrompt = this.buildMessageForwardPrompt(message);
+
+        session.status = 'running';
+        this.persistSession(sessionId);
+        this.broadcast({ type: 'session_status', sessionId, status: 'running' });
+
+        this.startAgent({ session, maxBudgetUsd: session.maxBudgetUsd, resumePrompt: forwardPrompt });
+      }
+    }
+
+    // For broadcast, we need to send to all teammates
+    if (message.type === 'broadcast') {
+      const teammates = this.getTeammates(sessionId);
+      const sender = teammates.find(t => t.agentId === message.sender || t.name === message.sender);
+      const otherTeammates = teammates.filter(t => t.agentId !== message.sender && t.name !== message.sender);
+
+      if (otherTeammates.length === 0) {
+        console.warn(`[sendTeammateMessage] No other teammates found for broadcast in session ${sessionId}`);
+        return;
+      }
+
+      const isLeadRunning = this.activeSessions.has(sessionId) && session.status === 'running';
+
+      if (!isLeadRunning) {
+        const forwardPrompt = this.buildBroadcastForwardPrompt(message, otherTeammates);
+
+        session.status = 'running';
+        this.persistSession(sessionId);
+        this.broadcast({ type: 'session_status', sessionId, status: 'running' });
+
+        this.startAgent({ session, maxBudgetUsd: session.maxBudgetUsd, resumePrompt: forwardPrompt });
+      }
+    }
+  }
+
+  private findTeammateByName(sessionId: string, name: string): Teammate | undefined {
+    for (const teammate of this.teammates.values()) {
+      if (teammate.sessionId === sessionId && teammate.name === name) {
+        return teammate;
+      }
+    }
+    return undefined;
+  }
+
+  private buildMessageForwardPrompt(message: TeammateMessage): string {
+    const messageType = message.type === 'shutdown_request' ? 'shutdown request' : 'message';
+    const formattedMessage = JSON.stringify({
+      type: message.type,
+      sender: message.sender,
+      content: message.content,
+      ...(message.requestId ? { requestId: message.requestId } : {}),
+    }, null, 2);
+
+    return `A teammate has sent a ${messageType} that needs to be forwarded.
+
+Please use the Task tool to resume teammate "${message.recipient}" with the following message:
+
+${formattedMessage}
+
+IMPORTANT: Include this exact JSON in the prompt parameter so the recipient can respond appropriately.`;
+  }
+
+  private buildBroadcastForwardPrompt(message: TeammateMessage, recipients: Teammate[]): string {
+    const recipientNames = recipients.map(t => t.name ?? t.agentId).join(', ');
+    const formattedMessage = JSON.stringify({
+      type: 'message',
+      sender: message.sender,
+      content: message.content,
+    }, null, 2);
+
+    return `A teammate has broadcast a message to all team members.
+
+Please use the Task tool to resume each of the following teammates with this message: ${recipientNames}
+
+Message to broadcast:
+${formattedMessage}
+
+Send this to each teammate in parallel using multiple Task tool calls.`;
   }
 
   // ---- Permission resolution ----
@@ -249,22 +351,28 @@ export class SessionManager {
       syncTasks: (id) => syncTasks(id, this.taskWatcherDeps()),
       startPolling: (agentId) => { if (session.sessionId) startTranscriptPolling({ sessionId: session.id, agentId, sdkSessionId: session.sessionId, cwd: session.cwd, deps: this.pollerDeps() }); },
       stopPolling: (agentId) => stopTranscriptPolling(agentId),
+      getSdkSessionId: () => session.sessionId,
+      sendTeammateMessage: (sessionId, message) => this.sendTeammateMessage(sessionId, message),
     });
     let prompt = resumePrompt ?? buildPrompt(teammateSpecs, session.taskDescription, skillSpecs);
     if (files && files.length > 0) {
       const savedPaths = saveAttachmentsToTmp(session.id, files);
       prompt += `\n\n添付ファイルが以下のパスに保存されています。テームメイトにはRead toolでこのパスを読ませてください:\n${savedPaths.map(p => `- ${p}`).join('\n')}`;
     }
-    const agents = resumePrompt ? undefined : buildAgents(teammateSpecs, skillSpecs);
+    const specs = teammateSpecs ?? session.teammateSpecs;
+    const agents = buildAgents(specs, skillSpecs);
     const promptOrStream = buildPromptOrStream(prompt, files);
     const isBypass = session.permissionMode === 'bypassPermissions';
     const canUseTool = isBypass ? undefined : createCanUseTool(session.id, this.broadcast, this.permissionMaps());
+
+    const queryOpts = buildQueryOptions({ session, resumePrompt, maxBudgetUsd, abortController, agents, hooks, canUseTool });
+    console.log(`[startAgent] sessionId=${session.id.slice(0, 8)} resume=${!!queryOpts.resume} hasAgents=${!!agents} model=${queryOpts.model}`);
 
     let agentQuery: Query;
     try {
       agentQuery = query({
         prompt: promptOrStream,
-        options: buildQueryOptions({ session, resumePrompt, maxBudgetUsd, abortController, agents, hooks, canUseTool }),
+        options: queryOpts,
       });
     } catch (err) {
       console.error(`Failed to start query for session ${session.id}:`, err);

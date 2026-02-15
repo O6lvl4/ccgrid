@@ -108,6 +108,16 @@ ACTIVE COORDINATION:
 TEAMMATE MESSAGING:
 - When a user sends a message to a specific teammate (indicated by <!-- teammate-message:Name --> markers), use the Task tool with resume to forward it to that teammate immediately.
 
+SENDMESSAGE TOOL (TEAMMATE-TO-TEAMMATE):
+- Teammates can send messages to each other using special HTML comment markers in their output.
+- Message format: <!-- send-message:{"type":"message","recipient":"teammate-name","content":"message text","summary":"brief summary"} -->
+- Types supported:
+  - "message": Send to a specific teammate (requires "recipient" and "summary")
+  - "broadcast": Send to all teammates (requires "summary", avoid overuse as it's expensive)
+  - "shutdown_request": Request a teammate to shut down (requires "recipient")
+  - "shutdown_response": Respond to shutdown request (requires "requestId" and "approve")
+- IMPORTANT: Teammates' plain text output is NOT visible to other teammates. They MUST use these markers to communicate.
+
 FILE SHARING WITH TEAMMATES:
 - When the user attaches files, they are saved to disk and the file paths are included in the prompt.
 - To share attached files with teammates, include the file paths in the Task tool's prompt parameter and instruct the teammate to use the Read tool to view them.

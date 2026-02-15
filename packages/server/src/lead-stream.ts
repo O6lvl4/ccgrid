@@ -99,6 +99,7 @@ function extractAssistantText(message: SDKMessage): string {
 
 async function handleResult(sessionId: string, session: Session, message: SDKMessage, deps: LeadStreamDeps): Promise<void> {
   if (message.type !== 'result') return;
+  console.log(`[lead-stream] ${sessionId.slice(0, 8)} RESULT subtype=${'subtype' in message ? message.subtype : 'unknown'} cost=${'total_cost_usd' in message ? message.total_cost_usd : '?'}`);
 
   if ('total_cost_usd' in message) session.costUsd = message.total_cost_usd as number;
   if ('usage' in message && typeof message.usage === 'object' && message.usage) {
