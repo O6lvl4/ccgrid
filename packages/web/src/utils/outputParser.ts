@@ -131,6 +131,27 @@ export function hasUnclosedFence(text: string): boolean {
   return count % 2 !== 0;
 }
 
+/** Find a paragraph boundary (\n\n) near the target position. */
+function findParagraphBreak(content: string, pos: number): number {
+  const breakAt = content.indexOf('\n\n', pos + CHUNK_SIZE - 400);
+  if (breakAt === -1 || breakAt > pos + CHUNK_SIZE + 400) {
+    return pos + CHUNK_SIZE;
+  }
+  return breakAt + 2; // include the \n\n
+}
+
+/** If breakAt splits inside a code fence, extend to the closing fence. Returns -1 if no closing fence found. */
+function extendPastFence(content: string, pos: number, breakAt: number): number {
+  const segment = content.slice(pos, breakAt);
+  if (!hasUnclosedFence(segment)) return breakAt;
+
+  const closingPos = content.indexOf('\n```', breakAt);
+  if (closingPos === -1) return -1; // no closing fence
+
+  const afterFence = content.indexOf('\n', closingPos + 4);
+  return afterFence === -1 ? content.length : afterFence + 1;
+}
+
 export function splitIntoChunks(content: string): string[] {
   if (!content) return [];
   if (content.length <= CHUNK_SIZE) return [content];
@@ -144,29 +165,10 @@ export function splitIntoChunks(content: string): string[] {
       break;
     }
 
-    // Find paragraph boundary near CHUNK_SIZE
-    let breakAt = content.indexOf('\n\n', pos + CHUNK_SIZE - 400);
-    if (breakAt === -1 || breakAt > pos + CHUNK_SIZE + 400) {
-      breakAt = pos + CHUNK_SIZE;
-    } else {
-      breakAt += 2; // include the \n\n
-    }
-
-    // Ensure we don't split inside a code fence
-    const segment = content.slice(pos, breakAt);
-    if (hasUnclosedFence(segment)) {
-      // Find the closing fence after breakAt
-      const searchFrom = breakAt;
-      let closingPos = content.indexOf('\n```', searchFrom);
-      if (closingPos !== -1) {
-        // Move past the closing fence line
-        const afterFence = content.indexOf('\n', closingPos + 4);
-        breakAt = afterFence === -1 ? content.length : afterFence + 1;
-      } else {
-        // No closing fence — include everything remaining
-        chunks.push(content.slice(pos));
-        break;
-      }
+    const breakAt = extendPastFence(content, pos, findParagraphBreak(content, pos));
+    if (breakAt === -1) {
+      chunks.push(content.slice(pos));
+      break;
     }
 
     chunks.push(content.slice(pos, breakAt));

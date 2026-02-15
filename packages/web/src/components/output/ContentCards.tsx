@@ -93,6 +93,12 @@ export const BORDER_COLORS: Record<string, string> = {
   '$indigo5': '#a5b4fc',
 };
 
+function CardBody({ content, children }: { content?: string; children?: ReactNode }) {
+  if (children) return <>{children}</>;
+  if (content) return <MemoMarkdown content={content} />;
+  return <span style={{ color: '#9ca3af', fontStyle: 'italic', fontSize: 13 }}>No output yet</span>;
+}
+
 export const ContentCard = memo(function ContentCard({ icon, title, subtitle, status, content, borderColorOverride, children }: {
   icon: ReactNode;
   title: string;
@@ -116,11 +122,7 @@ export const ContentCard = memo(function ContentCard({ icon, title, subtitle, st
       />
       {!collapsed && (
         <div style={{ padding: '0 12px 12px' }}>
-          {children ? children : content ? (
-            <MemoMarkdown content={content} />
-          ) : (
-            <span style={{ color: '#9ca3af', fontStyle: 'italic', fontSize: 13 }}>No output yet</span>
-          )}
+          <CardBody content={content}>{children}</CardBody>
         </div>
       )}
     </div>

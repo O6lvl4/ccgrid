@@ -102,8 +102,9 @@ async function handleResult(sessionId: string, session: Session, message: SDKMes
 
   if ('total_cost_usd' in message) session.costUsd = message.total_cost_usd as number;
   if ('usage' in message && typeof message.usage === 'object' && message.usage) {
-    session.inputTokens = (message.usage as any).input_tokens;
-    session.outputTokens = (message.usage as any).output_tokens;
+    const usage = message.usage as unknown as Record<string, number>;
+    session.inputTokens = usage.input_tokens;
+    session.outputTokens = usage.output_tokens;
   }
 
   deps.broadcast({

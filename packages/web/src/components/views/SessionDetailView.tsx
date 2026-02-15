@@ -7,57 +7,10 @@ import { OverviewTab } from './OverviewTab';
 import { TeammatesTab } from './TeammatesTab';
 import { TasksTab } from './TasksTab';
 import { PermissionDialog, PermissionBadge, PermissionHistory } from '../PermissionDialog';
+import { OutputSkeleton } from './OutputSkeleton';
+import { ToastStack } from './ToastStack';
 import type { Api } from '../../hooks/useApi';
 import type { TeamTask } from '@ccgrid/shared';
-
-const SKELETON_CARDS: number[][] = [
-  [92, 78, 85, 60],
-  [80, 65, 90, 50],
-  [70, 88, 55, 82],
-];
-
-function SkeletonCard({ lines, delay }: { lines: number[]; delay: number }) {
-  return (
-    <div style={{
-      border: '1px solid #e5e7eb',
-      borderRadius: 8,
-      backgroundColor: '#ffffff',
-      overflow: 'hidden',
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px' }}>
-        <div style={{ width: 22, height: 22, borderRadius: '50%', background: '#f0f1f3' }} />
-        <div style={{ width: 40, height: 12, borderRadius: 4, background: '#f0f1f3' }} />
-      </div>
-      <div style={{ padding: '0 12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {lines.map((w, i) => (
-          <div key={i} className="skeleton-pulse" style={{ height: 12, borderRadius: 4, background: '#f0f1f3', width: `${w}%`, animationDelay: `${(delay + i) * 0.1}s` }} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function OutputSkeleton() {
-  let delay = 0;
-  return (
-    <div style={{ flex: 1, padding: 16, backgroundColor: '#f9fafb', display: 'flex', flexDirection: 'column', gap: 12 }}>
-      {SKELETON_CARDS.map((lines, i) => {
-        const d = delay;
-        delay += lines.length;
-        return <SkeletonCard key={i} lines={lines} delay={d} />;
-      })}
-      <style>{`
-        .skeleton-pulse {
-          animation: skeleton-fade 1.2s ease-in-out infinite;
-        }
-        @keyframes skeleton-fade {
-          0%, 100% { opacity: 0.4; }
-          50% { opacity: 1; }
-        }
-      `}</style>
-    </div>
-  );
-}
 
 const TABS: { key: SessionTab; label: string }[] = [
   { key: 'output', label: 'Output' },
@@ -67,37 +20,6 @@ const TABS: { key: SessionTab; label: string }[] = [
 ];
 
 const EMPTY_TASKS: TeamTask[] = [];
-
-function ToastStack() {
-  const toasts = useStore(s => s.toasts);
-  if (toasts.length === 0) return null;
-  return (
-    <div style={{
-      position: 'fixed', bottom: 20, right: 20, zIndex: 900,
-      display: 'flex', flexDirection: 'column', gap: 6, maxWidth: 360,
-    }}>
-      {toasts.map(t => (
-        <div key={t.id} style={{
-          padding: '10px 16px', borderRadius: 12,
-          background: t.type === 'success' ? '#ecfdf5' : '#eff6ff',
-          border: `1px solid ${t.type === 'success' ? '#86efac' : '#93c5fd'}`,
-          color: t.type === 'success' ? '#065f46' : '#1e40af',
-          fontSize: 12, fontWeight: 600,
-          boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-          animation: 'toast-in 0.2s ease-out',
-        }}>
-          {t.type === 'success' ? '\u2713 ' : ''}{t.message}
-        </div>
-      ))}
-      <style>{`
-        @keyframes toast-in {
-          from { opacity: 0; transform: translateY(8px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
-    </div>
-  );
-}
 
 export const SessionDetailView = memo(function SessionDetailView({ sessionId, tab, api }: { sessionId: string; tab: SessionTab; api: Api }) {
   const session = useStore(s => s.sessions.get(sessionId));

@@ -28,13 +28,13 @@ export function useProgressiveReveal(
 
   // Lazily create the machine
   if (!machineRef.current) {
-    machineRef.current = new RevealStateMachine(
+    machineRef.current = new RevealStateMachine({
       chunksPerStep,
-      REVEAL_INTERVAL_MS,
-      { setInterval: window.setInterval.bind(window), clearInterval: window.clearInterval.bind(window) },
-      () => scrollContainerRef.current,
+      intervalMs: REVEAL_INTERVAL_MS,
+      timer: { setInterval: window.setInterval.bind(window), clearInterval: window.clearInterval.bind(window) },
+      getScrollContainer: () => scrollContainerRef.current,
       onChange,
-    );
+    });
   }
 
   const machine = machineRef.current;
