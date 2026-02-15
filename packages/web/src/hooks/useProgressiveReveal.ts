@@ -1,133 +1,59 @@
-import { useRef, useEffect, useLayoutEffect, useState } from 'react';
+import { useRef, useEffect, useLayoutEffect, useState, useCallback } from 'react';
+import { RevealStateMachine } from '../lib/RevealStateMachine';
+import type { RevealState } from '../lib/RevealStateMachine';
 
-/**
- * How many milliseconds between reveal steps.
- * 50 ms ≈ 20 fps — gives React enough time to render each step.
- */
 const REVEAL_INTERVAL_MS = 50;
 
-export interface RevealResult {
-  /** How many chunks (from the end) to show right now. */
-  visibleCount: number;
-  /** True while the reveal is still in progress. */
-  isRevealing: boolean;
-}
+export type { RevealState as RevealResult };
 
 /**
- * Progressive reveal hook.
+ * React hook wrapper around RevealStateMachine.
  *
- * Architecture:
- * - Uses a mutable ref (`visibleCountRef`) as the source of truth for how
- *   many chunks are visible. This avoids React state-queue timing issues.
- * - A `setInterval` drives the reveal. It reads/writes the ref directly
- *   and triggers re-renders via a force-update counter.
- * - The interval only depends on `totalChunks` — it does NOT depend on
- *   `visibleCount`, so parent re-renders cannot break the reveal chain.
- * - Once fully revealed, a `fullyRevealedRef` flag is set. Subsequent
- *   increases in `totalChunks` (streaming) are shown instantly.
- * - If `totalChunks` jumps by more than `chunksPerStep * 2` while already
- *   fully revealed (e.g. session switch with cached output), the reveal
- *   resets and runs progressively again.
- *
- * @param totalChunks  Total number of content chunks available.
- * @param chunksPerStep  How many chunks to add per interval tick.
- * @param scrollContainerRef  Ref to the scrollable container for scroll-position adjustment.
+ * - Creates the state machine once (via ref).
+ * - Calls `machine.update(totalChunks)` on every render.
+ * - Subscribes to `onChange` to trigger React re-renders via `useState`.
+ * - Handles scroll-position adjustment via `useLayoutEffect`.
  */
 export function useProgressiveReveal(
   totalChunks: number,
   chunksPerStep: number,
   scrollContainerRef: React.RefObject<HTMLElement | null>,
-): RevealResult {
-  const visibleCountRef = useRef(0);
-  const fullyRevealedRef = useRef(false);
-  const scrollHeightBeforeRef = useRef(0);
-  const prevTotalRef = useRef(totalChunks);
+): RevealState {
   const [, forceRender] = useState(0);
+  const machineRef = useRef<RevealStateMachine | null>(null);
 
-  // --- Initialization (runs during render, before effects) ---
+  const onChange = useCallback(() => {
+    forceRender(n => n + 1);
+  }, []);
 
-  // Small content: show everything immediately
-  if (
-    !fullyRevealedRef.current &&
-    totalChunks > 0 &&
-    totalChunks <= chunksPerStep &&
-    visibleCountRef.current === 0
-  ) {
-    visibleCountRef.current = totalChunks;
-    fullyRevealedRef.current = true;
+  // Lazily create the machine
+  if (!machineRef.current) {
+    machineRef.current = new RevealStateMachine(
+      chunksPerStep,
+      REVEAL_INTERVAL_MS,
+      { setInterval: window.setInterval.bind(window), clearInterval: window.clearInterval.bind(window) },
+      () => scrollContainerRef.current,
+      onChange,
+    );
   }
 
-  // Detect large content jump (session switch with cached output).
-  // Reset to progressive reveal instead of rendering everything at once.
-  const delta = totalChunks - prevTotalRef.current;
-  if (
-    fullyRevealedRef.current &&
-    delta > chunksPerStep * 2 &&
-    totalChunks > chunksPerStep
-  ) {
-    fullyRevealedRef.current = false;
-    visibleCountRef.current = 0;
-  }
+  const machine = machineRef.current;
 
-  // Streaming: small increase while already fully revealed → show instantly
-  if (
-    fullyRevealedRef.current &&
-    visibleCountRef.current < totalChunks
-  ) {
-    visibleCountRef.current = totalChunks;
-  }
+  // Update the machine with current total
+  machine.update(totalChunks);
 
-  prevTotalRef.current = totalChunks;
-
-  // --- setInterval-based progressive reveal ---
-
+  // Cleanup on unmount
   useEffect(() => {
-    if (fullyRevealedRef.current || totalChunks === 0) return;
+    return () => {
+      machineRef.current?.dispose();
+    };
+  }, []);
 
-    const target = totalChunks;
-
-    const id = setInterval(() => {
-      // Already done (e.g. streaming sync set it)
-      if (fullyRevealedRef.current) {
-        clearInterval(id);
-        return;
-      }
-
-      const current = visibleCountRef.current;
-      if (current >= target) {
-        fullyRevealedRef.current = true;
-        clearInterval(id);
-        return;
-      }
-
-      // Save scroll height BEFORE React adds DOM nodes above viewport
-      const el = scrollContainerRef.current;
-      if (el) {
-        scrollHeightBeforeRef.current = el.scrollHeight;
-      }
-
-      const next = Math.min(current + chunksPerStep, target);
-      visibleCountRef.current = next;
-
-      if (next >= target) {
-        fullyRevealedRef.current = true;
-        clearInterval(id);
-      }
-
-      forceRender(n => n + 1);
-    }, REVEAL_INTERVAL_MS);
-
-    return () => clearInterval(id);
-  }, [totalChunks, chunksPerStep, scrollContainerRef]);
-
-  // --- Scroll-position adjustment ---
-  // After React commits DOM changes, check if content was added above the
-  // current viewport and adjust scrollTop to prevent a visible jump.
-
+  // Scroll-position adjustment after DOM commit
   useLayoutEffect(() => {
-    const saved = scrollHeightBeforeRef.current;
+    const saved = machine.getScrollHeightBefore();
     if (!saved) return;
-    scrollHeightBeforeRef.current = 0;
+    machine.clearScrollHeightBefore();
 
     const el = scrollContainerRef.current;
     if (!el) return;
@@ -138,8 +64,5 @@ export function useProgressiveReveal(
     }
   });
 
-  return {
-    visibleCount: Math.min(visibleCountRef.current, totalChunks),
-    isRevealing: !fullyRevealedRef.current && visibleCountRef.current < totalChunks,
-  };
+  return machine.getState();
 }

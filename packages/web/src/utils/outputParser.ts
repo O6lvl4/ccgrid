@@ -13,7 +13,7 @@ const LINE_NUM_DETECT_RE = /^\s*\d+[\t\u2192:\-]/;
  * already inside a fenced code block. Wraps qualifying blocks (≥3 lines)
  * in triple-backtick fences so react-markdown treats them as <code>.
  */
-function wrapLineNumberedBlocks(text: string): string {
+export function wrapLineNumberedBlocks(text: string): string {
   const lines = text.split('\n');
   const output: string[] = [];
   let inFence = false;
@@ -118,7 +118,7 @@ const CHUNK_SIZE = 3000;
  * Count opening/closing code fences (lines starting with ```) in a text range.
  * Returns true if the number of fences is odd (i.e. we're inside an unclosed fence).
  */
-function hasUnclosedFence(text: string): boolean {
+export function hasUnclosedFence(text: string): boolean {
   let count = 0;
   let idx = 0;
   while (idx < text.length) {
