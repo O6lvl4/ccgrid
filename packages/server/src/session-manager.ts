@@ -2,7 +2,7 @@ import { query, type Query } from '@anthropic-ai/claude-agent-sdk';
 import { v4 as uuidv4 } from 'uuid';
 import type { Session, Teammate, TeamTask, TeammateSpec, SkillSpec, ServerMessage, PermissionLogEntry, FileAttachment } from '@ccgrid/shared';
 import { loadAllSessions, saveSession, deleteSessionFile } from './state-store.js';
-import { buildPrompt } from './prompt-builder.js';
+import { buildPrompt, buildFollowUpPrompt } from './prompt-builder.js';
 import { processLeadStream } from './lead-stream.js';
 import { createHookHandlers } from './hook-handlers.js';
 import { startTaskWatcher, syncTasks } from './task-watcher.js';
@@ -177,7 +177,8 @@ export class SessionManager {
     this.persistSession(sessionId);
     this.broadcast({ type: 'session_status', sessionId, status: 'running' });
 
-    this.startAgent({ session, maxBudgetUsd: session.maxBudgetUsd, resumePrompt: prompt, files });
+    const actionPrompt = buildFollowUpPrompt(prompt, session.teammateSpecs);
+    this.startAgent({ session, maxBudgetUsd: session.maxBudgetUsd, resumePrompt: actionPrompt, files });
     return session;
   }
 

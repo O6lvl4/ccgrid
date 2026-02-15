@@ -73,6 +73,24 @@ IMPORTANT RULES:
 ${taskDescription}`;
 }
 
+export function buildFollowUpPrompt(userMessage: string, teammateSpecs?: TeammateSpec[]): string {
+  const hasTeammates = teammateSpecs && teammateSpecs.length > 0;
+  const teammateNames = hasTeammates
+    ? teammateSpecs.map(s => s.name).join(', ')
+    : 'available teammates';
+
+  return `The user has sent a follow-up message:
+
+"${userMessage}"
+
+IMPORTANT RULES FOR THIS FOLLOW-UP:
+- You are resuming a previous session. Your teammates (${teammateNames}) can be re-spawned or resumed.
+- If the user is requesting new work or changes, spawn teammates to handle it. Do NOT just respond with text.
+- You MUST include a tool call in your response. A text-only response will end the session.
+- Follow the same ACTIVE COORDINATION PATTERN as before: spawn teammates → monitor with sleep 3 + TaskList → relay results → final summary.
+- If the request is a simple question that doesn't need teammates, answer it but still use a tool call (e.g. Bash with echo) to keep the session alive until you're ready for your final summary.`;
+}
+
 export function buildSystemPrompt(customInstructions?: string) {
   const base = `You are a team lead actively coordinating teammates.
 
