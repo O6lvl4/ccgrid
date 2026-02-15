@@ -77,24 +77,28 @@ export function DirPicker({
 }) {
   const [listing, setListing] = useState<DirListing | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchDirs = useCallback(async (path?: string) => {
     setLoading(true);
+    setError(null);
     try {
       const params = path ? `?path=${encodeURIComponent(path)}` : '';
       const res = await fetch(`/api/dirs${params}`);
       if (res.ok) {
         setListing(await res.json());
+      } else {
+        setError(`Server returned ${res.status}`);
       }
-    } catch {
-      // ignore
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Network error');
     }
     setLoading(false);
   }, []);
 
   useEffect(() => {
     fetchDirs(initialPath || undefined);
-  }, []);
+  }, [fetchDirs, initialPath]);
 
   if (!listing) {
     return (
@@ -104,10 +108,23 @@ export function DirPicker({
         borderRadius: 14,
         padding: 20,
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
+        gap: 8,
       }}>
-        <span style={{ fontSize: 12, color: '#8b95a3' }}>Loading...</span>
+        {loading && <span style={{ fontSize: 12, color: '#8b95a3' }}>Loading...</span>}
+        {error && (
+          <>
+            <span style={{ fontSize: 12, color: '#ef4444' }}>{error}</span>
+            <button
+              onClick={() => fetchDirs(initialPath || undefined)}
+              style={{ fontSize: 12, color: '#0ab9e6', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+            >
+              Retry
+            </button>
+          </>
+        )}
       </div>
     );
   }
