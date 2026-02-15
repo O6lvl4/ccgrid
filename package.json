@@ -9,7 +9,7 @@
     "packages/web"
   ],
   "scripts": {
-    "dev": "concurrently -k \"npm run dev -w @ccgrid/server\" \"npm run dev -w @ccgrid/web\""
+    "dev": "concurrently -k \"npm run dev -w @ccgrid/server\" \"wait-on tcp:7819 && npm run dev -w @ccgrid/web\""
   },
   "repository": {
     "type": "git",
@@ -23,7 +23,8 @@
   "license": "MIT",
   "devDependencies": {
     "concurrently": "^9.1.0",
-    "typescript": "^5.8.0"
+    "typescript": "^5.8.0",
+    "wait-on": "^9.0.4"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.74.0"
