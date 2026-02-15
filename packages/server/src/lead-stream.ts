@@ -98,9 +98,13 @@ function extractAssistantText(message: SDKMessage): string {
 }
 
 async function handleResult(sessionId: string, session: Session, message: SDKMessage, deps: LeadStreamDeps): Promise<void> {
-  session.costUsd = message.total_cost_usd;
-  session.inputTokens = message.usage.input_tokens;
-  session.outputTokens = message.usage.output_tokens;
+  if (message.type !== 'result') return;
+
+  if ('total_cost_usd' in message) session.costUsd = message.total_cost_usd as number;
+  if ('usage' in message && typeof message.usage === 'object' && message.usage) {
+    session.inputTokens = (message.usage as any).input_tokens;
+    session.outputTokens = (message.usage as any).output_tokens;
+  }
 
   deps.broadcast({
     type: 'cost_update',
@@ -129,7 +133,7 @@ async function handleResult(sessionId: string, session: Session, message: SDKMes
 }
 
 function appendResultText(sessionId: string, message: SDKMessage, deps: LeadStreamDeps): void {
-  if (message.subtype !== 'success' || !('result' in message) || typeof message.result !== 'string' || !message.result) return;
+  if (!('subtype' in message) || message.subtype !== 'success' || !('result' in message) || typeof message.result !== 'string' || !message.result) return;
   const existing = deps.leadOutputs.get(sessionId) ?? '';
   if (!existing.endsWith(message.result) && !existing.includes(message.result)) {
     deps.leadOutputs.set(sessionId, existing + message.result);

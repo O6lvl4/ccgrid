@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import type { SDKUserMessage } from '@anthropic-ai/claude-agent-sdk';
+import type { SDKUserMessage, SettingSource } from '@anthropic-ai/claude-agent-sdk';
 import type { ContentBlockParam } from '@anthropic-ai/sdk/resources';
 import type { Session, FileAttachment } from '@ccgrid/shared';
 import { buildSystemPrompt } from './prompt-builder.js';
@@ -61,7 +61,7 @@ export function buildQueryOptions(opts: {
     ...(agents ? { agents } : {}),
     env: { ...process.env, CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: '1' },
     systemPrompt: buildSystemPrompt(session.customInstructions),
-    settingSources: ['user', 'project'] as const,
+    settingSources: ['user', 'project'] as SettingSource[],
     hooks: {
       SubagentStart: [{ hooks: [hooks.onSubagentStart] }],
       SubagentStop: [{ hooks: [hooks.onSubagentStop] }],
