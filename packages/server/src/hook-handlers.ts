@@ -1,9 +1,11 @@
 import type { HookCallback } from '@anthropic-ai/claude-agent-sdk';
 import type { Teammate, ServerMessage, TeamTask, TeammateMessage } from '@ccgrid/shared';
 import { readTranscriptFromPath } from './transcript-reader.js';
-import { readdir, readFile, writeFile } from 'fs/promises';
+import { readdir, readFile, writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
+
+const STATUS_DIR = join(process.env.HOME ?? '', '.claude', 'ccgrid-status');
 
 export interface HookDeps {
   sessionId: string;
@@ -15,6 +17,7 @@ export interface HookDeps {
   stopPolling: (agentId: string) => void;
   getSdkSessionId: () => string | undefined;
   sendTeammateMessage?: (sessionId: string, message: TeammateMessage) => Promise<void>;
+  onAllTeammatesDone?: (sessionId: string) => void;
 }
 
 const HOME = process.env.HOME ?? '';
@@ -22,7 +25,7 @@ const TASKS_DIR = join(HOME, '.claude', 'tasks');
 const TEAMS_DIR = join(HOME, '.claude', 'teams');
 
 export function createHookHandlers(deps: HookDeps) {
-  const { sessionId, teammates, broadcast, persistSession, syncTasks, startPolling, stopPolling, getSdkSessionId, sendTeammateMessage } = deps;
+  const { sessionId, teammates, broadcast, persistSession, syncTasks, startPolling, stopPolling, getSdkSessionId, sendTeammateMessage, onAllTeammatesDone } = deps;
 
   const onSubagentStart: HookCallback = async (input) => {
     if (input.hook_event_name === 'SubagentStart') {
@@ -64,6 +67,7 @@ export function createHookHandlers(deps: HookDeps) {
         }
 
         persistSession(sessionId);
+        await writeTeammateStatusFile();
       }
     }
     return {};
@@ -77,6 +81,8 @@ export function createHookHandlers(deps: HookDeps) {
         teammate.name = input.teammate_name;
         persistSession(sessionId);
         broadcast({ type: 'teammate_status', sessionId, agentId: teammate.agentId, status: 'idle', name: input.teammate_name });
+
+        await writeTeammateStatusFile();
 
         // Check teammate output for SendMessage markers
         if (teammate.output && sendTeammateMessage) {
@@ -265,6 +271,37 @@ export function createHookHandlers(deps: HookDeps) {
       } catch (err) {
         console.error('[detectAndProcessMessages] Failed to parse message marker:', err);
       }
+    }
+  }
+
+  /**
+   * Write teammate status to a file that the Lead agent can read.
+   * This allows the Lead to detect when all teammates are done.
+   */
+  async function writeTeammateStatusFile(): Promise<void> {
+    try {
+      const sessionTeammates = Array.from(teammates.values()).filter(t => t.sessionId === sessionId);
+      if (sessionTeammates.length === 0) return;
+
+      const allDone = sessionTeammates.every(t => t.status === 'stopped' || t.status === 'idle');
+      const status = {
+        allDone,
+        total: sessionTeammates.length,
+        teammates: sessionTeammates.map(t => ({
+          name: t.name ?? t.agentType ?? t.agentId,
+          status: t.status,
+        })),
+      };
+
+      await mkdir(STATUS_DIR, { recursive: true });
+      await writeFile(join(STATUS_DIR, `${sessionId}.json`), JSON.stringify(status, null, 2), 'utf-8');
+
+      if (allDone && onAllTeammatesDone) {
+        console.log(`[hook] All ${sessionTeammates.length} teammates done for session ${sessionId.slice(0, 8)}, triggering auto-complete`);
+        onAllTeammatesDone(sessionId);
+      }
+    } catch (err) {
+      console.error('[writeTeammateStatusFile] Failed:', err);
     }
   }
 

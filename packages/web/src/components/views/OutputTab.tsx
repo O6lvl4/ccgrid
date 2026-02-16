@@ -109,7 +109,6 @@ export const OutputTab = memo(function OutputTab({ sessionId, visible }: { sessi
 
   if (!session) return null;
 
-  const isCompleted = session.status === 'completed';
   const hasTeammates = allTeammates.length > 0;
 
   let leadStatus: string;
@@ -166,7 +165,7 @@ export const OutputTab = memo(function OutputTab({ sessionId, visible }: { sessi
             <LeadStreamingIndicator show={isStreaming && segments.followUps.length === 0 && !hasTeammates && !!segments.initial} />
 
             {/* 5. フォローアップ入力 */}
-            {isCompleted && (
+            {session.status !== 'starting' && (
               <>
                 <TimelineConnector />
                 <FollowUpInput sessionId={sessionId} />

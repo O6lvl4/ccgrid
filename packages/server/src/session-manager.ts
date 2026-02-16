@@ -147,10 +147,25 @@ export class SessionManager {
     }
   }
 
-  continueSession(sessionId: string, prompt: string, files?: FileAttachment[]): Session | undefined {
+  async continueSession(sessionId: string, prompt: string, files?: FileAttachment[]): Promise<Session | undefined> {
     const session = this.sessions.get(sessionId);
     console.log(`[continueSession] sessionId=${sessionId} sdkSessionId=${session?.sessionId} status=${session?.status}`);
-    if (!session?.sessionId || session.status !== 'completed') return undefined;
+    if (!session?.sessionId) return undefined;
+    if (session.status === 'starting') return undefined;
+
+    // If running, stop first then continue
+    if (session.status === 'running') {
+      console.log(`[continueSession] session is running, stopping first`);
+      await this.stopSession(sessionId);
+      session.status = 'completed';
+      this.persistSession(sessionId);
+    }
+
+    // Allow error status to be recovered via follow-up
+    if (session.status === 'error') {
+      session.status = 'completed';
+      this.persistSession(sessionId);
+    }
 
     let fileMarkdown = '';
     if (files && files.length > 0) {
@@ -172,10 +187,44 @@ export class SessionManager {
     this.persistSession(sessionId);
     this.broadcast({ type: 'session_status', sessionId, status: 'running' });
 
-    const actionPrompt = buildFollowUpPrompt(prompt, session.teammateSpecs);
+    const actionPrompt = buildFollowUpPrompt(prompt, session.teammateSpecs, sessionId);
     console.log(`[continueSession] resuming with sdkSessionId=${session.sessionId} promptLen=${actionPrompt.length} hasTeammateSpecs=${!!session.teammateSpecs}`);
     this.startAgent({ session, maxBudgetUsd: session.maxBudgetUsd, resumePrompt: actionPrompt, files });
     return session;
+  }
+
+  // ---- Auto-complete when all teammates are done ----
+
+  private autoCompleteTimer = new Map<string, ReturnType<typeof setTimeout>>();
+
+  private autoCompleteSession(sessionId: string): void {
+    // Debounce: wait 5s to ensure no new teammates are being spawned
+    if (this.autoCompleteTimer.has(sessionId)) {
+      clearTimeout(this.autoCompleteTimer.get(sessionId)!);
+    }
+    this.autoCompleteTimer.set(sessionId, setTimeout(async () => {
+      this.autoCompleteTimer.delete(sessionId);
+
+      const session = this.sessions.get(sessionId);
+      if (!session || session.status !== 'running') return;
+
+      // Re-check: all teammates still done?
+      const sessionTeammates = Array.from(this.teammates.values()).filter(t => t.sessionId === sessionId);
+      const allDone = sessionTeammates.length > 0 && sessionTeammates.every(t => t.status === 'stopped' || t.status === 'idle');
+      if (!allDone) return;
+
+      console.log(`[autoComplete] All teammates done for ${sessionId.slice(0, 8)}, stopping Lead and requesting summary`);
+
+      // Stop the stuck Lead
+      await this.stopSession(sessionId);
+
+      // Fix status (stopSession + stream error race condition)
+      session.status = 'completed';
+      this.persistSession(sessionId);
+
+      // Continue with summary instruction
+      await this.continueSession(sessionId, '[SYSTEM] All teammates have completed their work. Write a comprehensive final summary of what each teammate accomplished, then end with a text-only response (no tool calls) to close the session.');
+    }, 5000));
   }
 
   // ---- Teammate messaging ----
@@ -353,8 +402,9 @@ Send this to each teammate in parallel using multiple Task tool calls.`;
       stopPolling: (agentId) => stopTranscriptPolling(agentId),
       getSdkSessionId: () => session.sessionId,
       sendTeammateMessage: (sessionId, message) => this.sendTeammateMessage(sessionId, message),
+      onAllTeammatesDone: (id) => this.autoCompleteSession(id),
     });
-    let prompt = resumePrompt ?? buildPrompt(teammateSpecs, session.taskDescription, skillSpecs);
+    let prompt = resumePrompt ?? buildPrompt(teammateSpecs, session.taskDescription, skillSpecs, session.id);
     if (files && files.length > 0) {
       const savedPaths = saveAttachmentsToTmp(session.id, files);
       prompt += `\n\n添付ファイルが以下のパスに保存されています。テームメイトにはRead toolでこのパスを読ませてください:\n${savedPaths.map(p => `- ${p}`).join('\n')}`;
@@ -385,6 +435,11 @@ Send this to each teammate in parallel using multiple Task tool calls.`;
     this.activeSessions.set(session.id, { query: agentQuery, abortController });
 
     processLeadStream(session.id, agentQuery, this.leadStreamDeps()).catch((err) => {
+      // Don't overwrite 'completed' status from stopSession (race condition)
+      if (session.status === 'completed') {
+        console.log(`[lead-stream] ${session.id.slice(0, 8)} stream ended after stop (expected)`);
+        return;
+      }
       console.error(`Lead stream error for session ${session.id}:`, err);
       session.status = 'error';
       this.broadcast({ type: 'session_status', sessionId: session.id, status: 'error' });

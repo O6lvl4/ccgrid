@@ -1,6 +1,6 @@
 import type { TeammateSpec, SkillSpec } from '@ccgrid/shared';
 
-export function buildPrompt(teammateSpecs: TeammateSpec[] | undefined, taskDescription: string, skillSpecs?: SkillSpec[]): string {
+export function buildPrompt(teammateSpecs: TeammateSpec[] | undefined, taskDescription: string, skillSpecs?: SkillSpec[], sessionId?: string): string {
   const skillMap = new Map((skillSpecs ?? []).map(s => [s.id, s]));
 
   let teammateInstruction: string;
@@ -47,37 +47,46 @@ You are an **active coordinator**, not a passive poller. Follow this pattern:
 ### Step 2: Monitor and coordinate actively
 After spawning, enter an active coordination loop:
 
-a. Call Bash with \`sleep 3\` to wait briefly, then call TaskList to check progress.
-b. For each **newly completed** teammate:
+a. Call Bash with \`sleep 3\` to wait briefly, then check teammate status using the Read tool on the status file:
+   \`~/.claude/ccgrid-status/${sessionId ?? '{SESSION_ID}'}.json\`
+   This file contains: \`{"allDone": true/false, "total": N, "teammates": [{"name": "...", "status": "stopped|idle|starting|running"}]}\`
+b. Also call TaskList to see detailed task progress.
+c. For each **newly completed** teammate:
    - Review their result immediately.
    - If their output contains information useful for other still-running teammates, use the Task tool with the \`resume\` parameter to send that information to the relevant teammate.
    - Example: if Backend completed an API schema, resume Frontend with the schema details.
-c. If any teammates are still running → go back to (a).
-d. Adjust your plan dynamically based on intermediate results. If a teammate's output reveals issues, you can spawn additional teammates or resume existing ones with corrective instructions.
+d. **CRITICAL**: If the status file shows \`"allDone": true\` → ALL teammates have finished. Proceed IMMEDIATELY to Step 3. Do NOT continue polling.
+e. If teammates are still running → go back to (a).
+f. Adjust your plan dynamically based on intermediate results. If a teammate's output reveals issues, you can spawn additional teammates or resume existing ones with corrective instructions.
 
 ### Step 3: Final summary
-Once ALL tasks are completed, write a comprehensive summary covering:
+Once ALL teammates are done (\`allDone: true\` in the status file), write a comprehensive summary covering:
 - What each teammate accomplished
 - How information was shared between teammates
 - Overall outcome
 
+Then respond with ONLY text (no tool call) to end the session.
+
 IMPORTANT RULES:
 - Every response MUST include a tool call until your final summary.
-- Use \`sleep 3\` (not \`sleep 10\`) between TaskList checks to avoid busy-waiting.
+- Use \`sleep 3\` (not \`sleep 10\`) between checks to avoid busy-waiting.
 - Do NOT use TaskCreate/TaskUpdate/TaskGet. Only use TaskList and Task.
 - When resuming a teammate with the Task tool, use the \`resume\` parameter with that teammate's agent ID.
 - Proactively relay useful findings between teammates — do not wait for all to finish.
 - Do NOT start doing the work yourself. Delegate to teammates and coordinate.
+- **When \`allDone\` is true, STOP polling and write your final summary immediately.**
 
 ## Task
 ${taskDescription}`;
 }
 
-export function buildFollowUpPrompt(userMessage: string, teammateSpecs?: TeammateSpec[]): string {
+export function buildFollowUpPrompt(userMessage: string, teammateSpecs?: TeammateSpec[], sessionId?: string): string {
   const hasTeammates = teammateSpecs && teammateSpecs.length > 0;
   const teammateNames = hasTeammates
     ? teammateSpecs.map(s => s.name).join(', ')
     : 'available teammates';
+
+  const statusFilePath = `~/.claude/ccgrid-status/${sessionId ?? '{SESSION_ID}'}.json`;
 
   return `The user has sent a follow-up message:
 
@@ -87,7 +96,9 @@ IMPORTANT RULES FOR THIS FOLLOW-UP:
 - You are resuming a previous session. Your teammates (${teammateNames}) can be re-spawned or resumed.
 - If the user is requesting new work or changes, spawn teammates to handle it. Do NOT just respond with text.
 - You MUST include a tool call in your response. A text-only response will end the session.
-- Follow the same ACTIVE COORDINATION PATTERN as before: spawn teammates → monitor with sleep 3 + TaskList → relay results → final summary.
+- Follow the same ACTIVE COORDINATION PATTERN as before: spawn teammates → monitor with sleep 3 + Read status file + TaskList → relay results → final summary.
+- Check teammate completion status by reading: \`${statusFilePath}\`
+  When this file shows \`"allDone": true\`, ALL teammates are finished. Write your final summary IMMEDIATELY and stop polling.
 - If the request is a simple question that doesn't need teammates, answer it but still use a tool call (e.g. Bash with echo) to keep the session alive until you're ready for your final summary.`;
 }
 
@@ -99,9 +110,10 @@ IMPORTANT SYSTEM BEHAVIOR:
 - You MUST include a tool call in every response until your final summary.
 
 ACTIVE COORDINATION:
-- After spawning teammates, use \`sleep 3\` then TaskList to monitor progress.
+- After spawning teammates, use \`sleep 3\` then check the teammate status file (path given in your prompt) and TaskList to monitor progress.
+- The status file is the AUTHORITATIVE source for teammate completion. When it shows \`"allDone": true\`, all teammates are done — write your final summary immediately.
 - When a teammate completes, immediately review their result and relay useful information to other teammates using the Task tool with the resume parameter.
-- Use \`sleep 3\` between TaskList checks. Do NOT call TaskList without waiting first.
+- Use \`sleep 3\` between checks. Do NOT call TaskList without waiting first.
 - Adjust plans dynamically based on intermediate results.
 - Do NOT start doing the work yourself — delegate and coordinate.
 

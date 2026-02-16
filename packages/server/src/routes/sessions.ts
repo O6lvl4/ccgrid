@@ -54,8 +54,8 @@ export function sessionRoutes(sm: SessionManager, getSkillSpecs: () => SkillSpec
   app.post('/:id/continue', async (c) => {
     const { prompt, files } = await c.req.json();
     if (!prompt) return c.json({ error: 'prompt required' }, 400);
-    const session = sm.continueSession(c.req.param('id'), prompt, files);
-    if (!session) return c.json({ error: 'Session not found or not completed' }, 404);
+    const session = await sm.continueSession(c.req.param('id'), prompt, files);
+    if (!session) return c.json({ error: 'Session not found or not ready' }, 404);
     return c.json(session);
   });
 
