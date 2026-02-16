@@ -146,9 +146,11 @@ export type ServerMessage =
   | { type: 'teammate_message_sent'; sessionId: string; message: TeammateMessage }
   | { type: 'permission_resolved'; entry: PermissionLogEntry }
   | { type: 'permission_rules_updated'; rules: PermissionRule[] }
+  | { type: 'user_question'; sessionId: string; requestId: string; question: string; agentId?: string }
   | { type: 'snapshot'; sessions: Session[]; teammates: Teammate[]; tasks: Record<string, TeamTask[]>; leadOutputs: Record<string, string>; teammateSpecs: TeammateSpec[]; skillSpecs: SkillSpec[]; plugins: PluginSpec[]; permissionRules: PermissionRule[] };
 
 // ---- WebSocket: Client → Server ----
 export type ClientMessage =
   | { type: 'permission_response'; requestId: string; behavior: 'allow' | 'deny'; message?: string; updatedInput?: Record<string, unknown> }
-  | { type: 'teammate_message'; sessionId: string; teammateName: string; message: string };
+  | { type: 'teammate_message'; sessionId: string; teammateName: string; message: string }
+  | { type: 'user_question_response'; requestId: string; answer: string };

@@ -24,6 +24,13 @@ export interface TeammateMessage {
   timestamp: string;
 }
 
+export interface PendingQuestion {
+  sessionId: string;
+  requestId: string;
+  question: string;
+  agentId?: string;
+}
+
 export interface FollowUpImage {
   name: string;
   dataUrl: string;
@@ -40,6 +47,7 @@ export interface AppState {
   skillSpecs: SkillSpec[];
   plugins: PluginSpec[];
   pendingPermissions: Map<string, PendingPermission>;
+  pendingQuestions: Map<string, PendingQuestion>;
   permissionHistory: Map<string, PermissionLogEntry[]>;
   permissionRules: PermissionRule[];
   toasts: { id: string; message: string; type: 'success' | 'info' }[];
@@ -60,6 +68,7 @@ export interface AppState {
   clearError: () => void;
   setWsSend: (send: ((msg: unknown) => void) | null) => void;
   respondToPermission: (requestId: string, behavior: 'allow' | 'deny', message?: string, updatedInput?: Record<string, unknown>) => void;
+  respondToQuestion: (requestId: string, answer: string) => void;
   pushFollowUpImages: (sessionId: string, followUpIndex: number, images: FollowUpImage[]) => void;
   addToast: (message: string, type?: 'success' | 'info') => void;
   removeToast: (id: string) => void;
@@ -76,6 +85,7 @@ export const useStore = create<AppState>((set, get) => ({
   skillSpecs: [],
   plugins: [],
   pendingPermissions: new Map(),
+  pendingQuestions: new Map(),
   permissionHistory: new Map(),
   permissionRules: [],
   toasts: [],
@@ -162,6 +172,18 @@ export const useStore = create<AppState>((set, get) => ({
       const pendingPermissions = new Map(state.pendingPermissions);
       pendingPermissions.delete(requestId);
       return { pendingPermissions };
+    });
+  },
+
+  respondToQuestion: (requestId, answer) => {
+    const { wsSend } = get();
+    if (wsSend) {
+      wsSend({ type: 'user_question_response', requestId, answer });
+    }
+    set(state => {
+      const pendingQuestions = new Map(state.pendingQuestions);
+      pendingQuestions.delete(requestId);
+      return { pendingQuestions };
     });
   },
 

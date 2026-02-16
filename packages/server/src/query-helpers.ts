@@ -47,13 +47,12 @@ export function buildQueryOptions(opts: {
   canUseTool?: ReturnType<typeof createCanUseTool>;
 }) {
   const { session, resumePrompt, maxBudgetUsd, abortController, agents, hooks, canUseTool } = opts;
-  const isBypass = session.permissionMode === 'bypassPermissions';
   return {
     ...(resumePrompt && session.sessionId ? { resume: session.sessionId } : {}),
     cwd: session.cwd,
     model: session.model,
-    permissionMode: isBypass ? ('bypassPermissions' as const) : ('default' as const),
-    ...(isBypass ? { allowDangerouslySkipPermissions: true } : { canUseTool }),
+    permissionMode: 'default' as const,
+    canUseTool,
     includePartialMessages: true,
     maxTurns: 999999,
     ...(maxBudgetUsd !== undefined ? { maxBudgetUsd } : {}),

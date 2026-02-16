@@ -119,6 +119,8 @@ wss.on('connection', (ws) => {
       const msg = JSON.parse(data.toString());
       if (msg.type === 'permission_response') {
         sm.resolvePermission(msg.requestId, msg.behavior, msg.message, msg.updatedInput);
+      } else if (msg.type === 'user_question_response') {
+        sm.resolveUserQuestion(msg.requestId, msg.answer);
       } else if (msg.type === 'teammate_message') {
         sm.sendToTeammate(msg.sessionId, msg.teammateName, msg.message);
       }

@@ -386,6 +386,17 @@ Send this to each teammate in parallel using multiple Task tool calls.`;
     else pending.resolve({ behavior: 'deny', message: message ?? 'User denied' });
   }
 
+  resolveUserQuestion(requestId: string, answer: string): void {
+    const meta = this.pendingPermissionMeta.get(requestId);
+    if (meta) {
+      const answerBlock = `\n\n> **Your answer:** ${answer}\n\n`;
+      const existing = this.leadOutputs.get(meta.sessionId) ?? '';
+      this.leadOutputs.set(meta.sessionId, existing + answerBlock);
+      this.broadcast({ type: 'lead_output', sessionId: meta.sessionId, text: answerBlock });
+    }
+    this.resolvePermission(requestId, 'deny', `ユーザーの回答: ${answer}`);
+  }
+
   // ---- Read-only accessors ----
   getTeammates(sessionId?: string): Teammate[] { const all = Array.from(this.teammates.values()); return sessionId ? all.filter(t => t.sessionId === sessionId) : all; }
   getTeammate(agentId: string): Teammate | undefined { return this.teammates.get(agentId); }
@@ -424,7 +435,7 @@ Send this to each teammate in parallel using multiple Task tool calls.`;
     const agents = buildAgents(specs, skillSpecs);
     const promptOrStream = buildPromptOrStream(prompt, files);
     const isBypass = session.permissionMode === 'bypassPermissions';
-    const canUseTool = isBypass ? undefined : createCanUseTool(session.id, this.broadcast, this.permissionMaps());
+    const canUseTool = createCanUseTool(session.id, this.broadcast, this.permissionMaps(), isBypass);
 
     const queryOpts = buildQueryOptions({ session, resumePrompt, maxBudgetUsd, abortController, agents, hooks, canUseTool });
     console.log(`[startAgent] sessionId=${session.id.slice(0, 8)} resume=${!!queryOpts.resume} hasAgents=${!!agents} model=${queryOpts.model}`);

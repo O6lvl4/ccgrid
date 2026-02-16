@@ -19,9 +19,52 @@ export function createCanUseTool(
   sessionId: string,
   broadcast: (msg: ServerMessage) => void,
   maps: PermissionMaps,
+  bypassMode: boolean = false,
 ): CanUseTool {
   return (toolName, input, options) => {
     console.log(`[canUseTool] session=${sessionId.slice(0, 8)} tool=${toolName} agent=${options.agentID ?? 'lead'} toolUseID=${options.toolUseID}`);
+
+    // AskUserQuestion: intercept in ALL modes (including bypass)
+    if (toolName === 'AskUserQuestion') {
+      const inputObj = input as Record<string, unknown>;
+      const questions = inputObj.questions as Array<{ question: string }> | undefined;
+      const question = questions?.[0]?.question ?? (inputObj.question as string) ?? '';
+
+      return new Promise((resolve) => {
+        const requestId = uuidv4();
+        const wrappedResolve = (result: { behavior: 'allow'; updatedInput?: Record<string, unknown> } | { behavior: 'deny'; message: string }) => {
+          console.log(`[canUseTool:user-question-resolved] requestId=${requestId.slice(0, 8)} behavior=${result.behavior}`);
+          resolve(result);
+        };
+        maps.pendingPermissions.set(requestId, { resolve: wrappedResolve });
+        maps.pendingPermissionInputs.set(requestId, input as Record<string, unknown>);
+        maps.pendingPermissionMeta.set(requestId, { sessionId, toolName: 'AskUserQuestion', description: question, agentId: options.agentID });
+
+        broadcast({ type: 'user_question', sessionId, requestId, question, agentId: options.agentID });
+
+        if (options.signal.aborted) {
+          console.log(`[canUseTool:user-question-already-aborted] requestId=${requestId.slice(0, 8)}`);
+          maps.pendingPermissions.delete(requestId);
+          maps.pendingPermissionInputs.delete(requestId);
+          maps.pendingPermissionMeta.delete(requestId);
+          wrappedResolve({ behavior: 'deny', message: 'Already aborted' });
+          return;
+        }
+
+        options.signal.addEventListener('abort', () => {
+          console.log(`[canUseTool:user-question-abort] requestId=${requestId.slice(0, 8)}`);
+          maps.pendingPermissions.delete(requestId);
+          maps.pendingPermissionInputs.delete(requestId);
+          maps.pendingPermissionMeta.delete(requestId);
+          wrappedResolve({ behavior: 'deny', message: 'Aborted' });
+        });
+      });
+    }
+
+    // Bypass mode: allow everything except AskUserQuestion (handled above)
+    if (bypassMode) {
+      return Promise.resolve({ behavior: 'allow' as const, updatedInput: input as Record<string, unknown> });
+    }
 
     // Auto-allow Read tool on user-attached files
     if (toolName === 'Read') {

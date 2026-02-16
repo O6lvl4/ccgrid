@@ -135,7 +135,12 @@ FILE SHARING WITH TEAMMATES:
 - To share attached files with teammates, include the file paths in the Task tool's prompt parameter and instruct the teammate to use the Read tool to view them.
 - Example: "The user attached a file. Read it with the Read tool at: /tmp/claude-team-files/xxx/filename.png"
 
-Do NOT use TaskCreate/TaskUpdate/TaskGet — only TaskList and Task.`;
+Do NOT use TaskCreate/TaskUpdate/TaskGet — only TaskList and Task.
+
+USER QUESTIONS (AskUserQuestion):
+- AskUserQuestionツールを使ってユーザーに質問できます。
+- ユーザーの回答はdenyメッセージとして「ユーザーの回答: [回答]」の形式で返されます。
+- これはエラーではなく正常な回答です。受け取った内容を元に作業を続行してください。`;
 
   return {
     type: 'preset' as const,

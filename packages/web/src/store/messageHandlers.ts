@@ -40,6 +40,7 @@ const MESSAGE_HANDLERS: { [K in ServerMessage['type']]?: Handler<K> } = {
   teammate_message_relayed: handleTeammateMessageRelayed,
   permission_resolved: handlePermissionResolved,
   permission_rules_updated: handlePermissionRulesUpdated,
+  user_question: handleUserQuestion,
   error: handleError,
 };
 
@@ -91,10 +92,11 @@ function handleSessionStatus(msg: MsgOf<'session_status'>, _get: StateGetter, se
   set(state => {
     const sessions = new Map(state.sessions);
     const session = sessions.get(msg.sessionId);
-    if (session) {
-      sessions.set(msg.sessionId, { ...session, status: msg.status });
-    }
-    return { sessions };
+    if (session) sessions.set(msg.sessionId, { ...session, status: msg.status });
+    if (msg.status !== 'completed' && msg.status !== 'error') return { sessions };
+    const pendingQuestions = new Map(state.pendingQuestions);
+    for (const [id, q] of pendingQuestions) { if (q.sessionId === msg.sessionId) pendingQuestions.delete(id); }
+    return { sessions, pendingQuestions };
   });
 }
 
@@ -112,7 +114,8 @@ function handleSessionDeleted(msg: MsgOf<'session_deleted'>, _get: StateGetter, 
     leadOutputs.delete(msg.sessionId);
     const teammateMessages = new Map(state.teammateMessages);
     teammateMessages.delete(msg.sessionId);
-
+    const pendingQuestions = new Map(state.pendingQuestions);
+    for (const [id, q] of pendingQuestions) { if (q.sessionId === msg.sessionId) pendingQuestions.delete(id); }
     const isViewingDeleted =
       (state.route.view !== 'session_list') &&
       ('sessionId' in state.route) &&
@@ -125,7 +128,7 @@ function handleSessionDeleted(msg: MsgOf<'session_deleted'>, _get: StateGetter, 
     }
 
     return {
-      sessions, teammates, tasks, leadOutputs, teammateMessages,
+      sessions, teammates, tasks, leadOutputs, teammateMessages, pendingQuestions,
       selectedSessionId: state.selectedSessionId === msg.sessionId ? nextSessionId : state.selectedSessionId,
       route: isViewingDeleted ? { view: 'session_list' } : state.route,
     };
@@ -271,6 +274,14 @@ function handlePermissionResolved(msg: MsgOf<'permission_resolved'>, _get: State
 
 function handlePermissionRulesUpdated(msg: MsgOf<'permission_rules_updated'>, _get: StateGetter, set: StateSetter): void {
   set({ permissionRules: msg.rules });
+}
+
+function handleUserQuestion(msg: MsgOf<'user_question'>, _get: StateGetter, set: StateSetter): void {
+  set(state => ({
+    pendingQuestions: new Map(state.pendingQuestions).set(msg.requestId, {
+      sessionId: msg.sessionId, requestId: msg.requestId, question: msg.question, agentId: msg.agentId,
+    }),
+  }));
 }
 
 function handleError(msg: MsgOf<'error'>, _get: StateGetter, set: StateSetter): void {
