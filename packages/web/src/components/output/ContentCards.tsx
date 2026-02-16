@@ -87,11 +87,9 @@ export function CardHeader({ icon, title, subtitle, status, copyContent, collaps
         {subtitle && (
           <span style={{ color: '#9ca3af', fontSize: 11 }}>{subtitle}</span>
         )}
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        {copyContent && <CopyButton text={copyContent} />}
         {status && <StatusBadge status={status} />}
       </div>
+      {copyContent && <CopyButton text={copyContent} />}
     </div>
   );
 }
