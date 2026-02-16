@@ -47,7 +47,7 @@ function FollowUpEntry({ fu, index, isLast, isStreaming, scrollRef }: {
       {fu.response && (
         <>
           <TimelineConnector />
-          <ContentCard icon={<FollowUpAvatar />} title={`Follow-up #${index + 1}`} status={followUpStatus} borderColorOverride="$blue5">
+          <ContentCard icon={<FollowUpAvatar />} title={`Follow-up #${index + 1}`} status={followUpStatus} borderColorOverride="$blue5" copyContent={fu.response}>
             <ProgressiveMarkdown content={fu.response} scrollRef={scrollRef} />
           </ContentCard>
         </>
@@ -225,7 +225,7 @@ export const OutputTab = memo(function OutputTab({ sessionId, visible }: { sessi
         <div style={{ width: '100%', padding: '0 16px' }}>
           <div ref={contentRef}>
             {/* 1. 初回 Lead 出力 */}
-            <ContentCard icon={<LeadAvatar />} title="Lead" status={leadStatus}>
+            <ContentCard icon={<LeadAvatar />} title="Lead" status={leadStatus} copyContent={segments.initial}>
               <ProgressiveMarkdown content={segments.initial} scrollRef={scrollRef} />
             </ContentCard>
 
