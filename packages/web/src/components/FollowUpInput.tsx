@@ -8,6 +8,7 @@ export function FollowUpInput({ sessionId }: { sessionId: string }) {
   const api = useApi();
   const [prompt, setPrompt] = useState('');
   const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -15,6 +16,7 @@ export function FollowUpInput({ sessionId }: { sessionId: string }) {
     const text = prompt.trim();
     if ((!text && attachedFiles.length === 0) || sending) return;
     setSending(true);
+    setError(null);
     try {
       const files = attachedFiles.length > 0
         ? await readFilesAsAttachments(attachedFiles)
@@ -24,6 +26,7 @@ export function FollowUpInput({ sessionId }: { sessionId: string }) {
       setAttachedFiles([]);
     } catch (err) {
       console.error('Failed to continue session:', err);
+      setError(err instanceof Error ? err.message : 'Failed to send');
     } finally {
       setSending(false);
     }
@@ -135,6 +138,9 @@ export function FollowUpInput({ sessionId }: { sessionId: string }) {
             }
           }}
         />
+        {error && (
+          <div style={{ color: '#dc2626', fontSize: 12, padding: '4px 0' }}>{error}</div>
+        )}
         <InputToolbar sending={sending} canSend={canSend} onAttach={() => fileInputRef.current?.click()} onSend={handleSend} />
       </div>
     </div>

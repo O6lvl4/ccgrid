@@ -22,6 +22,7 @@ export class SessionManager {
   private leadOutputs: Map<string, string>;
   private broadcast: (msg: ServerMessage) => void;
   private persistTimers = new Map<string, ReturnType<typeof setTimeout>>();
+  private sessionGeneration = new Map<string, number>();
   private pendingPermissions = new Map<string, {
     resolve: (result: { behavior: 'allow'; updatedInput?: Record<string, unknown> } | { behavior: 'deny'; message: string }) => void;
   }>();
@@ -152,6 +153,12 @@ export class SessionManager {
     console.log(`[continueSession] sessionId=${sessionId} sdkSessionId=${session?.sessionId} status=${session?.status}`);
     if (!session?.sessionId) return undefined;
     if (session.status === 'starting') return undefined;
+
+    // Cancel any pending auto-complete for this session
+    if (this.autoCompleteTimer.has(sessionId)) {
+      clearTimeout(this.autoCompleteTimer.get(sessionId)!);
+      this.autoCompleteTimer.delete(sessionId);
+    }
 
     // If running, stop first then continue
     if (session.status === 'running') {
@@ -394,6 +401,10 @@ Send this to each teammate in parallel using multiple Task tool calls.`;
     const { session, teammateSpecs, maxBudgetUsd, resumePrompt, skillSpecs, files } = opts;
     const abortController = new AbortController();
 
+    // Increment generation so old stream error handlers become stale
+    const gen = (this.sessionGeneration.get(session.id) ?? 0) + 1;
+    this.sessionGeneration.set(session.id, gen);
+
     const hooks = createHookHandlers({
       sessionId: session.id, teammates: this.teammates, broadcast: this.broadcast,
       persistSession: (id) => this.persistSession(id),
@@ -435,6 +446,11 @@ Send this to each teammate in parallel using multiple Task tool calls.`;
     this.activeSessions.set(session.id, { query: agentQuery, abortController });
 
     processLeadStream(session.id, agentQuery, this.leadStreamDeps()).catch((err) => {
+      // If a newer agent generation has started, this stream is stale — ignore its error
+      if (this.sessionGeneration.get(session.id) !== gen) {
+        console.log(`[lead-stream] ${session.id.slice(0, 8)} old stream (gen ${gen}) ended, ignoring`);
+        return;
+      }
       // Don't overwrite 'completed' status from stopSession (race condition)
       if (session.status === 'completed') {
         console.log(`[lead-stream] ${session.id.slice(0, 8)} stream ended after stop (expected)`);
