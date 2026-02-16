@@ -1,11 +1,11 @@
-import os from 'node:os';
 import path from 'node:path';
 import { v4 as uuidv4 } from 'uuid';
 import type { CanUseTool } from '@anthropic-ai/claude-agent-sdk';
 import type { PermissionLogEntry, PermissionRule, ServerMessage } from '@ccgrid/shared';
 import { loadPermissionRules } from './state-store.js';
+import { ATTACHMENTS_BASE_DIR } from './query-helpers.js';
 
-const ATTACHMENTS_DIR = path.join(os.tmpdir(), 'claude-team-files') + path.sep;
+const ATTACHMENTS_DIR = ATTACHMENTS_BASE_DIR + path.sep;
 
 export interface PermissionMaps {
   pendingPermissions: Map<string, {

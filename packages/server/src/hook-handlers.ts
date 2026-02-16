@@ -111,10 +111,6 @@ export function createHookHandlers(deps: HookDeps) {
     return {};
   };
 
-  /**
-   * Automatically unblock tasks that were blocked by the completed task.
-   * Scans all tasks and removes the completed task ID from their blockedBy arrays.
-   */
   async function unblockDependentTasks(completedTaskId: string): Promise<void> {
     try {
       const sdkSessionId = getSdkSessionId();
@@ -140,10 +136,6 @@ export function createHookHandlers(deps: HookDeps) {
     }
   }
 
-  /**
-   * Find the task directory for the current session.
-   * Scans team configs or falls back to SDK session ID.
-   */
   async function findTaskDir(sdkSessionId: string): Promise<string | null> {
     // 1. Try team-name based directory by scanning team configs
     const teamDir = await scanTeamConfigs(sdkSessionId);
@@ -156,9 +148,6 @@ export function createHookHandlers(deps: HookDeps) {
     return null;
   }
 
-  /**
-   * Scan team configs to find task directory matching the SDK session ID.
-   */
   async function scanTeamConfigs(sdkSessionId: string): Promise<string | null> {
     if (!existsSync(TEAMS_DIR)) return null;
     try {
@@ -173,19 +162,16 @@ export function createHookHandlers(deps: HookDeps) {
             const teamTaskDir = join(TASKS_DIR, teamName);
             if (existsSync(teamTaskDir)) return teamTaskDir;
           }
-        } catch {
-          // skip invalid config
+        } catch (err) {
+          console.warn(`[hook-handlers] Failed to parse team config ${teamName}:`, err);
         }
       }
-    } catch {
-      // teams dir read failed
+    } catch (err) {
+      console.warn('[hook-handlers] Failed to read teams directory:', err);
     }
     return null;
   }
 
-  /**
-   * Load all tasks from the task directory.
-   */
   async function loadAllTasks(taskDir: string): Promise<TeamTask[]> {
     try {
       const files = await readdir(taskDir);
@@ -205,8 +191,8 @@ export function createHookHandlers(deps: HookDeps) {
             blocks: data.blocks ?? [],
             blockedBy: data.blockedBy ?? [],
           });
-        } catch {
-          // skip invalid files
+        } catch (err) {
+          console.warn(`[hook-handlers] Failed to parse task file ${file}:`, err);
         }
       }
       return tasks;
@@ -215,9 +201,6 @@ export function createHookHandlers(deps: HookDeps) {
     }
   }
 
-  /**
-   * Save a task back to disk.
-   */
   async function saveTask(taskDir: string, task: TeamTask): Promise<void> {
     try {
       const taskPath = join(taskDir, `${task.id}.json`);
@@ -236,48 +219,38 @@ export function createHookHandlers(deps: HookDeps) {
     }
   }
 
-  /**
-   * Detect SendMessage markers in teammate output and process them.
-   * Marker format: <!-- send-message:{"type":"message","recipient":"researcher",...} -->
-   */
+  const processedMarkers = new Set<string>();
+
+  // Detect SendMessage markers in teammate output (deduplicated via processedMarkers)
   async function detectAndProcessMessages(
     teammate: Teammate,
-    sessionId: string,
-    sendTeammateMessage: (sessionId: string, message: TeammateMessage) => Promise<void>
+    sid: string,
+    sendMsg: (sessionId: string, message: TeammateMessage) => Promise<void>
   ): Promise<void> {
     if (!teammate.output) return;
 
     const messagePattern = /<!-- send-message:(.*?) -->/g;
-    const matches = [...teammate.output.matchAll(messagePattern)];
-
-    for (const match of matches) {
+    for (const match of teammate.output.matchAll(messagePattern)) {
+      const raw = match[1];
+      const key = `${teammate.agentId}:${raw}`;
+      if (processedMarkers.has(key)) continue;
+      processedMarkers.add(key);
       try {
-        const messageJson = match[1];
-        const parsed = JSON.parse(messageJson);
-
+        const parsed = JSON.parse(raw);
         const message: TeammateMessage = {
-          type: parsed.type,
-          sender: teammate.name ?? teammate.agentId,
-          recipient: parsed.recipient,
-          content: parsed.content,
-          summary: parsed.summary,
-          requestId: parsed.requestId,
-          approve: parsed.approve,
-          timestamp: new Date().toISOString(),
+          type: parsed.type, sender: teammate.name ?? teammate.agentId,
+          recipient: parsed.recipient, content: parsed.content,
+          summary: parsed.summary, requestId: parsed.requestId,
+          approve: parsed.approve, timestamp: new Date().toISOString(),
         };
-
         console.log(`[detectAndProcessMessages] Found message from ${message.sender} type=${message.type}`);
-        await sendTeammateMessage(sessionId, message);
+        await sendMsg(sid, message);
       } catch (err) {
         console.error('[detectAndProcessMessages] Failed to parse message marker:', err);
       }
     }
   }
 
-  /**
-   * Write teammate status to a file that the Lead agent can read.
-   * This allows the Lead to detect when all teammates are done.
-   */
   async function writeTeammateStatusFile(): Promise<void> {
     try {
       const sessionTeammates = Array.from(teammates.values()).filter(t => t.sessionId === sessionId);

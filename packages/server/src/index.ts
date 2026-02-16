@@ -111,6 +111,8 @@ wss.on('connection', (ws) => {
     skillSpecs: specsState.skillSpecs,
     plugins: specsState.plugins,
     permissionRules: specsState.permissionRules,
+    pendingPermissions: sm.getPendingPermissions(),
+    pendingQuestions: sm.getPendingQuestions(),
   };
   ws.send(JSON.stringify(snapshot));
 

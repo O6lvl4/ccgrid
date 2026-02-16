@@ -1,16 +1,15 @@
-import { query, type Query } from '@anthropic-ai/claude-agent-sdk';
+import { type Query } from '@anthropic-ai/claude-agent-sdk';
 import { v4 as uuidv4 } from 'uuid';
 import type { Session, Teammate, TeamTask, TeammateSpec, SkillSpec, ServerMessage, PermissionLogEntry, FileAttachment, TeammateMessage } from '@ccgrid/shared';
 import { loadAllSessions, saveSession, deleteSessionFile } from './state-store.js';
-import { buildPrompt, buildFollowUpPrompt } from './prompt-builder.js';
-import { processLeadStream } from './lead-stream.js';
-import { createHookHandlers } from './hook-handlers.js';
+import { buildFollowUpPrompt } from './prompt-builder.js';
 import { startTaskWatcher, syncTasks } from './task-watcher.js';
 import { loadTeammateOutputs, readTeammateTranscript } from './transcript-reader.js';
 import { startPolling as startTranscriptPolling, stopPolling as stopTranscriptPolling, stopAllPolling, type PollerDeps } from './transcript-poller.js';
-import { createCanUseTool, type PermissionMaps } from './permission-evaluator.js';
-import { buildAgents } from './agent-builder.js';
-import { buildPromptOrStream, buildQueryOptions, saveAttachmentsToTmp } from './query-helpers.js';
+import { type PermissionMaps } from './permission-evaluator.js';
+import { saveAttachmentsToTmp, cleanupAttachments } from './query-helpers.js';
+import { sendToTeammate as sendToTeammateFn, sendTeammateMessage as sendTeammateMessageFn, type MessagingDeps } from './teammate-messaging.js';
+import { launchAgent, type LauncherDeps } from './agent-launcher.js';
 
 interface ActiveSession { query: Query; abortController: AbortController }
 
@@ -48,39 +47,30 @@ export class SessionManager {
   }
 
   private async recoverTeammateOutputs(): Promise<void> {
-    const sessionsToSave = new Set<string>();
-    for (const teammate of this.teammates.values()) {
-      if (teammate.output) continue;
-      const session = this.sessions.get(teammate.sessionId);
-      if (!session?.sessionId) continue;
-      const output = await readTeammateTranscript(session.cwd, session.sessionId, teammate.agentId);
-      if (output) {
-        teammate.output = output;
-        sessionsToSave.add(teammate.sessionId);
-        this.broadcast({ type: 'teammate_output', sessionId: teammate.sessionId, agentId: teammate.agentId, text: output });
-      }
+    const toSave = new Set<string>();
+    for (const tm of this.teammates.values()) {
+      if (tm.output) continue;
+      const s = this.sessions.get(tm.sessionId);
+      if (!s?.sessionId) continue;
+      const output = await readTeammateTranscript(s.cwd, s.sessionId, tm.agentId);
+      if (!output) continue;
+      tm.output = output;
+      toSave.add(tm.sessionId);
+      this.broadcast({ type: 'teammate_output', sessionId: tm.sessionId, agentId: tm.agentId, text: output });
     }
-    for (const sessionId of sessionsToSave) this.persistSession(sessionId);
+    for (const id of toSave) this.persistSession(id);
   }
 
-  private persistSession(sessionId: string): void {
-    const session = this.sessions.get(sessionId);
+  private persistSession(id: string): void {
+    const session = this.sessions.get(id);
     if (!session) return;
-    const teammates = Array.from(this.teammates.values()).filter(t => t.sessionId === sessionId);
-    const tasks = this.tasks.get(sessionId) ?? [];
-    const leadOutput = this.leadOutputs.get(sessionId) ?? '';
-    saveSession({ sessionId, session, teammates, tasks, leadOutput });
+    saveSession({ sessionId: id, session, teammates: [...this.teammates.values()].filter(t => t.sessionId === id), tasks: this.tasks.get(id) ?? [], leadOutput: this.leadOutputs.get(id) ?? '' });
   }
 
-  private persistSessionDebounced(sessionId: string): void {
-    if (this.persistTimers.has(sessionId)) return;
-    this.persistTimers.set(sessionId, setTimeout(() => {
-      this.persistTimers.delete(sessionId);
-      this.persistSession(sessionId);
-    }, 3000));
+  private persistSessionDebounced(id: string): void {
+    if (this.persistTimers.has(id)) return;
+    this.persistTimers.set(id, setTimeout(() => { this.persistTimers.delete(id); this.persistSession(id); }, 3000));
   }
-
-  // ---- Sessions CRUD ----
 
   async createSession(opts: {
     name: string; cwd: string; model: string; teammateSpecs: TeammateSpec[] | undefined;
@@ -105,12 +95,8 @@ export class SessionManager {
     return session;
   }
 
-  getSessions(): Session[] {
-    return Array.from(this.sessions.values());
-  }
-
+  getSessions(): Session[] { return Array.from(this.sessions.values()); }
   getSession(sessionId: string): Session | undefined { return this.sessions.get(sessionId); }
-
   updateSession(sessionId: string, updates: { name?: string }): Session | undefined {
     const session = this.sessions.get(sessionId);
     if (!session) return undefined;
@@ -119,16 +105,16 @@ export class SessionManager {
     this.broadcast({ type: 'session_status', sessionId, status: session.status });
     return session;
   }
-
   async deleteSession(sessionId: string): Promise<boolean> {
     await this.stopSession(sessionId);
     this.sessions.delete(sessionId); this.leadOutputs.delete(sessionId); this.tasks.delete(sessionId);
     for (const [agentId, tm] of this.teammates) { if (tm.sessionId === sessionId) this.teammates.delete(agentId); }
+    this.cleanupPendingForSession(sessionId);
+    cleanupAttachments(sessionId);
     deleteSessionFile(sessionId);
     this.broadcast({ type: 'session_deleted', sessionId });
     return true;
   }
-
   async stopSession(sessionId: string): Promise<void> {
     stopAllPolling(sessionId, this.pollerDeps());
     const active = this.activeSessions.get(sessionId);
@@ -150,29 +136,12 @@ export class SessionManager {
 
   async continueSession(sessionId: string, prompt: string, files?: FileAttachment[]): Promise<Session | undefined> {
     const session = this.sessions.get(sessionId);
-    console.log(`[continueSession] sessionId=${sessionId} sdkSessionId=${session?.sessionId} status=${session?.status}`);
-    if (!session?.sessionId) return undefined;
-    if (session.status === 'starting') return undefined;
+    if (!session?.sessionId || session.status === 'starting') return undefined;
 
-    // Cancel any pending auto-complete for this session
-    if (this.autoCompleteTimer.has(sessionId)) {
-      clearTimeout(this.autoCompleteTimer.get(sessionId)!);
-      this.autoCompleteTimer.delete(sessionId);
-    }
-
-    // If running, stop first then continue
-    if (session.status === 'running') {
-      console.log(`[continueSession] session is running, stopping first`);
-      await this.stopSession(sessionId);
-      session.status = 'completed';
-      this.persistSession(sessionId);
-    }
-
-    // Allow error status to be recovered via follow-up
-    if (session.status === 'error') {
-      session.status = 'completed';
-      this.persistSession(sessionId);
-    }
+    const timer = this.autoCompleteTimer.get(sessionId);
+    if (timer) { clearTimeout(timer); this.autoCompleteTimer.delete(sessionId); }
+    if (session.status === 'running') await this.stopSession(sessionId);
+    if (session.status !== 'completed') { session.status = 'completed'; this.persistSession(sessionId); }
 
     let fileMarkdown = '';
     if (files && files.length > 0) {
@@ -195,181 +164,43 @@ export class SessionManager {
     this.broadcast({ type: 'session_status', sessionId, status: 'running' });
 
     const actionPrompt = buildFollowUpPrompt(prompt, session.teammateSpecs, sessionId);
-    console.log(`[continueSession] resuming with sdkSessionId=${session.sessionId} promptLen=${actionPrompt.length} hasTeammateSpecs=${!!session.teammateSpecs}`);
     this.startAgent({ session, maxBudgetUsd: session.maxBudgetUsd, resumePrompt: actionPrompt, files });
     return session;
   }
 
-  // ---- Auto-complete when all teammates are done ----
-
   private autoCompleteTimer = new Map<string, ReturnType<typeof setTimeout>>();
 
   private autoCompleteSession(sessionId: string): void {
-    // Debounce: wait 5s to ensure no new teammates are being spawned
-    if (this.autoCompleteTimer.has(sessionId)) {
-      clearTimeout(this.autoCompleteTimer.get(sessionId)!);
-    }
+    if (this.autoCompleteTimer.has(sessionId)) clearTimeout(this.autoCompleteTimer.get(sessionId)!);
     this.autoCompleteTimer.set(sessionId, setTimeout(async () => {
       this.autoCompleteTimer.delete(sessionId);
-
       const session = this.sessions.get(sessionId);
       if (!session || session.status !== 'running') return;
-
-      // Re-check: all teammates still done?
-      const sessionTeammates = Array.from(this.teammates.values()).filter(t => t.sessionId === sessionId);
-      const allDone = sessionTeammates.length > 0 && sessionTeammates.every(t => t.status === 'stopped' || t.status === 'idle');
-      if (!allDone) return;
-
-      console.log(`[autoComplete] All teammates done for ${sessionId.slice(0, 8)}, stopping Lead and requesting summary`);
-
-      // Stop the stuck Lead
+      const tms = Array.from(this.teammates.values()).filter(t => t.sessionId === sessionId);
+      if (tms.length === 0 || !tms.every(t => t.status === 'stopped' || t.status === 'idle')) return;
       await this.stopSession(sessionId);
-
-      // Fix status (stopSession + stream error race condition)
       session.status = 'completed';
       this.persistSession(sessionId);
-
-      // Continue with summary instruction
       await this.continueSession(sessionId, '[SYSTEM] All teammates have completed their work. Write a comprehensive final summary of what each teammate accomplished, then end with a text-only response (no tool calls) to close the session.');
     }, 5000));
   }
 
-  // ---- Teammate messaging ----
+  private messagingDeps(): MessagingDeps {
+    return {
+      sessions: this.sessions, teammates: this.teammates, activeSessions: this.activeSessions,
+      leadOutputs: this.leadOutputs, broadcast: this.broadcast,
+      persistSession: (id) => this.persistSession(id),
+      startAgent: (opts) => this.startAgent(opts),
+    };
+  }
 
   sendToTeammate(sessionId: string, teammateName: string, message: string): Session | undefined {
-    const session = this.sessions.get(sessionId);
-    if (!session) return undefined;
-
-    const isRunningOrCompleted = session.status === 'running' || session.status === 'completed';
-    if (!isRunningOrCompleted || !session.sessionId) return undefined;
-
-    const marker = `\n\n<!-- teammate-message:${teammateName} -->\n\n> **To ${teammateName}:** ${message.replace(/\n/g, '\n> ')}\n\n`;
-    const existing = this.leadOutputs.get(sessionId) ?? '';
-    this.leadOutputs.set(sessionId, existing + marker);
-    this.broadcast({ type: 'lead_output', sessionId, text: marker });
-
-    this.broadcast({ type: 'teammate_message_relayed', sessionId, teammateName, message });
-
-    if (session.status === 'completed') {
-      const forwardPrompt = `The user has sent a message to teammate "${teammateName}". Please forward this message by resuming the teammate using the Task tool with the resume parameter:\n\nMessage to ${teammateName}: ${message}`;
-
-      session.status = 'running';
-      this.persistSession(sessionId);
-      this.broadcast({ type: 'session_status', sessionId, status: 'running' });
-
-      this.startAgent({ session, maxBudgetUsd: session.maxBudgetUsd, resumePrompt: forwardPrompt });
-    }
-
-    return session;
+    return sendToTeammateFn(sessionId, teammateName, message, this.messagingDeps());
   }
-
-  // ---- SendMessage tool support (teammate-to-teammate messaging) ----
 
   async sendTeammateMessage(sessionId: string, message: TeammateMessage): Promise<void> {
-    const session = this.sessions.get(sessionId);
-    if (!session?.sessionId) return;
-
-    // Broadcast the message event to UI
-    this.broadcast({ type: 'teammate_message_sent', sessionId, message });
-
-    // For direct messages and shutdown requests, find the recipient and resume them
-    if ((message.type === 'message' || message.type === 'shutdown_request') && message.recipient) {
-      const recipient = this.findTeammateByName(sessionId, message.recipient);
-      if (!recipient) {
-        console.warn(`[sendTeammateMessage] Recipient "${message.recipient}" not found in session ${sessionId}`);
-        return;
-      }
-
-      // Check if Lead is currently running
-      const isLeadRunning = this.activeSessions.has(sessionId) && session.status === 'running';
-
-      if (isLeadRunning) {
-        // Lead is running - message will be delivered via hook detection
-        console.log(`[sendTeammateMessage] Lead is running, message will be detected by hooks`);
-      } else {
-        // Lead is completed - need to resume Lead to forward the message
-        console.log(`[sendTeammateMessage] Lead is completed, resuming to forward message`);
-        const forwardPrompt = this.buildMessageForwardPrompt(message);
-
-        session.status = 'running';
-        this.persistSession(sessionId);
-        this.broadcast({ type: 'session_status', sessionId, status: 'running' });
-
-        this.startAgent({ session, maxBudgetUsd: session.maxBudgetUsd, resumePrompt: forwardPrompt });
-      }
-    }
-
-    // For broadcast, we need to send to all teammates
-    if (message.type === 'broadcast') {
-      const teammates = this.getTeammates(sessionId);
-      const sender = teammates.find(t => t.agentId === message.sender || t.name === message.sender);
-      const otherTeammates = teammates.filter(t => t.agentId !== message.sender && t.name !== message.sender);
-
-      if (otherTeammates.length === 0) {
-        console.warn(`[sendTeammateMessage] No other teammates found for broadcast in session ${sessionId}`);
-        return;
-      }
-
-      const isLeadRunning = this.activeSessions.has(sessionId) && session.status === 'running';
-
-      if (!isLeadRunning) {
-        const forwardPrompt = this.buildBroadcastForwardPrompt(message, otherTeammates);
-
-        session.status = 'running';
-        this.persistSession(sessionId);
-        this.broadcast({ type: 'session_status', sessionId, status: 'running' });
-
-        this.startAgent({ session, maxBudgetUsd: session.maxBudgetUsd, resumePrompt: forwardPrompt });
-      }
-    }
+    sendTeammateMessageFn(sessionId, message, this.messagingDeps());
   }
-
-  private findTeammateByName(sessionId: string, name: string): Teammate | undefined {
-    for (const teammate of this.teammates.values()) {
-      if (teammate.sessionId === sessionId && teammate.name === name) {
-        return teammate;
-      }
-    }
-    return undefined;
-  }
-
-  private buildMessageForwardPrompt(message: TeammateMessage): string {
-    const messageType = message.type === 'shutdown_request' ? 'shutdown request' : 'message';
-    const formattedMessage = JSON.stringify({
-      type: message.type,
-      sender: message.sender,
-      content: message.content,
-      ...(message.requestId ? { requestId: message.requestId } : {}),
-    }, null, 2);
-
-    return `A teammate has sent a ${messageType} that needs to be forwarded.
-
-Please use the Task tool to resume teammate "${message.recipient}" with the following message:
-
-${formattedMessage}
-
-IMPORTANT: Include this exact JSON in the prompt parameter so the recipient can respond appropriately.`;
-  }
-
-  private buildBroadcastForwardPrompt(message: TeammateMessage, recipients: Teammate[]): string {
-    const recipientNames = recipients.map(t => t.name ?? t.agentId).join(', ');
-    const formattedMessage = JSON.stringify({
-      type: 'message',
-      sender: message.sender,
-      content: message.content,
-    }, null, 2);
-
-    return `A teammate has broadcast a message to all team members.
-
-Please use the Task tool to resume each of the following teammates with this message: ${recipientNames}
-
-Message to broadcast:
-${formattedMessage}
-
-Send this to each teammate in parallel using multiple Task tool calls.`;
-  }
-
-  // ---- Permission resolution ----
 
   resolvePermission(requestId: string, behavior: 'allow' | 'deny', message?: string, updatedInput?: Record<string, unknown>): void {
     const pending = this.pendingPermissions.get(requestId);
@@ -385,7 +216,6 @@ Send this to each teammate in parallel using multiple Task tool calls.`;
     if (behavior === 'allow') pending.resolve({ behavior: 'allow', updatedInput: updatedInput ?? originalInput });
     else pending.resolve({ behavior: 'deny', message: message ?? 'User denied' });
   }
-
   resolveUserQuestion(requestId: string, answer: string): void {
     const meta = this.pendingPermissionMeta.get(requestId);
     if (meta) {
@@ -396,8 +226,6 @@ Send this to each teammate in parallel using multiple Task tool calls.`;
     }
     this.resolvePermission(requestId, 'deny', `ユーザーの回答: ${answer}`);
   }
-
-  // ---- Read-only accessors ----
   getTeammates(sessionId?: string): Teammate[] { const all = Array.from(this.teammates.values()); return sessionId ? all.filter(t => t.sessionId === sessionId) : all; }
   getTeammate(agentId: string): Teammate | undefined { return this.teammates.get(agentId); }
   getTasks(sessionId: string): TeamTask[] { return this.tasks.get(sessionId) ?? []; }
@@ -405,75 +233,30 @@ Send this to each teammate in parallel using multiple Task tool calls.`;
   getLeadOutput(sessionId: string): string { return this.leadOutputs.get(sessionId) ?? ''; }
   getLeadOutputs(): Record<string, string> { return Object.fromEntries(this.leadOutputs); }
 
-  // ---- Internal ----
-  private permissionMaps(): PermissionMaps { return { pendingPermissions: this.pendingPermissions, pendingPermissionInputs: this.pendingPermissionInputs, pendingPermissionMeta: this.pendingPermissionMeta }; }
-
-  private startAgent(opts: { session: Session; teammateSpecs?: TeammateSpec[]; maxBudgetUsd?: number; resumePrompt?: string; skillSpecs?: SkillSpec[]; files?: FileAttachment[] }): void {
-    const { session, teammateSpecs, maxBudgetUsd, resumePrompt, skillSpecs, files } = opts;
-    const abortController = new AbortController();
-
-    // Increment generation so old stream error handlers become stale
-    const gen = (this.sessionGeneration.get(session.id) ?? 0) + 1;
-    this.sessionGeneration.set(session.id, gen);
-
-    const hooks = createHookHandlers({
-      sessionId: session.id, teammates: this.teammates, broadcast: this.broadcast,
-      persistSession: (id) => this.persistSession(id),
-      syncTasks: (id) => syncTasks(id, this.taskWatcherDeps()),
-      startPolling: (agentId) => { if (session.sessionId) startTranscriptPolling({ sessionId: session.id, agentId, sdkSessionId: session.sessionId, cwd: session.cwd, deps: this.pollerDeps() }); },
-      stopPolling: (agentId) => stopTranscriptPolling(agentId),
-      getSdkSessionId: () => session.sessionId,
-      sendTeammateMessage: (sessionId, message) => this.sendTeammateMessage(sessionId, message),
-      onAllTeammatesDone: (id) => this.autoCompleteSession(id),
-    });
-    let prompt = resumePrompt ?? buildPrompt(teammateSpecs, session.taskDescription, skillSpecs, session.id);
-    if (files && files.length > 0) {
-      const savedPaths = saveAttachmentsToTmp(session.id, files);
-      prompt += `\n\n添付ファイルが以下のパスに保存されています。テームメイトにはRead toolでこのパスを読ませてください:\n${savedPaths.map(p => `- ${p}`).join('\n')}`;
-    }
-    const specs = teammateSpecs ?? session.teammateSpecs;
-    const agents = buildAgents(specs, skillSpecs);
-    const promptOrStream = buildPromptOrStream(prompt, files);
-    const isBypass = session.permissionMode === 'bypassPermissions';
-    const canUseTool = createCanUseTool(session.id, this.broadcast, this.permissionMaps(), isBypass);
-
-    const queryOpts = buildQueryOptions({ session, resumePrompt, maxBudgetUsd, abortController, agents, hooks, canUseTool });
-    console.log(`[startAgent] sessionId=${session.id.slice(0, 8)} resume=${!!queryOpts.resume} hasAgents=${!!agents} model=${queryOpts.model}`);
-
-    let agentQuery: Query;
-    try {
-      agentQuery = query({
-        prompt: promptOrStream,
-        options: queryOpts,
-      });
-    } catch (err) {
-      console.error(`Failed to start query for session ${session.id}:`, err);
-      session.status = 'error';
-      this.broadcast({ type: 'session_status', sessionId: session.id, status: 'error' });
-      this.broadcast({ type: 'error', message: `Failed to start agent: ${String(err)}`, sessionId: session.id });
-      return;
-    }
-
-    this.activeSessions.set(session.id, { query: agentQuery, abortController });
-
-    processLeadStream(session.id, agentQuery, this.leadStreamDeps()).catch((err) => {
-      // If a newer agent generation has started, this stream is stale — ignore its error
-      if (this.sessionGeneration.get(session.id) !== gen) {
-        console.log(`[lead-stream] ${session.id.slice(0, 8)} old stream (gen ${gen}) ended, ignoring`);
-        return;
-      }
-      // Don't overwrite 'completed' status from stopSession (race condition)
-      if (session.status === 'completed') {
-        console.log(`[lead-stream] ${session.id.slice(0, 8)} stream ended after stop (expected)`);
-        return;
-      }
-      console.error(`Lead stream error for session ${session.id}:`, err);
-      session.status = 'error';
-      this.broadcast({ type: 'session_status', sessionId: session.id, status: 'error' });
-      this.broadcast({ type: 'error', message: String(err), sessionId: session.id });
-    });
+  getPendingPermissions() {
+    return [...this.pendingPermissionMeta].filter(([, m]) => m.toolName !== 'AskUserQuestion').map(([requestId, m]) => (
+      { sessionId: m.sessionId, requestId, toolName: m.toolName, input: this.pendingPermissionInputs.get(requestId) ?? {}, description: m.description, agentId: m.agentId }
+    ));
   }
 
+  getPendingQuestions() {
+    return [...this.pendingPermissionMeta].filter(([, m]) => m.toolName === 'AskUserQuestion').map(([requestId, m]) => (
+      { sessionId: m.sessionId, requestId, question: m.description ?? '', agentId: m.agentId }
+    ));
+  }
+
+  private cleanupPendingForSession(sessionId: string): void {
+    for (const [requestId, meta] of this.pendingPermissionMeta) {
+      if (meta.sessionId !== sessionId) continue;
+      const pending = this.pendingPermissions.get(requestId);
+      if (pending) pending.resolve({ behavior: 'deny', message: 'Session deleted' });
+      this.pendingPermissions.delete(requestId);
+      this.pendingPermissionInputs.delete(requestId);
+      this.pendingPermissionMeta.delete(requestId);
+    }
+  }
+
+  private permissionMaps(): PermissionMaps { return { pendingPermissions: this.pendingPermissions, pendingPermissionInputs: this.pendingPermissionInputs, pendingPermissionMeta: this.pendingPermissionMeta }; }
   private pollerDeps(): PollerDeps { return { teammates: this.teammates, sessions: this.sessions, broadcast: this.broadcast }; }
   private taskWatcherDeps() { return { sessions: this.sessions, tasks: this.tasks, activeSessions: this.activeSessions, broadcast: this.broadcast, persistSession: (id: string) => this.persistSession(id) }; }
   private leadStreamDeps() {
@@ -486,5 +269,28 @@ Send this to each teammate in parallel using multiple Task tool calls.`;
       loadTeammateOutputs: (id: string) => loadTeammateOutputs(id, { sessions: this.sessions, teammates: this.teammates, broadcast: this.broadcast, persistSession: (sid: string) => this.persistSession(sid) }),
       stopAllPolling: (id: string) => stopAllPolling(id, this.pollerDeps()),
     };
+  }
+
+  private launcherDeps(): LauncherDeps {
+    return {
+      sessions: this.sessions, teammates: this.teammates, tasks: this.tasks,
+      activeSessions: this.activeSessions, leadOutputs: this.leadOutputs,
+      sessionGeneration: this.sessionGeneration, broadcast: this.broadcast,
+      permissionMaps: () => this.permissionMaps(),
+      hookDeps: (session) => ({
+        persistSession: (id) => this.persistSession(id),
+        syncTasks: (id) => syncTasks(id, this.taskWatcherDeps()),
+        startPolling: (agentId) => { if (session.sessionId) startTranscriptPolling({ sessionId: session.id, agentId, sdkSessionId: session.sessionId, cwd: session.cwd, deps: this.pollerDeps() }); },
+        stopPolling: (agentId) => stopTranscriptPolling(agentId),
+        getSdkSessionId: () => session.sessionId,
+        sendTeammateMessage: (sid, message) => this.sendTeammateMessage(sid, message),
+        onAllTeammatesDone: (id) => this.autoCompleteSession(id),
+      }),
+      leadStreamDeps: () => this.leadStreamDeps(),
+    };
+  }
+
+  private startAgent(opts: { session: Session; teammateSpecs?: TeammateSpec[]; maxBudgetUsd?: number; resumePrompt?: string; skillSpecs?: SkillSpec[]; files?: FileAttachment[] }): void {
+    launchAgent(opts, this.launcherDeps());
   }
 }

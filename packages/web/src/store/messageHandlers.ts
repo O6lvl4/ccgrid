@@ -57,6 +57,12 @@ function handleSnapshot(msg: MsgOf<'snapshot'>, _get: StateGetter, set: StateSet
       window.history.replaceState(null, '', routeToPath(route));
     }
     const tasks = new Map<string, TeamTask[]>(Object.entries(msg.tasks ?? {}));
+    const pendingPermissions = new Map(
+      (msg.pendingPermissions ?? []).map(p => [p.requestId, p]),
+    );
+    const pendingQuestions = new Map(
+      (msg.pendingQuestions ?? []).map(q => [q.requestId, q]),
+    );
     return {
       sessions,
       teammates: new Map<string, Teammate>(msg.teammates.map((t) => [t.agentId, t])),
@@ -66,6 +72,8 @@ function handleSnapshot(msg: MsgOf<'snapshot'>, _get: StateGetter, set: StateSet
       skillSpecs: msg.skillSpecs ?? [],
       plugins: msg.plugins ?? [],
       permissionRules: msg.permissionRules ?? [],
+      pendingPermissions,
+      pendingQuestions,
       selectedSessionId,
       route,
       activeSection: deriveSectionFromRoute(route),
@@ -94,42 +102,34 @@ function handleSessionStatus(msg: MsgOf<'session_status'>, _get: StateGetter, se
     const session = sessions.get(msg.sessionId);
     if (session) sessions.set(msg.sessionId, { ...session, status: msg.status });
     if (msg.status !== 'completed' && msg.status !== 'error') return { sessions };
+    const pendingPermissions = new Map(state.pendingPermissions);
+    for (const [id, p] of pendingPermissions) { if (p.sessionId === msg.sessionId) pendingPermissions.delete(id); }
     const pendingQuestions = new Map(state.pendingQuestions);
     for (const [id, q] of pendingQuestions) { if (q.sessionId === msg.sessionId) pendingQuestions.delete(id); }
-    return { sessions, pendingQuestions };
+    return { sessions, pendingPermissions, pendingQuestions };
   });
+}
+
+function deleteFromMapBySession<T extends { sessionId: string }>(map: Map<string, T>, sessionId: string): Map<string, T> {
+  const copy = new Map(map);
+  for (const [id, v] of copy) { if (v.sessionId === sessionId) copy.delete(id); }
+  return copy;
 }
 
 function handleSessionDeleted(msg: MsgOf<'session_deleted'>, _get: StateGetter, set: StateSetter): void {
   set(state => {
-    const sessions = new Map(state.sessions);
-    sessions.delete(msg.sessionId);
-    const teammates = new Map(state.teammates);
-    for (const [, tm] of teammates) {
-      if (tm.sessionId === msg.sessionId) teammates.delete(tm.agentId);
-    }
-    const tasks = new Map(state.tasks);
-    tasks.delete(msg.sessionId);
-    const leadOutputs = new Map(state.leadOutputs);
-    leadOutputs.delete(msg.sessionId);
-    const teammateMessages = new Map(state.teammateMessages);
-    teammateMessages.delete(msg.sessionId);
-    const pendingQuestions = new Map(state.pendingQuestions);
-    for (const [id, q] of pendingQuestions) { if (q.sessionId === msg.sessionId) pendingQuestions.delete(id); }
-    const isViewingDeleted =
-      (state.route.view !== 'session_list') &&
-      ('sessionId' in state.route) &&
-      state.route.sessionId === msg.sessionId;
-
-    const nextSessionId = sessions.keys().next().value ?? null;
-
-    if (isViewingDeleted) {
-      window.history.replaceState(null, '', routeToPath({ view: 'session_list' }));
-    }
-
+    const sessions = new Map(state.sessions); sessions.delete(msg.sessionId);
+    const teammates = deleteFromMapBySession(state.teammates, msg.sessionId);
+    const tasks = new Map(state.tasks); tasks.delete(msg.sessionId);
+    const leadOutputs = new Map(state.leadOutputs); leadOutputs.delete(msg.sessionId);
+    const teammateMessages = new Map(state.teammateMessages); teammateMessages.delete(msg.sessionId);
+    const pendingPermissions = deleteFromMapBySession(state.pendingPermissions, msg.sessionId);
+    const pendingQuestions = deleteFromMapBySession(state.pendingQuestions, msg.sessionId);
+    const isViewingDeleted = state.route.view !== 'session_list' && 'sessionId' in state.route && state.route.sessionId === msg.sessionId;
+    if (isViewingDeleted) window.history.replaceState(null, '', routeToPath({ view: 'session_list' }));
     return {
-      sessions, teammates, tasks, leadOutputs, teammateMessages, pendingQuestions,
-      selectedSessionId: state.selectedSessionId === msg.sessionId ? nextSessionId : state.selectedSessionId,
+      sessions, teammates, tasks, leadOutputs, teammateMessages, pendingPermissions, pendingQuestions,
+      selectedSessionId: state.selectedSessionId === msg.sessionId ? (sessions.keys().next().value ?? null) : state.selectedSessionId,
       route: isViewingDeleted ? { view: 'session_list' } : state.route,
     };
   });

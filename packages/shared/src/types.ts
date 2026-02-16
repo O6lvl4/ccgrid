@@ -147,7 +147,7 @@ export type ServerMessage =
   | { type: 'permission_resolved'; entry: PermissionLogEntry }
   | { type: 'permission_rules_updated'; rules: PermissionRule[] }
   | { type: 'user_question'; sessionId: string; requestId: string; question: string; agentId?: string }
-  | { type: 'snapshot'; sessions: Session[]; teammates: Teammate[]; tasks: Record<string, TeamTask[]>; leadOutputs: Record<string, string>; teammateSpecs: TeammateSpec[]; skillSpecs: SkillSpec[]; plugins: PluginSpec[]; permissionRules: PermissionRule[] };
+  | { type: 'snapshot'; sessions: Session[]; teammates: Teammate[]; tasks: Record<string, TeamTask[]>; leadOutputs: Record<string, string>; teammateSpecs: TeammateSpec[]; skillSpecs: SkillSpec[]; plugins: PluginSpec[]; permissionRules: PermissionRule[]; pendingPermissions?: Array<{ sessionId: string; requestId: string; toolName: string; input: Record<string, unknown>; description?: string; agentId?: string }>; pendingQuestions?: Array<{ sessionId: string; requestId: string; question: string; agentId?: string }> };
 
 // ---- WebSocket: Client → Server ----
 export type ClientMessage =

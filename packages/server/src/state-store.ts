@@ -54,12 +54,12 @@ export function loadAllSessions(): {
         if (data.leadOutput) {
           leadOutputs.set(data.session.id, data.leadOutput);
         }
-      } catch {
-        // skip corrupt files
+      } catch (err) {
+        console.warn(`[state-store] Failed to load session file ${file}:`, err);
       }
     }
-  } catch {
-    // directory doesn't exist yet
+  } catch (err) {
+    console.warn('[state-store] Failed to read sessions directory:', err);
   }
 
   return { sessions, teammates, tasks, leadOutputs };
@@ -106,12 +106,12 @@ function scanTeamConfigsSync(sdkSessionId: string): string | null {
           const teamTaskDir = join(TASKS_DIR, teamName);
           if (existsSync(teamTaskDir)) return teamTaskDir;
         }
-      } catch {
-        // skip invalid config
+      } catch (err) {
+        console.warn(`[state-store] Failed to parse team config ${teamName}:`, err);
       }
     }
-  } catch {
-    // teams dir read failed
+  } catch (err) {
+    console.warn('[state-store] Failed to read teams directory:', err);
   }
   return null;
 }
@@ -148,12 +148,13 @@ function loadTasksFromDisk(sdkSessionId: string): TeamTask[] {
           blocks: data.blocks ?? [],
           blockedBy: data.blockedBy ?? [],
         });
-      } catch {
-        // skip invalid files
+      } catch (err) {
+        console.warn(`[state-store] Failed to parse task file ${file}:`, err);
       }
     }
     return tasks;
-  } catch {
+  } catch (err) {
+    console.warn('[state-store] Failed to read task directory:', err);
     return [];
   }
 }
@@ -165,7 +166,8 @@ export function loadTeammateSpecs(): TeammateSpec[] {
     if (!existsSync(SPECS_FILE)) return [];
     const raw = readFileSync(SPECS_FILE, 'utf-8');
     return JSON.parse(raw) as TeammateSpec[];
-  } catch {
+  } catch (err) {
+    console.warn('[state-store] Failed to load teammate specs:', err);
     return [];
   }
 }
@@ -186,7 +188,8 @@ export function loadSkillSpecs(): SkillSpec[] {
     if (!existsSync(SKILL_SPECS_FILE)) return [];
     const raw = readFileSync(SKILL_SPECS_FILE, 'utf-8');
     return JSON.parse(raw) as SkillSpec[];
-  } catch {
+  } catch (err) {
+    console.warn('[state-store] Failed to load skill specs:', err);
     return [];
   }
 }
@@ -207,7 +210,8 @@ export function loadPermissionRules(): PermissionRule[] {
     if (!existsSync(PERMISSION_RULES_FILE)) return [];
     const raw = readFileSync(PERMISSION_RULES_FILE, 'utf-8');
     return JSON.parse(raw) as PermissionRule[];
-  } catch {
+  } catch (err) {
+    console.warn('[state-store] Failed to load permission rules:', err);
     return [];
   }
 }
@@ -232,7 +236,8 @@ export function loadPlugins(): PluginSpec[] {
     if (!existsSync(PLUGINS_FILE)) return [];
     const raw = readFileSync(PLUGINS_FILE, 'utf-8');
     return JSON.parse(raw) as PluginSpec[];
-  } catch {
+  } catch (err) {
+    console.warn('[state-store] Failed to load plugins:', err);
     return [];
   }
 }

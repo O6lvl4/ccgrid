@@ -9,16 +9,25 @@ import { buildAgents, filesToContentBlocks } from './agent-builder.js';
 import { createHookHandlers } from './hook-handlers.js';
 import { createCanUseTool } from './permission-evaluator.js';
 
+export const ATTACHMENTS_BASE_DIR = path.join(os.tmpdir(), 'claude-team-files');
+
 export function saveAttachmentsToTmp(sessionId: string, files: FileAttachment[]): string[] {
-  const dir = path.join(os.tmpdir(), 'claude-team-files', sessionId);
+  const dir = path.join(ATTACHMENTS_BASE_DIR, sessionId);
   fs.mkdirSync(dir, { recursive: true });
   const savedPaths: string[] = [];
   for (const file of files) {
-    const filePath = path.join(dir, file.name);
+    const safeName = path.basename(file.name);
+    const filePath = path.join(dir, safeName);
+    if (!filePath.startsWith(dir + path.sep)) continue;
     fs.writeFileSync(filePath, Buffer.from(file.base64Data, 'base64'));
     savedPaths.push(filePath);
   }
   return savedPaths;
+}
+
+export function cleanupAttachments(sessionId: string): void {
+  const dir = path.join(ATTACHMENTS_BASE_DIR, sessionId);
+  fs.rmSync(dir, { recursive: true, force: true });
 }
 
 export function buildPromptOrStream(prompt: string, files?: FileAttachment[]): string | AsyncIterable<SDKUserMessage> {
