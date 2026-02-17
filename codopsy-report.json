@@ -1,0 +1,522 @@
+{
+  "timestamp": "2026-02-16T05:15:19.264Z",
+  "targetDir": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/store",
+  "files": [
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/store/messageHandlers.ts",
+      "complexity": {
+        "cyclomatic": 8,
+        "cognitive": 9,
+        "functions": [
+          {
+            "name": "handleServerMessage",
+            "line": 9,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "handleSnapshot",
+            "line": 47,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 48,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 51,
+            "complexity": 4,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 61,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 64,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 68,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "handleSessionCreated",
+            "line": 84,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 87,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "handleSessionStatus",
+            "line": 99,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 100,
+            "complexity": 8,
+            "cognitiveComplexity": 9
+          },
+          {
+            "name": "deleteFromMapBySession",
+            "line": 113,
+            "complexity": 3,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "handleSessionDeleted",
+            "line": 119,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 120,
+            "complexity": 6,
+            "cognitiveComplexity": 4
+          },
+          {
+            "name": "handleLeadOutput",
+            "line": 138,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 142,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 146,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "handleTeammateDiscovered",
+            "line": 158,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 159,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "handleTeammateStatus",
+            "line": 166,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 167,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "handleTeammateOutput",
+            "line": 177,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 180,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 184,
+            "complexity": 3,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "handleTaskSync",
+            "line": 198,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 199,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "handleTaskCompleted",
+            "line": 206,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "handleCostUpdate",
+            "line": 213,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 220,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 224,
+            "complexity": 3,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "handlePermissionRequest",
+            "line": 238,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 239,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "handleTeammateMessageRelayed",
+            "line": 253,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 254,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "handlePermissionResolved",
+            "line": 266,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 267,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "handlePermissionRulesUpdated",
+            "line": 275,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "handleUserQuestion",
+            "line": 279,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 280,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "handleError",
+            "line": 287,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": [
+        {
+          "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/store/messageHandlers.ts",
+          "line": 288,
+          "column": 3,
+          "severity": "info",
+          "rule": "no-console",
+          "message": "Unexpected console.error statement"
+        }
+      ]
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/store/routing.ts",
+      "complexity": {
+        "cyclomatic": 9,
+        "cognitive": 3,
+        "functions": [
+          {
+            "name": "deriveSectionFromRoute",
+            "line": 16,
+            "complexity": 9,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "routeToPath",
+            "line": 34,
+            "complexity": 9,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 58,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 59,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 60,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 61,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 62,
+            "complexity": 5,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 63,
+            "complexity": 5,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 64,
+            "complexity": 4,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "pathToRoute",
+            "line": 71,
+            "complexity": 3,
+            "cognitiveComplexity": 3
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/store/useStore.ts",
+      "complexity": {
+        "cyclomatic": 9,
+        "cognitive": 5,
+        "functions": [
+          {
+            "name": "(anonymous)",
+            "line": 77,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "handleServerMessage",
+            "line": 98,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "navigate",
+            "line": 102,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 108,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "goBack",
+            "line": 113,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 113,
+            "complexity": 9,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "patchSession",
+            "line": 145,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 145,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "setActiveSection",
+            "line": 154,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "setTeammateSpecs",
+            "line": 156,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "setSkillSpecs",
+            "line": 158,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "setPlugins",
+            "line": 160,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "clearError",
+            "line": 162,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "setWsSend",
+            "line": 164,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "respondToPermission",
+            "line": 166,
+            "complexity": 4,
+            "cognitiveComplexity": 5
+          },
+          {
+            "name": "(anonymous)",
+            "line": 171,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "respondToQuestion",
+            "line": 178,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 183,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "addToast",
+            "line": 190,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 192,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 193,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "removeToast",
+            "line": 196,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 196,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 197,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "pushFollowUpImages",
+            "line": 202,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 202,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 212,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          }
+        ]
+      },
+      "issues": []
+    }
+  ],
+  "summary": {
+    "totalFiles": 3,
+    "totalIssues": 1,
+    "issuesBySeverity": {
+      "error": 0,
+      "warning": 0,
+      "info": 1
+    },
+    "averageComplexity": 2.0259740259740258,
+    "maxComplexity": {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/store/routing.ts",
+      "function": "deriveSectionFromRoute",
+      "complexity": 9
+    }
+  }
+}
