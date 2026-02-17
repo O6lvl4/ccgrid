@@ -1,9 +1,11 @@
 import { useState, useCallback, useRef, useMemo } from 'react';
 import { useApi } from '../hooks/useApi';
 import { useStore } from '../store/useStore';
-import { readFilesAsAttachments, FILE_ACCEPT } from '../utils/fileUtils';
+import { readFilesAsAttachments, FILE_ACCEPT, fileToDataUrl } from '../utils/fileUtils';
+import { useFileDrop } from '../hooks/useFileDrop';
 import { FileChip } from './FileChip';
 import { extractPastedFiles } from '../utils/pasteUtils';
+import type { FollowUpImage } from '../store/useStore';
 
 interface InputTheme {
   dot: string; border: string; focus: string; bg: string;
@@ -33,6 +35,32 @@ const PULSE_CSS = `@keyframes pulse-dot {
   50% { opacity: 0.5; transform: scale(1.4); }
 }`;
 
+async function buildFollowUpImages(files: File[]): Promise<FollowUpImage[]> {
+  return Promise.all(
+    files.map(async (f) => {
+      if (f.type.startsWith('image/')) {
+        const dataUrl = await fileToDataUrl(f);
+        return { name: f.name, mimeType: f.type, dataUrl };
+      }
+      return { name: f.name, mimeType: f.type || 'application/octet-stream' };
+    }),
+  );
+}
+
+async function sendFollowUp(opts: {
+  api: ReturnType<typeof useApi>; sessionId: string; text: string;
+  files: File[]; pushImages: (sid: string, idx: number, imgs: FollowUpImage[]) => void;
+  followUpIndex: number;
+}) {
+  const { api, sessionId, text, files, pushImages, followUpIndex } = opts;
+  const attachments = files.length > 0 ? await readFilesAsAttachments(files) : undefined;
+  await api.continueSession(sessionId, text || '添付ファイルを確認してください', attachments);
+  if (files.length > 0) {
+    const images = await buildFollowUpImages(files);
+    pushImages(sessionId, followUpIndex, images);
+  }
+}
+
 function usePendingQuestion(sessionId: string) {
   const pendingQuestions = useStore(s => s.pendingQuestions);
   return useMemo(() => {
@@ -52,9 +80,21 @@ export function FollowUpInput({ sessionId }: { sessionId: string }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pendingQuestion = usePendingQuestion(sessionId);
   const respondToQuestion = useStore(s => s.respondToQuestion);
+  const pushFollowUpImages = useStore(s => s.pushFollowUpImages);
+  const followUpCount = useStore(s => {
+    const output = s.leadOutputs.get(sessionId) ?? '';
+    // Count existing follow-ups by splitting on the follow-up separator
+    return (output.match(/\n\n<!-- follow-up -->\n\n/g) ?? []).length;
+  });
   const isQuestion = !!pendingQuestion;
   const theme = isQuestion ? THEME_QUESTION : THEME_FOLLOWUP;
   const canSend = !!(prompt.trim() || attachedFiles.length > 0) && !sending;
+
+  const addFiles = useCallback((files: File[]) => {
+    setAttachedFiles(prev => [...prev, ...files]);
+  }, []);
+
+  const { isDragOver, dropHandlers } = useFileDrop(addFiles, isQuestion);
 
   const handleSend = useCallback(async () => {
     const text = prompt.trim();
@@ -65,10 +105,7 @@ export function FollowUpInput({ sessionId }: { sessionId: string }) {
       if (pendingQuestion) {
         respondToQuestion(pendingQuestion.requestId, text || '(no answer)');
       } else {
-        const files = attachedFiles.length > 0
-          ? await readFilesAsAttachments(attachedFiles)
-          : undefined;
-        await api.continueSession(sessionId, text || '添付ファイルを確認してください', files);
+        await sendFollowUp({ api, sessionId, text, files: [...attachedFiles], pushImages: pushFollowUpImages, followUpIndex: followUpCount });
         setAttachedFiles([]);
       }
       setPrompt('');
@@ -77,7 +114,7 @@ export function FollowUpInput({ sessionId }: { sessionId: string }) {
     } finally {
       setSending(false);
     }
-  }, [api, sessionId, prompt, sending, attachedFiles, pendingQuestion, respondToQuestion]);
+  }, [api, sessionId, prompt, sending, attachedFiles, pendingQuestion, respondToQuestion, pushFollowUpImages, followUpCount]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
@@ -92,11 +129,17 @@ export function FollowUpInput({ sessionId }: { sessionId: string }) {
   }, []);
 
   return (
-    <div style={{
-      width: '100%', boxSizing: 'border-box' as const, background: '#fff',
-      borderRadius: 16, boxShadow: '0 1px 6px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04)',
-      overflow: 'hidden',
-    }}>
+    <div
+      {...dropHandlers}
+      style={{
+        width: '100%', boxSizing: 'border-box' as const, background: '#fff',
+        borderRadius: 16,
+        boxShadow: isDragOver
+          ? '0 0 0 2px #0ab9e6, 0 1px 6px rgba(0,0,0,0.06)'
+          : '0 1px 6px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04)',
+        overflow: 'hidden',
+        transition: 'box-shadow 0.15s',
+      }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', borderBottom: '1px solid #f0f1f3' }}>
         <div style={{ width: 6, height: 6, borderRadius: 3, background: theme.dot, flexShrink: 0, animation: theme.animation }} />
         <span style={{ fontSize: 12, fontWeight: 700, color: '#3c4257', letterSpacing: 0.5, textTransform: 'uppercase' as const }}>{theme.label}</span>

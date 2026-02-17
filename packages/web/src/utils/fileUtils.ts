@@ -75,3 +75,12 @@ export function readFilesAsAttachments(files: File[]): Promise<FileAttachment[]>
 const ACCEPT = 'image/jpeg,image/png,image/gif,image/webp,application/pdf,.txt,.md,.csv,.json,.ts,.js,.py,.html,.css';
 
 export { ACCEPT as FILE_ACCEPT };
+
+export function fileToDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}

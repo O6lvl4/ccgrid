@@ -33,7 +33,8 @@ export interface PendingQuestion {
 
 export interface FollowUpImage {
   name: string;
-  dataUrl: string;
+  mimeType: string;
+  dataUrl?: string;
 }
 
 export interface AppState {

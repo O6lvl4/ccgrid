@@ -3,6 +3,7 @@ import { DirPicker } from './DirPicker';
 import { FileChip } from './FileChip';
 import { useStore } from '../store/useStore';
 import { readFilesAsAttachments, FILE_ACCEPT } from '../utils/fileUtils';
+import { useFileDrop } from '../hooks/useFileDrop';
 import { extractPastedFiles } from '../utils/pasteUtils';
 import { inputStyle, textareaStyle, labelStyle, sectionStyle, focusBorder, blurBorder } from './session/FormStyles';
 import { PillOption } from './session/PillOption';
@@ -134,10 +135,16 @@ export function SessionConfig({ api, onCreated }: { api: Api; onCreated?: () => 
     }
   }, []);
 
+  const addFiles = useCallback((files: File[]) => {
+    setAttachedFiles(prev => [...prev, ...files]);
+  }, []);
+
+  const { isDragOver, dropHandlers } = useFileDrop(addFiles);
+
   const canSubmit = name.trim() && cwd.trim() && taskDescription.trim() && !submitting;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <div {...dropHandlers} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       {/* Name & Directory */}
       <div style={{ display: 'flex', gap: 12 }}>
         <div style={{ ...sectionStyle, flex: 1 }}>
@@ -214,7 +221,11 @@ export function SessionConfig({ api, onCreated }: { api: Api; onCreated?: () => 
       </div>
 
       {/* Attachments */}
-      <div style={sectionStyle}>
+      <div style={{
+        ...sectionStyle,
+        ...(isDragOver ? { border: '2px dashed #0ab9e6', borderRadius: 12, padding: 12 } : {}),
+        transition: 'border 0.15s',
+      }}>
         <label style={labelStyle}>Attachments <span style={{ fontWeight: 400, textTransform: 'none', color: '#b0b8c4' }}>optional</span></label>
         <input
           ref={fileInputRef}

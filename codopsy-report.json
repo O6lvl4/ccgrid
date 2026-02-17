@@ -1,7 +1,5588 @@
 {
-  "timestamp": "2026-02-16T05:15:19.264Z",
-  "targetDir": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/store",
+  "timestamp": "2026-02-17T05:18:12.784Z",
+  "targetDir": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src",
   "files": [
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/App.tsx",
+      "complexity": {
+        "cyclomatic": 9,
+        "cognitive": 4,
+        "functions": [
+          {
+            "name": "AppInner",
+            "line": 16,
+            "complexity": 4,
+            "cognitiveComplexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 19,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "renderView",
+            "line": 35,
+            "complexity": 9,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 57,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "App",
+            "line": 73,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/CodeBlock.test.ts",
+      "complexity": {
+        "cyclomatic": 1,
+        "cognitive": 0,
+        "functions": [
+          {
+            "name": "(anonymous)",
+            "line": 12,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 13,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 20,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 27,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 34,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 41,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 48,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 52,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 60,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 61,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 66,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 71,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 75,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 79,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 84,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 90,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 96,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 105,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 106,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 113,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 120,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 127,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 134,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 141,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 152,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 153,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 157,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 161,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 165,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 169,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 173,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 177,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 181,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 185,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 189,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 193,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 197,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 201,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 205,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 209,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 213,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 217,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 221,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/CodeBlock.tsx",
+      "complexity": {
+        "cyclomatic": 6,
+        "cognitive": 4,
+        "functions": [
+          {
+            "name": "LineNumberedCode",
+            "line": 39,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 62,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "HighlightedCode",
+            "line": 86,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "CodeBlock",
+            "line": 111,
+            "complexity": 6,
+            "cognitiveComplexity": 4
+          },
+          {
+            "name": "InlineImage",
+            "line": 137,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/CostTracker.tsx",
+      "complexity": {
+        "cyclomatic": 7,
+        "cognitive": 6,
+        "functions": [
+          {
+            "name": "CostTracker",
+            "line": 3,
+            "complexity": 7,
+            "cognitiveComplexity": 6
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/DirPicker.tsx",
+      "complexity": {
+        "cyclomatic": 9,
+        "cognitive": 6,
+        "functions": [
+          {
+            "name": "PathBreadcrumb",
+            "line": 14,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 21,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 31,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 32,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 37,
+            "complexity": 5,
+            "cognitiveComplexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 46,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 57,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 58,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "DirPicker",
+            "line": 69,
+            "complexity": 9,
+            "cognitiveComplexity": 6
+          },
+          {
+            "name": "(anonymous)",
+            "line": 82,
+            "complexity": 5,
+            "cognitiveComplexity": 6
+          },
+          {
+            "name": "(anonymous)",
+            "line": 99,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 121,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 149,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 162,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 163,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 192,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 195,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 208,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 209,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 264,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 265,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 270,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 283,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 284,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/ErrorBoundary.tsx",
+      "complexity": {
+        "cyclomatic": 2,
+        "cognitive": 1,
+        "functions": [
+          {
+            "name": "getDerivedStateFromError",
+            "line": 9,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "render",
+            "line": 13,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 56,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 70,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 71,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/FileChip.tsx",
+      "complexity": {
+        "cyclomatic": 8,
+        "cognitive": 4,
+        "functions": [
+          {
+            "name": "FileChip",
+            "line": 3,
+            "complexity": 8,
+            "cognitiveComplexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 7,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 11,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 65,
+            "complexity": 2,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 69,
+            "complexity": 2,
+            "cognitiveComplexity": 2
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/FollowUpInput.tsx",
+      "complexity": {
+        "cyclomatic": 10,
+        "cognitive": 8,
+        "functions": [
+          {
+            "name": "buildFollowUpImages",
+            "line": 38,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 40,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "sendFollowUp",
+            "line": 50,
+            "complexity": 4,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "usePendingQuestion",
+            "line": 64,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 65,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 66,
+            "complexity": 3,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "FollowUpInput",
+            "line": 74,
+            "complexity": 10,
+            "cognitiveComplexity": 7
+          },
+          {
+            "name": "(anonymous)",
+            "line": 82,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 83,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 84,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 93,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 94,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 99,
+            "complexity": 8,
+            "cognitiveComplexity": 8
+          },
+          {
+            "name": "(anonymous)",
+            "line": 119,
+            "complexity": 4,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 126,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 128,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 155,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 156,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 156,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 156,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 161,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 169,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 170,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 173,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 173,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 177,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "InputToolbar",
+            "line": 184,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "AttachButton",
+            "line": 198,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 207,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 208,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "SendButton",
+            "line": 213,
+            "complexity": 6,
+            "cognitiveComplexity": 5
+          },
+          {
+            "name": "(anonymous)",
+            "line": 228,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 229,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 230,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 231,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/InlineEdit.tsx",
+      "complexity": {
+        "cyclomatic": 3,
+        "cognitive": 3,
+        "functions": [
+          {
+            "name": "InlineEdit",
+            "line": 10,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 15,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 22,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "commit",
+            "line": 26,
+            "complexity": 3,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "cancel",
+            "line": 36,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 46,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 48,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 70,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 80,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 81,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/PermissionCard.tsx",
+      "complexity": {
+        "cyclomatic": 8,
+        "cognitive": 7,
+        "functions": [
+          {
+            "name": "PermissionCard",
+            "line": 4,
+            "complexity": 8,
+            "cognitiveComplexity": 7
+          },
+          {
+            "name": "handleEdit",
+            "line": 17,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "handleChange",
+            "line": 23,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "handleAllow",
+            "line": 33,
+            "complexity": 5,
+            "cognitiveComplexity": 6
+          },
+          {
+            "name": "(anonymous)",
+            "line": 90,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 96,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 108,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 109,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 114,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 130,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 131,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 150,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 151,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "InputSection",
+            "line": 160,
+            "complexity": 6,
+            "cognitiveComplexity": 5
+          },
+          {
+            "name": "EditingView",
+            "line": 217,
+            "complexity": 4,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 226,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 233,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 234,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/PermissionDialog.tsx",
+      "complexity": {
+        "cyclomatic": 4,
+        "cognitive": 3,
+        "functions": [
+          {
+            "name": "PermissionDialog",
+            "line": 8,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 9,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 10,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 13,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 13,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 34,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "PermissionBadge",
+            "line": 46,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 47,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 49,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 49,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "PermissionHistory",
+            "line": 82,
+            "complexity": 4,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 84,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 91,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 110,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "PermissionLogRow",
+            "line": 120,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/PermissionRulesPanel.tsx",
+      "complexity": {
+        "cyclomatic": 5,
+        "cognitive": 4,
+        "functions": [
+          {
+            "name": "PermissionRulesPanel",
+            "line": 6,
+            "complexity": 5,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 7,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "handleAdd",
+            "line": 14,
+            "complexity": 4,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "handleDelete",
+            "line": 30,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 60,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 70,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 75,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 88,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 89,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "BehaviorButton",
+            "line": 98,
+            "complexity": 5,
+            "cognitiveComplexity": 4
+          },
+          {
+            "name": "AddRuleForm",
+            "line": 113,
+            "complexity": 5,
+            "cognitiveComplexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 125,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 127,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 128,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 131,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 132,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 138,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 140,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 141,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 145,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 146,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 155,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 156,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "RuleRow",
+            "line": 163,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 201,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 213,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 214,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": [
+        {
+          "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/PermissionRulesPanel.tsx",
+          "line": 26,
+          "column": 7,
+          "severity": "info",
+          "rule": "no-console",
+          "message": "Unexpected console.error statement"
+        },
+        {
+          "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/PermissionRulesPanel.tsx",
+          "line": 34,
+          "column": 7,
+          "severity": "info",
+          "rule": "no-console",
+          "message": "Unexpected console.error statement"
+        }
+      ]
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/SessionConfig.tsx",
+      "complexity": {
+        "cyclomatic": 7,
+        "cognitive": 5,
+        "functions": [
+          {
+            "name": "buildCreateParams",
+            "line": 14,
+            "complexity": 6,
+            "cognitiveComplexity": 5
+          },
+          {
+            "name": "(anonymous)",
+            "line": 22,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 23,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "SubmitButton",
+            "line": 36,
+            "complexity": 6,
+            "cognitiveComplexity": 5
+          },
+          {
+            "name": "(anonymous)",
+            "line": 41,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 42,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 43,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 44,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "ModelPermissionBudget",
+            "line": 51,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 61,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 61,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 67,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 68,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 74,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "SessionConfig",
+            "line": 86,
+            "complexity": 7,
+            "cognitiveComplexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 87,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 88,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "toggleSpec",
+            "line": 103,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 104,
+            "complexity": 2,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "handleCreate",
+            "line": 112,
+            "complexity": 7,
+            "cognitiveComplexity": 5
+          },
+          {
+            "name": "(anonymous)",
+            "line": 131,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 134,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 138,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 139,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 156,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 169,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 176,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 178,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 179,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 188,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 189,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 199,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 214,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 236,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 238,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 245,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 249,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 249,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 249,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 256,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 258,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 259,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 278,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": [
+        {
+          "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/SessionConfig.tsx",
+          "line": 125,
+          "column": 7,
+          "severity": "info",
+          "rule": "no-console",
+          "message": "Unexpected console.error statement"
+        }
+      ]
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/StatusBadge.tsx",
+      "complexity": {
+        "cyclomatic": 4,
+        "cognitive": 3,
+        "functions": [
+          {
+            "name": "StatusBadge",
+            "line": 13,
+            "complexity": 4,
+            "cognitiveComplexity": 3
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/TeammateSpecEditor.tsx",
+      "complexity": {
+        "cyclomatic": 2,
+        "cognitive": 1,
+        "functions": [
+          {
+            "name": "TeammateSpecEditor",
+            "line": 3,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "addSpec",
+            "line": 10,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "removeSpec",
+            "line": 14,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 15,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "updateSpec",
+            "line": 18,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 19,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 35,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 43,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 50,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 58,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 64,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/dialogs/DialogOverlay.tsx",
+      "complexity": {
+        "cyclomatic": 2,
+        "cognitive": 1,
+        "functions": [
+          {
+            "name": "DialogOverlay",
+            "line": 3,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 83,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 84,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/dialogs/ExternalSkillSection.tsx",
+      "complexity": {
+        "cyclomatic": 8,
+        "cognitive": 7,
+        "functions": [
+          {
+            "name": "ExternalSkillSection",
+            "line": 5,
+            "complexity": 8,
+            "cognitiveComplexity": 7
+          },
+          {
+            "name": "(anonymous)",
+            "line": 6,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 7,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 8,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 9,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 10,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 18,
+            "complexity": 7,
+            "cognitiveComplexity": 7
+          },
+          {
+            "name": "(anonymous)",
+            "line": 48,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 49,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 51,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 52,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 63,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 65,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 66,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/dialogs/NewSessionDialog.tsx",
+      "complexity": {
+        "cyclomatic": 1,
+        "cognitive": 0,
+        "functions": [
+          {
+            "name": "NewSessionDialog",
+            "line": 5,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/dialogs/NewSkillSpecDialog.tsx",
+      "complexity": {
+        "cyclomatic": 10,
+        "cognitive": 12,
+        "functions": [
+          {
+            "name": "NewSkillSpecDialog",
+            "line": 52,
+            "complexity": 5,
+            "cognitiveComplexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 53,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 54,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 64,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 64,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 64,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "handleCreate",
+            "line": 68,
+            "complexity": 7,
+            "cognitiveComplexity": 12
+          },
+          {
+            "name": "(anonymous)",
+            "line": 71,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 116,
+            "complexity": 5,
+            "cognitiveComplexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 122,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 134,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 135,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 153,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 163,
+            "complexity": 10,
+            "cognitiveComplexity": 10
+          },
+          {
+            "name": "OfficialSkillPicker",
+            "line": 202,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 208,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 209,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 214,
+            "complexity": 10,
+            "cognitiveComplexity": 11
+          },
+          {
+            "name": "(anonymous)",
+            "line": 227,
+            "complexity": 3,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 229,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 230,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "CustomSkillForm",
+            "line": 250,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 258,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 259,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 259,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 263,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 265,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 265,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": [
+        {
+          "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/dialogs/NewSkillSpecDialog.tsx",
+          "line": 84,
+          "column": 9,
+          "severity": "info",
+          "rule": "no-console",
+          "message": "Unexpected console.error statement"
+        },
+        {
+          "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/dialogs/NewSkillSpecDialog.tsx",
+          "line": 102,
+          "column": 9,
+          "severity": "info",
+          "rule": "no-console",
+          "message": "Unexpected console.error statement"
+        }
+      ]
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/dialogs/NewTeammateSpecDialog.tsx",
+      "complexity": {
+        "cyclomatic": 9,
+        "cognitive": 7,
+        "functions": [
+          {
+            "name": "NewTeammateSpecDialog",
+            "line": 12,
+            "complexity": 9,
+            "cognitiveComplexity": 7
+          },
+          {
+            "name": "(anonymous)",
+            "line": 13,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 14,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 15,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "toggleSkill",
+            "line": 24,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 25,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 26,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "handleCreate",
+            "line": 30,
+            "complexity": 6,
+            "cognitiveComplexity": 5
+          },
+          {
+            "name": "(anonymous)",
+            "line": 64,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 77,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 78,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 86,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 99,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 100,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 109,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 126,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 127,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 142,
+            "complexity": 4,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 148,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 158,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 159,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": [
+        {
+          "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/dialogs/NewTeammateSpecDialog.tsx",
+          "line": 47,
+          "column": 7,
+          "severity": "info",
+          "rule": "no-console",
+          "message": "Unexpected console.error statement"
+        }
+      ]
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/dialogs/PluginInstallDialog.tsx",
+      "complexity": {
+        "cyclomatic": 8,
+        "cognitive": 7,
+        "functions": [
+          {
+            "name": "PluginInstallDialog",
+            "line": 6,
+            "complexity": 8,
+            "cognitiveComplexity": 7
+          },
+          {
+            "name": "(anonymous)",
+            "line": 7,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 8,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 9,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 10,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 11,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "handleInstall",
+            "line": 19,
+            "complexity": 7,
+            "cognitiveComplexity": 7
+          },
+          {
+            "name": "(anonymous)",
+            "line": 67,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 68,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 70,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 71,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 85,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 87,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 88,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/layout/IconRail.tsx",
+      "complexity": {
+        "cyclomatic": 3,
+        "cognitive": 2,
+        "functions": [
+          {
+            "name": "IconRail",
+            "line": 11,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 12,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 13,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 47,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 53,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 63,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 67,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/layout/SidebarPanel.tsx",
+      "complexity": {
+        "cyclomatic": 4,
+        "cognitive": 3,
+        "functions": [
+          {
+            "name": "SidebarPanel",
+            "line": 6,
+            "complexity": 4,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 7,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/layout/UsageGauge.tsx",
+      "complexity": {
+        "cyclomatic": 6,
+        "cognitive": 5,
+        "functions": [
+          {
+            "name": "usageColor",
+            "line": 7,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "timeUntil",
+            "line": 13,
+            "complexity": 4,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "shortModel",
+            "line": 23,
+            "complexity": 5,
+            "cognitiveComplexity": 4
+          },
+          {
+            "name": "gaugeGradientCSS",
+            "line": 32,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "GaugeBar",
+            "line": 45,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 78,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "LimitRow",
+            "line": 106,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "CostBreakdown",
+            "line": 138,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 145,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "UsageTooltip",
+            "line": 155,
+            "complexity": 6,
+            "cognitiveComplexity": 5
+          },
+          {
+            "name": "(anonymous)",
+            "line": 170,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "UsageGaugeArea",
+            "line": 184,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 209,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 210,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 214,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/layout/ViewShell.tsx",
+      "complexity": {
+        "cyclomatic": 1,
+        "cognitive": 0,
+        "functions": [
+          {
+            "name": "ViewShell",
+            "line": 4,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/layout/panels/SessionItem.tsx",
+      "complexity": {
+        "cyclomatic": 6,
+        "cognitive": 6,
+        "functions": [
+          {
+            "name": "SessionItemBody",
+            "line": 4,
+            "complexity": 5,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 15,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 17,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 18,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "SessionItemMenu",
+            "line": 34,
+            "complexity": 6,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 43,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 45,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 46,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 51,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 52,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "SessionItem",
+            "line": 59,
+            "complexity": 6,
+            "cognitiveComplexity": 6
+          },
+          {
+            "name": "(anonymous)",
+            "line": 97,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "handler",
+            "line": 99,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 105,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 108,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "commitRename",
+            "line": 116,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 133,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 147,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 148,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "MenuItem",
+            "line": 178,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 203,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 204,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/layout/panels/SessionPanel.tsx",
+      "complexity": {
+        "cyclomatic": 3,
+        "cognitive": 2,
+        "functions": [
+          {
+            "name": "SessionPanel",
+            "line": 14,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 15,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 16,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 17,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 18,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 24,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 53,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 70,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 75,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 80,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 81,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 89,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 106,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 109,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 109,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 110,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 111,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 115,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 122,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 132,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/layout/panels/SkillPanel.tsx",
+      "complexity": {
+        "cyclomatic": 5,
+        "cognitive": 4,
+        "functions": [
+          {
+            "name": "SkillPanel",
+            "line": 12,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 13,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 14,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 15,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 16,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "handleDelete",
+            "line": 22,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 25,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 54,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 71,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 76,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 81,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 82,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 96,
+            "complexity": 5,
+            "cognitiveComplexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 103,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 113,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 114,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 165,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": [
+        {
+          "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/layout/panels/SkillPanel.tsx",
+          "line": 27,
+          "column": 7,
+          "severity": "info",
+          "rule": "no-console",
+          "message": "Unexpected console.error statement"
+        }
+      ]
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/layout/panels/TeammatePanel.tsx",
+      "complexity": {
+        "cyclomatic": 5,
+        "cognitive": 4,
+        "functions": [
+          {
+            "name": "TeammatePanel",
+            "line": 6,
+            "complexity": 4,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 7,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 8,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 9,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 10,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "handleDelete",
+            "line": 16,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 19,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 47,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 64,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 69,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 74,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 75,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 89,
+            "complexity": 5,
+            "cognitiveComplexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 95,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 105,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 106,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 158,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": [
+        {
+          "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/layout/panels/TeammatePanel.tsx",
+          "line": 21,
+          "column": 7,
+          "severity": "info",
+          "rule": "no-console",
+          "message": "Unexpected console.error statement"
+        }
+      ]
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/output/Avatars.tsx",
+      "complexity": {
+        "cyclomatic": 2,
+        "cognitive": 1,
+        "functions": [
+          {
+            "name": "hashString",
+            "line": 14,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "Avatar",
+            "line": 24,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "LeadAvatar",
+            "line": 51,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "UserAvatar",
+            "line": 55,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "TeammateAvatar",
+            "line": 82,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "FollowUpAvatar",
+            "line": 89,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/output/ContentCards.tsx",
+      "complexity": {
+        "cyclomatic": 10,
+        "cognitive": 4,
+        "functions": [
+          {
+            "name": "StatusBadge",
+            "line": 7,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "CopyButton",
+            "line": 34,
+            "complexity": 4,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 36,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 38,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 40,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 54,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 55,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "CardHeader",
+            "line": 61,
+            "complexity": 5,
+            "cognitiveComplexity": 4
+          },
+          {
+            "name": "PulseWorking",
+            "line": 98,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "CardBody",
+            "line": 125,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "ContentCard",
+            "line": 131,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 153,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 153,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "TeammateCard",
+            "line": 165,
+            "complexity": 10,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 179,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 179,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "TimelineConnector",
+            "line": 199,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/output/FollowUpAttachments.tsx",
+      "complexity": {
+        "cyclomatic": 4,
+        "cognitive": 3,
+        "functions": [
+          {
+            "name": "FollowUpAttachments",
+            "line": 3,
+            "complexity": 4,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 5,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 6,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 12,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 28,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/output/MemoMarkdown.tsx",
+      "complexity": {
+        "cyclomatic": 2,
+        "cognitive": 1,
+        "functions": [
+          {
+            "name": "MemoMarkdown",
+            "line": 14,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/output/ProgressiveMarkdown.tsx",
+      "complexity": {
+        "cyclomatic": 4,
+        "cognitive": 3,
+        "functions": [
+          {
+            "name": "RevealSkeleton",
+            "line": 13,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 16,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "LoadingBanner",
+            "line": 45,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "ProgressiveMarkdown",
+            "line": 75,
+            "complexity": 4,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 82,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 101,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/session/FormStyles.ts",
+      "complexity": {
+        "cyclomatic": 1,
+        "cognitive": 0,
+        "functions": [
+          {
+            "name": "focusBorder",
+            "line": 39,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "blurBorder",
+            "line": 43,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/session/PillOption.tsx",
+      "complexity": {
+        "cyclomatic": 5,
+        "cognitive": 4,
+        "functions": [
+          {
+            "name": "PillOption",
+            "line": 1,
+            "complexity": 5,
+            "cognitiveComplexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 26,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 27,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 28,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 29,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/session/TeammateSelector.tsx",
+      "complexity": {
+        "cyclomatic": 6,
+        "cognitive": 5,
+        "functions": [
+          {
+            "name": "TeammateSelector",
+            "line": 4,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 28,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 29,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 35,
+            "complexity": 6,
+            "cognitiveComplexity": 5
+          },
+          {
+            "name": "(anonymous)",
+            "line": 41,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 54,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 55,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/views/OutputSkeleton.tsx",
+      "complexity": {
+        "cyclomatic": 1,
+        "cognitive": 0,
+        "functions": [
+          {
+            "name": "SkeletonCard",
+            "line": 7,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 20,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "OutputSkeleton",
+            "line": 28,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 32,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/views/OutputTab.tsx",
+      "complexity": {
+        "cyclomatic": 10,
+        "cognitive": 6,
+        "functions": [
+          {
+            "name": "LeadStreamingIndicator",
+            "line": 15,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "FollowUpEntry",
+            "line": 36,
+            "complexity": 10,
+            "cognitiveComplexity": 6
+          },
+          {
+            "name": "ActiveTeammateBar",
+            "line": 85,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 86,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 98,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "ActiveTeammateChip",
+            "line": 107,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 113,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 122,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 123,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "ScrollToBottomButton",
+            "line": 133,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 145,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 146,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "computeLeadStatus",
+            "line": 153,
+            "complexity": 5,
+            "cognitiveComplexity": 5
+          },
+          {
+            "name": "OutputTab",
+            "line": 162,
+            "complexity": 8,
+            "cognitiveComplexity": 5
+          },
+          {
+            "name": "(anonymous)",
+            "line": 163,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 164,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 165,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 166,
+            "complexity": 3,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 178,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 188,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 188,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 193,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 197,
+            "complexity": 5,
+            "cognitiveComplexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 205,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 208,
+            "complexity": 4,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 217,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 220,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 245,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 253,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/views/OverviewTab.tsx",
+      "complexity": {
+        "cyclomatic": 7,
+        "cognitive": 6,
+        "functions": [
+          {
+            "name": "SectionLabel",
+            "line": 4,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "InfoRow",
+            "line": 19,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "Card",
+            "line": 44,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "CostTokensSection",
+            "line": 57,
+            "complexity": 7,
+            "cognitiveComplexity": 6
+          },
+          {
+            "name": "TeammateSpecsSection",
+            "line": 90,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 96,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "OverviewTab",
+            "line": 112,
+            "complexity": 4,
+            "cognitiveComplexity": 3
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/views/SessionDetailView.tsx",
+      "complexity": {
+        "cyclomatic": 10,
+        "cognitive": 10,
+        "functions": [
+          {
+            "name": "SessionDetailView",
+            "line": 24,
+            "complexity": 10,
+            "cognitiveComplexity": 10
+          },
+          {
+            "name": "(anonymous)",
+            "line": 25,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 26,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 27,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 28,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 29,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 32,
+            "complexity": 3,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 39,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 40,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 40,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 44,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 45,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 46,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "handleRename",
+            "line": 53,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 133,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 148,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 152,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 156,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 157,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 166,
+            "complexity": 4,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 171,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 185,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 188,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 225,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 226,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/views/SkillSpecDetailView.tsx",
+      "complexity": {
+        "cyclomatic": 9,
+        "cognitive": 5,
+        "functions": [
+          {
+            "name": "PluginInfoSection",
+            "line": 18,
+            "complexity": 9,
+            "cognitiveComplexity": 4
+          },
+          {
+            "name": "handleUpdate",
+            "line": 25,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 52,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 53,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 60,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 61,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "SkillSpecDetailView",
+            "line": 71,
+            "complexity": 4,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 72,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 73,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 74,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 75,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 76,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 77,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 78,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 81,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 84,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 88,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "updateField",
+            "line": 94,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 97,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "handleDescriptionSave",
+            "line": 103,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 131,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 132,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 136,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 146,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 148,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 150,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 151,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 172,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 176,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 206,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 226,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 234,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 235,
+            "complexity": 5,
+            "cognitiveComplexity": 5
+          },
+          {
+            "name": "(anonymous)",
+            "line": 236,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 240,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 242,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 252,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 253,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 257,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 258,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": [
+        {
+          "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/views/SkillSpecDetailView.tsx",
+          "line": 99,
+          "column": 7,
+          "severity": "info",
+          "rule": "no-console",
+          "message": "Unexpected console.error statement"
+        },
+        {
+          "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/views/SkillSpecDetailView.tsx",
+          "line": 248,
+          "column": 19,
+          "severity": "info",
+          "rule": "no-console",
+          "message": "Unexpected console.error statement"
+        },
+        {
+          "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/views/SkillSpecDetailView.tsx",
+          "line": 262,
+          "column": 19,
+          "severity": "info",
+          "rule": "no-console",
+          "message": "Unexpected console.error statement"
+        }
+      ]
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/views/TaskCard.tsx",
+      "complexity": {
+        "cyclomatic": 5,
+        "cognitive": 4,
+        "functions": [
+          {
+            "name": "avatarColor",
+            "line": 8,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "avatarInitial",
+            "line": 14,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "TaskCard",
+            "line": 18,
+            "complexity": 5,
+            "cognitiveComplexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 42,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 46,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/views/TaskDetailView.tsx",
+      "complexity": {
+        "cyclomatic": 7,
+        "cognitive": 4,
+        "functions": [
+          {
+            "name": "SectionLabel",
+            "line": 5,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "TaskDetailView",
+            "line": 20,
+            "complexity": 7,
+            "cognitiveComplexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 21,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 22,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 23,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 24,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 26,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 27,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 27,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 29,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "renderDepList",
+            "line": 37,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 43,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 44,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 48,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 60,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 61,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 112,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 113,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 163,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 175,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 176,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/views/TasksTab.tsx",
+      "complexity": {
+        "cyclomatic": 3,
+        "cognitive": 3,
+        "functions": [
+          {
+            "name": "TasksTab",
+            "line": 15,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 16,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 17,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 18,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 20,
+            "complexity": 3,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 30,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 32,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 39,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 70,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 134,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 140,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/views/TeammateDetailView.tsx",
+      "complexity": {
+        "cyclomatic": 7,
+        "cognitive": 6,
+        "functions": [
+          {
+            "name": "InfoRow",
+            "line": 11,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "MessageBubble",
+            "line": 28,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "SectionLabel",
+            "line": 53,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "TeammateMessageInput",
+            "line": 68,
+            "complexity": 7,
+            "cognitiveComplexity": 6
+          },
+          {
+            "name": "(anonymous)",
+            "line": 73,
+            "complexity": 4,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 87,
+            "complexity": 4,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 129,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 150,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 151,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 178,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 179,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 180,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 181,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "TeammateHeader",
+            "line": 192,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 198,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 199,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "TeammateContent",
+            "line": 214,
+            "complexity": 5,
+            "cognitiveComplexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 238,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "TeammateDetailView",
+            "line": 246,
+            "complexity": 7,
+            "cognitiveComplexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 247,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 248,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 249,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 251,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 252,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 255,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 257,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          }
+        ]
+      },
+      "issues": [
+        {
+          "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/views/TeammateDetailView.tsx",
+          "line": 81,
+          "column": 7,
+          "severity": "info",
+          "rule": "no-console",
+          "message": "Unexpected console.error statement"
+        }
+      ]
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/views/TeammateSpecDetailView.tsx",
+      "complexity": {
+        "cyclomatic": 4,
+        "cognitive": 3,
+        "functions": [
+          {
+            "name": "TeammateSpecDetailView",
+            "line": 12,
+            "complexity": 4,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 13,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 14,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 15,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 16,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 17,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 19,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 22,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 26,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "updateField",
+            "line": 32,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 35,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "handleInstructionsSave",
+            "line": 41,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 69,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 70,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 74,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 84,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 86,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 88,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 89,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 110,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 114,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 136,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 137,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 138,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 158,
+            "complexity": 4,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "toggleSkill",
+            "line": 161,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 164,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 168,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 186,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 187,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 234,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 254,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": [
+        {
+          "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/views/TeammateSpecDetailView.tsx",
+          "line": 37,
+          "column": 7,
+          "severity": "info",
+          "rule": "no-console",
+          "message": "Unexpected console.error statement"
+        },
+        {
+          "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/views/TeammateSpecDetailView.tsx",
+          "line": 170,
+          "column": 23,
+          "severity": "info",
+          "rule": "no-console",
+          "message": "Unexpected console.error statement"
+        }
+      ]
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/views/TeammatesTab.tsx",
+      "complexity": {
+        "cyclomatic": 4,
+        "cognitive": 3,
+        "functions": [
+          {
+            "name": "TeammatesTab",
+            "line": 6,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 7,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 9,
+            "complexity": 3,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 41,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 48,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "TeammateCard",
+            "line": 56,
+            "complexity": 4,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 84,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 89,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/views/ToastStack.tsx",
+      "complexity": {
+        "cyclomatic": 5,
+        "cognitive": 4,
+        "functions": [
+          {
+            "name": "ToastStack",
+            "line": 3,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 4,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 11,
+            "complexity": 5,
+            "cognitiveComplexity": 4
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/views/WelcomeView.tsx",
+      "complexity": {
+        "cyclomatic": 1,
+        "cognitive": 0,
+        "functions": [
+          {
+            "name": "WelcomeView",
+            "line": 1,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/hooks/useApi.ts",
+      "complexity": {
+        "cyclomatic": 5,
+        "cognitive": 4,
+        "functions": [
+          {
+            "name": "request",
+            "line": 36,
+            "complexity": 5,
+            "cognitiveComplexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 44,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "useApi",
+            "line": 50,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 51,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 63,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 66,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 69,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 72,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 75,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 78,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 81,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 84,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 87,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 90,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 93,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 96,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 99,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 102,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 105,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 108,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 111,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/hooks/useFileDrop.ts",
+      "complexity": {
+        "cyclomatic": 3,
+        "cognitive": 2,
+        "functions": [
+          {
+            "name": "(anonymous)",
+            "line": 5,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "isAcceptedFile",
+            "line": 8,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "useFileDrop",
+            "line": 14,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 18,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 26,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 34,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 39,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/hooks/useProgressiveReveal.ts",
+      "complexity": {
+        "cyclomatic": 4,
+        "cognitive": 3,
+        "functions": [
+          {
+            "name": "useProgressiveReveal",
+            "line": 17,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 25,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 26,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "getScrollContainer",
+            "line": 35,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 46,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 47,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 53,
+            "complexity": 4,
+            "cognitiveComplexity": 3
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/hooks/useUsage.ts",
+      "complexity": {
+        "cyclomatic": 4,
+        "cognitive": 3,
+        "functions": [
+          {
+            "name": "useUsage",
+            "line": 22,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 25,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "fetchUsage",
+            "line": 28,
+            "complexity": 4,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 37,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/hooks/useWebSocket.ts",
+      "complexity": {
+        "cyclomatic": 7,
+        "cognitive": 13,
+        "functions": [
+          {
+            "name": "useWebSocket",
+            "line": 5,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 6,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 7,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 12,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "startStatusPoller",
+            "line": 16,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 18,
+            "complexity": 7,
+            "cognitiveComplexity": 13
+          },
+          {
+            "name": "stopStatusPoller",
+            "line": 35,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "connect",
+            "line": 42,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 49,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 50,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 54,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 63,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 70,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 75,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          }
+        ]
+      },
+      "issues": [
+        {
+          "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/hooks/useWebSocket.ts",
+          "line": 59,
+          "column": 11,
+          "severity": "info",
+          "rule": "no-console",
+          "message": "Unexpected console.error statement"
+        }
+      ]
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/lib/RevealStateMachine.edge.test.ts",
+      "complexity": {
+        "cyclomatic": 1,
+        "cognitive": 0,
+        "functions": [
+          {
+            "name": "(anonymous)",
+            "line": 4,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 5,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 6,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 26,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 27,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 40,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 51,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 52,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 67,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 68,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 80,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 94,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 95,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 112,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 113,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/lib/RevealStateMachine.test.ts",
+      "complexity": {
+        "cyclomatic": 1,
+        "cognitive": 0,
+        "functions": [
+          {
+            "name": "(anonymous)",
+            "line": 4,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 5,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 6,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 14,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 15,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 23,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 30,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 38,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 39,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 59,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 72,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 73,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 88,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 104,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 105,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 128,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 137,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 138,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 145,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/lib/RevealStateMachine.ts",
+      "complexity": {
+        "cyclomatic": 8,
+        "cognitive": 7,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 59,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "getState",
+            "line": 68,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "update",
+            "line": 79,
+            "complexity": 8,
+            "cognitiveComplexity": 7
+          },
+          {
+            "name": "getScrollHeightBefore",
+            "line": 102,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "clearScrollHeightBefore",
+            "line": 107,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "dispose",
+            "line": 112,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "handleEmpty",
+            "line": 116,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "tryInstantReveal",
+            "line": 123,
+            "complexity": 4,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "trySessionSwitch",
+            "line": 133,
+            "complexity": 4,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "tryStreamingAppend",
+            "line": 145,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "startInterval",
+            "line": 152,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 155,
+            "complexity": 5,
+            "cognitiveComplexity": 4
+          },
+          {
+            "name": "stopInterval",
+            "line": 179,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/lib/codeBlockUtils.ts",
+      "complexity": {
+        "cyclomatic": 4,
+        "cognitive": 5,
+        "functions": [
+          {
+            "name": "hasLineNumbers",
+            "line": 10,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 11,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 13,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "stripLineNumbers",
+            "line": 17,
+            "complexity": 4,
+            "cognitiveComplexity": 5
+          },
+          {
+            "name": "guessLanguage",
+            "line": 48,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 51,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/lib/revealTestHelpers.ts",
+      "complexity": {
+        "cyclomatic": 7,
+        "cognitive": 13,
+        "functions": [
+          {
+            "name": "setInterval",
+            "line": 11,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "clearInterval",
+            "line": 17,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "tick",
+            "line": 21,
+            "complexity": 7,
+            "cognitiveComplexity": 13
+          },
+          {
+            "name": "(anonymous)",
+            "line": 36,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "get activeCount",
+            "line": 46,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 54,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "reset",
+            "line": 55,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "createFakeScroll",
+            "line": 58,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "createMachine",
+            "line": 62,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "getScrollContainer",
+            "line": 76,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/main.tsx",
+      "complexity": {
+        "cyclomatic": 0,
+        "cognitive": 0,
+        "functions": []
+      },
+      "issues": []
+    },
     {
       "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/store/messageHandlers.ts",
       "complexity": {
@@ -339,121 +5920,115 @@
         "functions": [
           {
             "name": "(anonymous)",
-            "line": 77,
+            "line": 78,
             "complexity": 1,
             "cognitiveComplexity": 0
           },
           {
             "name": "handleServerMessage",
-            "line": 98,
+            "line": 99,
             "complexity": 1,
             "cognitiveComplexity": 0
           },
           {
             "name": "navigate",
-            "line": 102,
+            "line": 103,
             "complexity": 2,
             "cognitiveComplexity": 1
           },
           {
             "name": "(anonymous)",
-            "line": 108,
+            "line": 109,
             "complexity": 1,
             "cognitiveComplexity": 0
           },
           {
             "name": "goBack",
-            "line": 113,
+            "line": 114,
             "complexity": 1,
             "cognitiveComplexity": 0
           },
           {
             "name": "(anonymous)",
-            "line": 113,
+            "line": 114,
             "complexity": 9,
             "cognitiveComplexity": 1
           },
           {
             "name": "patchSession",
-            "line": 145,
+            "line": 146,
             "complexity": 1,
             "cognitiveComplexity": 0
           },
           {
             "name": "(anonymous)",
-            "line": 145,
+            "line": 146,
             "complexity": 2,
             "cognitiveComplexity": 1
           },
           {
             "name": "setActiveSection",
-            "line": 154,
+            "line": 155,
             "complexity": 1,
             "cognitiveComplexity": 0
           },
           {
             "name": "setTeammateSpecs",
-            "line": 156,
+            "line": 157,
             "complexity": 1,
             "cognitiveComplexity": 0
           },
           {
             "name": "setSkillSpecs",
-            "line": 158,
+            "line": 159,
             "complexity": 1,
             "cognitiveComplexity": 0
           },
           {
             "name": "setPlugins",
-            "line": 160,
+            "line": 161,
             "complexity": 1,
             "cognitiveComplexity": 0
           },
           {
             "name": "clearError",
-            "line": 162,
+            "line": 163,
             "complexity": 1,
             "cognitiveComplexity": 0
           },
           {
             "name": "setWsSend",
-            "line": 164,
+            "line": 165,
             "complexity": 1,
             "cognitiveComplexity": 0
           },
           {
             "name": "respondToPermission",
-            "line": 166,
+            "line": 167,
             "complexity": 4,
             "cognitiveComplexity": 5
           },
           {
             "name": "(anonymous)",
-            "line": 171,
+            "line": 172,
             "complexity": 1,
             "cognitiveComplexity": 0
           },
           {
             "name": "respondToQuestion",
-            "line": 178,
+            "line": 179,
             "complexity": 2,
             "cognitiveComplexity": 1
           },
           {
             "name": "(anonymous)",
-            "line": 183,
+            "line": 184,
             "complexity": 1,
             "cognitiveComplexity": 0
           },
           {
             "name": "addToast",
-            "line": 190,
-            "complexity": 1,
-            "cognitiveComplexity": 0
-          },
-          {
-            "name": "(anonymous)",
-            "line": 192,
+            "line": 191,
             "complexity": 1,
             "cognitiveComplexity": 0
           },
@@ -464,40 +6039,604 @@
             "cognitiveComplexity": 0
           },
           {
-            "name": "removeToast",
-            "line": 196,
+            "name": "(anonymous)",
+            "line": 194,
             "complexity": 1,
             "cognitiveComplexity": 0
           },
           {
-            "name": "(anonymous)",
-            "line": 196,
-            "complexity": 2,
-            "cognitiveComplexity": 1
-          },
-          {
-            "name": "(anonymous)",
+            "name": "removeToast",
             "line": 197,
             "complexity": 1,
             "cognitiveComplexity": 0
           },
           {
-            "name": "pushFollowUpImages",
-            "line": 202,
-            "complexity": 1,
-            "cognitiveComplexity": 0
-          },
-          {
             "name": "(anonymous)",
-            "line": 202,
-            "complexity": 1,
-            "cognitiveComplexity": 0
-          },
-          {
-            "name": "(anonymous)",
-            "line": 212,
+            "line": 197,
             "complexity": 2,
             "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 198,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "pushFollowUpImages",
+            "line": 203,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 203,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 213,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/utils/fileUtils.ts",
+      "complexity": {
+        "cyclomatic": 5,
+        "cognitive": 4,
+        "functions": [
+          {
+            "name": "resizeImage",
+            "line": 6,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 7,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 10,
+            "complexity": 5,
+            "cognitiveComplexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 42,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "readFileAsAttachment",
+            "line": 47,
+            "complexity": 4,
+            "cognitiveComplexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 56,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 58,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "readFilesAsAttachments",
+            "line": 71,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "fileToDataUrl",
+            "line": 79,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 80,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 82,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/utils/outputParser.test.ts",
+      "complexity": {
+        "cyclomatic": 2,
+        "cognitive": 1,
+        "functions": [
+          {
+            "name": "(anonymous)",
+            "line": 16,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 17,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 23,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 29,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 35,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 41,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 47,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 53,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 59,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 63,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 68,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 80,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 81,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 89,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 95,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 101,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 107,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 113,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 121,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 122,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 127,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 136,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 137,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 143,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 149,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 158,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 167,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 178,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 185,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 193,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 204,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 205,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 209,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 213,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 217,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 221,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 225,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 229,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 237,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 238,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 242,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 249,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 250,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 257,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 267,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 275,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 276,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/utils/outputParser.ts",
+      "complexity": {
+        "cyclomatic": 9,
+        "cognitive": 15,
+        "functions": [
+          {
+            "name": "wrapLineNumberedBlocks",
+            "line": 16,
+            "complexity": 8,
+            "cognitiveComplexity": 15
+          },
+          {
+            "name": "flushBlock",
+            "line": 22,
+            "complexity": 2,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "cleanSdkOutput",
+            "line": 59,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "parseSegments",
+            "line": 72,
+            "complexity": 9,
+            "cognitiveComplexity": 14
+          },
+          {
+            "name": "hasUnclosedFence",
+            "line": 121,
+            "complexity": 4,
+            "cognitiveComplexity": 5
+          },
+          {
+            "name": "findParagraphBreak",
+            "line": 135,
+            "complexity": 3,
+            "cognitiveComplexity": 2
+          },
+          {
+            "name": "extendPastFence",
+            "line": 144,
+            "complexity": 4,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "splitIntoChunks",
+            "line": 155,
+            "complexity": 6,
+            "cognitiveComplexity": 7
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/utils/pasteUtils.ts",
+      "complexity": {
+        "cyclomatic": 6,
+        "cognitive": 8,
+        "functions": [
+          {
+            "name": "extractPastedFiles",
+            "line": 4,
+            "complexity": 6,
+            "cognitiveComplexity": 8
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/utils/timeAgo.ts",
+      "complexity": {
+        "cyclomatic": 4,
+        "cognitive": 3,
+        "functions": [
+          {
+            "name": "timeAgo",
+            "line": 1,
+            "complexity": 4,
+            "cognitiveComplexity": 3
+          }
+        ]
+      },
+      "issues": []
+    },
+    {
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/utils/twemoji.tsx",
+      "complexity": {
+        "cyclomatic": 7,
+        "cognitive": 11,
+        "functions": [
+          {
+            "name": "installEmojiErrorHandler",
+            "line": 8,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 9,
+            "complexity": 4,
+            "cognitiveComplexity": 4
+          },
+          {
+            "name": "toCodePoint",
+            "line": 27,
+            "complexity": 4,
+            "cognitiveComplexity": 4
+          },
+          {
+            "name": "twemojiUrl",
+            "line": 41,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "TwemojiIcon",
+            "line": 46,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 54,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "replaceEmoji",
+            "line": 67,
+            "complexity": 5,
+            "cognitiveComplexity": 5
+          },
+          {
+            "name": "(anonymous)",
+            "line": 88,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "rehypeTwemoji",
+            "line": 118,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "(anonymous)",
+            "line": 119,
+            "complexity": 1,
+            "cognitiveComplexity": 0
+          },
+          {
+            "name": "applyTwemojiToElement",
+            "line": 129,
+            "complexity": 7,
+            "cognitiveComplexity": 11
+          },
+          {
+            "name": "emojiPartToNode",
+            "line": 172,
+            "complexity": 2,
+            "cognitiveComplexity": 1
+          },
+          {
+            "name": "expandTextChild",
+            "line": 189,
+            "complexity": 4,
+            "cognitiveComplexity": 3
+          },
+          {
+            "name": "visitTextNodes",
+            "line": 198,
+            "complexity": 5,
+            "cognitiveComplexity": 6
+          },
+          {
+            "name": "splitEmoji",
+            "line": 220,
+            "complexity": 4,
+            "cognitiveComplexity": 4
           }
         ]
       },
@@ -505,18 +6644,18 @@
     }
   ],
   "summary": {
-    "totalFiles": 3,
-    "totalIssues": 1,
+    "totalFiles": 70,
+    "totalIssues": 16,
     "issuesBySeverity": {
       "error": 0,
       "warning": 0,
-      "info": 1
+      "info": 16
     },
-    "averageComplexity": 2.0259740259740258,
+    "averageComplexity": 1.810754912099276,
     "maxComplexity": {
-      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/store/routing.ts",
-      "function": "deriveSectionFromRoute",
-      "complexity": 9
+      "file": "/Users/o6lvl4/workspace/github.com/O6lvl4/ccgrid/packages/web/src/components/FollowUpInput.tsx",
+      "function": "FollowUpInput",
+      "complexity": 10
     }
   }
 }

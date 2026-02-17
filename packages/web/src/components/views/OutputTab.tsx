@@ -1,9 +1,11 @@
 import { useEffect, useRef, useMemo, useCallback, useState, memo } from 'react';
 import { useStore } from '../../store/useStore';
+import type { FollowUpImage } from '../../store/useStore';
 import { useShallow } from 'zustand/shallow';
 import { FollowUpInput } from '../FollowUpInput';
 import { parseSegments } from '../../utils/outputParser';
 import { ProgressiveMarkdown } from '../output/ProgressiveMarkdown';
+import { FollowUpAttachments } from '../output/FollowUpAttachments';
 import { LeadAvatar, UserAvatar, FollowUpAvatar } from '../output/Avatars';
 import { StatusBadge, PulseWorking, ContentCard, TeammateCard, TimelineConnector } from '../output/ContentCards';
 import type { Teammate } from '@ccgrid/shared';
@@ -31,17 +33,26 @@ function LeadStreamingIndicator({ show }: { show: boolean }) {
 
 interface FollowUp { userPrompt?: string; response?: string }
 
-function FollowUpEntry({ fu, index, isLast, isStreaming, scrollRef }: {
+function FollowUpEntry({ fu, index, isLast, isStreaming, scrollRef, images }: {
   fu: FollowUp; index: number; isLast: boolean; isStreaming: boolean;
   scrollRef: React.RefObject<HTMLDivElement | null>;
+  images?: FollowUpImage[];
 }) {
   const followUpStatus = isLast && isStreaming ? 'running' : 'completed';
+  const hasAttachments = images && images.length > 0;
   return (
     <div>
       {fu.userPrompt && (
         <>
           <TimelineConnector />
-          <ContentCard icon={<UserAvatar />} title="You" content={fu.userPrompt} borderColorOverride="$indigo5" />
+          {hasAttachments ? (
+            <ContentCard icon={<UserAvatar />} title="You" borderColorOverride="$indigo5">
+              <div style={{ fontSize: 13, lineHeight: 1.5, color: '#1a1d24', whiteSpace: 'pre-wrap' }}>{fu.userPrompt}</div>
+              <FollowUpAttachments images={images} />
+            </ContentCard>
+          ) : (
+            <ContentCard icon={<UserAvatar />} title="You" content={fu.userPrompt} borderColorOverride="$indigo5" />
+          )}
         </>
       )}
       {fu.response && (
@@ -151,6 +162,7 @@ function computeLeadStatus(sessionStatus: string, hasTeammates: boolean, hasFoll
 export const OutputTab = memo(function OutputTab({ sessionId, visible }: { sessionId: string; visible: boolean }) {
   const session = useStore(s => s.sessions.get(sessionId));
   const output = useStore(s => s.leadOutputs.get(sessionId) ?? '');
+  const followUpImagesMap = useStore(s => s.followUpImages.get(sessionId));
   const allTeammates = useStore(useShallow((s) => {
     const result: Teammate[] = [];
     for (const tm of s.teammates.values()) {
@@ -246,6 +258,7 @@ export const OutputTab = memo(function OutputTab({ sessionId, visible }: { sessi
                 isLast={i === segments.followUps.length - 1}
                 isStreaming={isStreaming}
                 scrollRef={scrollRef}
+                images={followUpImagesMap?.get(i)}
               />
             ))}
 
